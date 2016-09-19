@@ -251,6 +251,19 @@ public class StringUtils {
 			return "";
 		}
 	}
+
+	public static boolean isEmpty(Object str) {
+		return (str == null || "".equals(str));
+	}
+
+	public static boolean isNotEmpty(Object str) {
+		return !(str == null || "".equals(str));
+	}
+
+	public static String trimStr(Object str){
+		return (str == null ? "" : String.valueOf(str).trim());
+	}
+
 	public static boolean isNum(String val)
 	{
 		String nreg ="[.0-9]+";
