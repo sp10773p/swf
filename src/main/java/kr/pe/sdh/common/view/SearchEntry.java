@@ -25,7 +25,6 @@ public class SearchEntry {
     private boolean isMand = false;
 
     private int length = 0;
-    private int index  = 0;
 
     private List<EventEntry> eventEntries;
 
@@ -44,7 +43,6 @@ public class SearchEntry {
         map.put("title"  , title);
         map.put("isMand" , isMand);
         map.put("length" , length);
-        map.put("index"  , index);
         map.put("style"  , style);
         map.put("from"   , fromDate);
         map.put("to"     , toDate);
@@ -95,7 +93,7 @@ public class SearchEntry {
         return type;
     }
 
-    public void setType(String type) {
+    void setType(String type) {
         // 유형 체크
         try{
             TYPE.valueOf(type);
@@ -105,164 +103,146 @@ public class SearchEntry {
         }
     }
 
-    public String getTitle() {
+    String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
+    void setTitle(String title) {
         this.title = title;
     }
 
-    public String getStyle() {
+    String getStyle() {
         return style;
     }
 
-    public void setStyle(String style) {
+    void setStyle(String style) {
         this.style = style;
     }
 
-    public String getSelect() {
+    String getSelect() {
         return select;
     }
 
-    public void setSelect(String select) {
+    void setSelect(String select) {
         this.select = select;
     }
 
-    public String getSelectQKey() {
+    String getSelectQKey() {
         return selectQKey;
     }
 
-    public void setSelectQKey(String selectQKey) {
+    void setSelectQKey(String selectQKey) {
         this.selectQKey = selectQKey;
     }
 
-    public String getCheck() {
+    String getCheck() {
         return check;
     }
 
-    public void setCheck(String check) {
+    void setCheck(String check) {
         this.check = check;
     }
 
-    public String getCheckQKey() {
+    String getCheckQKey() {
         return checkQKey;
     }
 
-    public void setCheckQKey(String checkQKey) {
+    void setCheckQKey(String checkQKey) {
         this.checkQKey = checkQKey;
     }
 
-    public String getRadio() {
+    String getRadio() {
         return radio;
     }
 
-    public void setRadio(String radio) {
+    void setRadio(String radio) {
         this.radio = radio;
     }
 
-    public String getRadioQKey() {
+    String getRadioQKey() {
         return radioQKey;
     }
 
-    public void setRadioQKey(String radioQKey) {
+    void setRadioQKey(String radioQKey) {
         this.radioQKey = radioQKey;
     }
 
-    public boolean isMand() {
+    boolean isMand() {
         return isMand;
     }
 
-    public void setMand(boolean mand) {
+    void setMand(boolean mand) {
         isMand = mand;
     }
 
-    public void setMand(String mandStr) {
+    void setMand(String mandStr) {
         if(mandStr != null && mandStr.length() > 0){
-            System.err.print("::: <seach> Tag의 'isMand(" + mandStr + ")속성의 값이 유효하지 않습니다");
+            if(!"Y".equals(mandStr) && !"N".equals(mandStr)){
+                System.err.print("::: <search> Tag의 'isMand(" + mandStr + ")속성의 값이 유효하지 않습니다");
+            }
         }else{
             isMand = "Y".equals(mandStr) ? true : false;
         }
     }
 
-    public int getLength() {
+    int getLength() {
         return length;
     }
 
-    public void setLength(int length) {
+    void setLength(int length) {
         this.length = length;
     }
 
-    public void setLength(String lengthStr) {
+    void setLength(String lengthStr) {
         if(lengthStr != null && lengthStr.length() > 0){
             if(!StringUtils.isNum(lengthStr)){
-                System.err.print("::: <seach> Tag의 'length(" + lengthStr + ")속성의 값이 유효하지 않습니다");
+                System.err.print("::: <search> Tag의 'length(" + lengthStr + ")속성의 값이 유효하지 않습니다");
             }else{
                 this.length = Integer.parseInt(lengthStr);
             }
         }
     }
 
-    public int getIndex() {
-        return index;
-    }
-
-    public void setIndex(int index) {
-        this.index = index;
-    }
-
-
-    public void setIndex(String indexStr) {
-        if(indexStr != null && indexStr.length() > 0){
-            if(!StringUtils.isNum(indexStr)){
-                System.err.print("::: <seach> Tag의 'index(" + indexStr + ")속성의 값이 유효하지 않습니다");
-            }else{
-                this.length = Integer.parseInt(indexStr);
-            }
-        }
-    }
-
-    public List<EventEntry> getEventEntries() {
+    List<EventEntry> getEventEntries() {
         return eventEntries;
     }
 
-    public void setEventEntries(List<EventEntry> eventEntries) {
+    void setEventEntries(List<EventEntry> eventEntries) {
         this.eventEntries = eventEntries;
     }
 
-    public void addEventEntry(EventEntry eventEntry) {
+    void addEventEntry(EventEntry eventEntry) {
         if(this.eventEntries == null)
             this.eventEntries = new ArrayList<EventEntry>();
 
         this.eventEntries.add(eventEntry);
     }
 
-    public String getFromDate() {
+    String getFromDate() {
         return fromDate;
     }
 
-    public void setFromDate(String fromDate) {
+    void setFromDate(String fromDate) {
         this.fromDate = fromDate;
     }
 
-    public String getToDate() {
+    String getToDate() {
         return toDate;
     }
 
-    public void setToDate(String toDate) {
+    void setToDate(String toDate) {
         this.toDate = toDate;
     }
 
-    public String getDefaultDate() {
+    String getDefaultDate() {
         return defaultDate;
     }
 
-    public void setDefaultDate(String defaultDate) {
+    void setDefaultDate(String defaultDate) {
         this.defaultDate = defaultDate;
     }
 
-    @Override
-    public String toString() {
+    String print() {
         return "SearchEntry{" +
                 "id='" + id + '\'' +
                 ", type='" + type + '\'' +
@@ -276,7 +256,6 @@ public class SearchEntry {
                 ", radioQKey='" + radioQKey + '\'' +
                 ", isMand=" + isMand +
                 ", length=" + length +
-                ", index=" + index +
                 ", fromDate='" + fromDate + '\'' +
                 ", toDate='" + toDate + '\'' +
                 ", defaultDate='" + defaultDate + '\'' +

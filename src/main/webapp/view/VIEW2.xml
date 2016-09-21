@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<view id="view02" type="DUE_LIST_1" title="DUE LIST type">
+
+    <searchs>
+        <search id="search1" type="duedate" title="Due Date" isMand="Y" form="-7" to="0" />
+        <search id="search2" type="select"  title="Seleect Box" isMand="Y" >
+            <style>width: 150px</style>
+            <select>
+                [':All', 'A:A:S', 'B:B']
+            </select>
+            <!-- CODE, VALUE, DEFAULT
+                <selectQKey>module1.select</selectQKey>
+            -->
+        </search>
+        <search id="search3" type="checkbox" title="Check Box">
+            <check>
+                ['M:Milk', 'S:Sugar:C']
+            </check>
+            <!-- CODE, VALUE, DEFAULT
+                <checkQKey>module1.select</checkQKey>
+            -->
+        </search>
+        <search id="search4" type="text" title="Text Box" length="10">
+            <!-- <style>font-size:12px</style> -->
+            <!-- <event name="keypress">fn_search</event> -->
+        </search>
+        <search id="search5" type="radio" title="Radio Button">
+            <radio>
+                ['M:Milk', 'S:Sugar:C']
+            </radio>
+            <!-- CODE, VALUE, DEFAULT
+                <radioQKey>module1.select</radioQKey>
+            -->
+        </search>
+    </searchs>
+    <searchs>
+        <search id="search6" type="text" title="검색조건6" length="10"/>
+        <search id="search7" type="date" title="Date" default="-7"/>
+        <search id="search8" type="text" title="검색조건8" length="10"/>
+        <search id="search9" type="text" title="검색조건9" length="10"/>
+    </searchs>
+    <script>
+        <![CDATA[
+            function fn_test(){
+                alert("test");
+            }
+        ]]>
+    </script>
+</view>

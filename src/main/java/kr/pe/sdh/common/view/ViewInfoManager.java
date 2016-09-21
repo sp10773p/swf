@@ -1,9 +1,9 @@
 package kr.pe.sdh.common.view;
 
-import org.w3c.dom.Document;
+import kr.pe.sdh.common.util.DateUtil;
 import org.w3c.dom.Element;
 
-import java.util.ArrayList;
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,40 +11,50 @@ import java.util.Map;
 /**
  * Created by seongdonghun on 2016. 9. 12..
  */
-public class ViewInfoManager {
-    private static ViewInfoManager viewInfoManager = new ViewInfoManager();
+class ViewInfoManager {
 
-    private List<Document> documentList = new ArrayList<Document>();
-    private Map<String, Element> viewPath = new HashMap<String, Element>();
-    private Map<String, String> viewTitle = new HashMap<String, String>();
+    // view id, view info
+    private Map<String, ViewEntry> viewEntryMap = new HashMap<String, ViewEntry>();
+    private Map<String, String> viewLoadManage = new HashMap<String, String>();
 
-    private Map<String, List<SearchEntry>> moduelSearchInfo = new HashMap<String, List<SearchEntry>>();
-
-    public static ViewInfoManager newInstance(){
-        return viewInfoManager;
+    ViewEntry getViewEntry(String viewId) {
+        return viewEntryMap.get(viewId);
     }
 
-    public void setView(String module, Element root){
-        viewPath.put(module, root);
+    void setViewEntryMap(String viewId, ViewEntry viewEntry) {
+        viewEntryMap.put(viewId, viewEntry);
     }
 
-    public Element getView(String module){
-        return viewPath.get(module);
+    void setViewLoadManage(String viewId, String fileName){
+        String fileInfo = fileName+":"+String.valueOf(new File(fileName).lastModified());
+        viewLoadManage.put(viewId, fileInfo);
     }
 
-    public void setModuleSearchInfo(String module, List<SearchEntry> searchEntries){
-        moduelSearchInfo.put(module, searchEntries);
+    boolean checkViewInfo(String viewId){
+        String[] fileManager = getFileManager(viewId);
+        String fileName = fileManager[0];
+        long saveTime = Long.valueOf(fileManager[1]);
+
+        if(saveTime < new File(fileName).lastModified()){
+            return false;
+
+        }
+
+        return true;
     }
 
-    public List<SearchEntry> getSearchEntry(String module){
-        return moduelSearchInfo.get(module);
+    String getViewInfoFile(String viewId){
+        return getFileManager(viewId)[0];
     }
 
-    public String getViewTitle(String module){
-        return viewTitle.get(module);
+    private String[] getFileManager(String viewId){
+        return viewLoadManage.get(viewId).split(":");
     }
 
-    public void setViewTitle(String module, String title){
-        viewTitle.put(module, title);
+    void removeViewInfo(String viewId){
+        viewEntryMap.remove(viewId);
+        viewLoadManage.remove(viewId);
     }
+
+
 }

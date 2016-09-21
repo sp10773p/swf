@@ -8,17 +8,17 @@ function w3DisplayData(id, data) {
     htmlObj = document.getElementById(id);
     htmlTemplate = w3InitTemplate(id, htmlObj);
     html = htmlTemplate.cloneNode(true);
-    arr = w3GetElementsByAttribute(html, "w3-repeat");
+    arr = w3GetElementsByAttribute(html, "w3factory-repeat");
     l = arr.length;
     for (j = (l-1); j >= 0; j -= 1) {
-        cc = arr[j].getAttribute("w3-repeat").split(" ");
+        cc = arr[j].getAttribute("w3factory-repeat").split(" ");
         if (cc.length == 1) {
             repeat = cc[0];
         } else {
             repeatX = cc[0];
             repeat = cc[2];
         }
-        arr[j].removeAttribute("w3-repeat");
+        arr[j].removeAttribute("w3factory-repeat");
         repeatObj = data[repeat];
         if (repeatObj && typeof repeatObj == "object" && repeatObj.length != "undefined") {
             i = 0;
@@ -33,7 +33,7 @@ function w3DisplayData(id, data) {
                 (i === repeatObj.length) ? arr[j].parentNode.replaceChild(rowClone, arr[j]) : arr[j].parentNode.insertBefore(rowClone, arr[j]);
             }
         } else {
-            console.log("w3-repeat must be an array. " + repeat + " is not an array.");
+            console.log("w3factory-repeat must be an array. " + repeat + " is not an array.");
             continue;
         }
     }
@@ -118,13 +118,13 @@ function w3IncludeHTML() {
     var z, i, a, file, xhttp;
     z = document.getElementsByTagName("*");
     for (i = 0; i < z.length; i++) {
-        if (z[i].getAttribute("w3-include-html")) {
+        if (z[i].getAttribute("w3factory-include-html")) {
             a = z[i].cloneNode(false);
-            file = z[i].getAttribute("w3-include-html");
+            file = z[i].getAttribute("w3factory-include-html");
             var xhttp = new XMLHttpRequest();
             xhttp.onreadystatechange = function() {
                 if (xhttp.readyState == 4 && xhttp.status == 200) {
-                    a.removeAttribute("w3-include-html");
+                    a.removeAttribute("w3factory-include-html");
                     a.innerHTML = xhttp.responseText;
                     z[i].parentNode.replaceChild(a, z[i]);
                     w3IncludeHTML();

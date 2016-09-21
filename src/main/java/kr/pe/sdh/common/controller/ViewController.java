@@ -1,11 +1,11 @@
 package kr.pe.sdh.common.controller;
 
-import kr.pe.sdh.common.view.SearchCreator;
-import kr.pe.sdh.common.view.SearchEntry;
-import kr.pe.sdh.common.view.ViewInfoManager;
+import kr.pe.sdh.common.util.StringUtils;
+import kr.pe.sdh.common.view.SwfViewBuilder;
 import org.apache.velocity.app.VelocityEngine;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,63 +24,68 @@ import java.util.Map;
  */
 @Controller
 public class ViewController {
-    ViewInfoManager viewInfoManager = ViewInfoManager.newInstance();
+    @Autowired
+    SwfViewBuilder swfViewBuilder;
 
     @Resource(name="velocityEngine")
     private VelocityEngine velocityEngine;
 
-    @RequestMapping("/view.do")
+    @RequestMapping("/index.do")
     public String view(HttpServletRequest request, HttpServletResponse response){
-
         return "main";
     }
 
     @RequestMapping("/mainView.do")
-    public void mainView(@RequestParam(value = "p") String p,  HttpServletRequest request, HttpServletResponse response){
+    public void mainView(@RequestParam(value = "view") String viewId,
+                         @RequestParam(value = "param") String param, HttpServletResponse response) throws IOException {
+
+        JSONObject returnData = new JSONObject();
+        response.setCharacterEncoding("UTF-8");
+
         try {
-            JSONParser jsonParser = new JSONParser();
-            JSONObject jsonObject = (JSONObject) jsonParser.parse(p);
+            JSONParser jsonParser;
+            JSONObject params;
+            if(StringUtils.isNotEmpty(param)){
+                jsonParser = new JSONParser();
+                params     = (JSONObject) jsonParser.parse(param);
+            }
 
-            String module = (String)jsonObject.get("module");
 
-            response.setCharacterEncoding("UTF-8");
+            if(!swfViewBuilder.isExists(viewId)){
+                throw new Exception("존재하지 않는 view : " + viewId);
+            }
 
             Map map = new HashMap();
-            map.put("title", viewInfoManager.getViewTitle(module));
-            map.put("search", getSearchInfoHtml(module));
+            map.put("title"     , swfViewBuilder.getTitle(viewId));
+            map.put("bindScript", swfViewBuilder.getSearchInfoScript(viewId));
+
+            // searchs
+            map.putAll(swfViewBuilder.getSearchInfoHtml(viewId));
 
             StringWriter writer = new StringWriter();
 
-            // velocity
-            VelocityEngineUtils.mergeTemplate(velocityEngine, "vm/module1.vm", "UTF-8", map, writer);
-            System.out.println(writer.toString());
+            String vm = swfViewBuilder.getViewType(viewId);
 
-            response.getWriter().write(writer.toString());
+            if(swfViewBuilder.getViewVm(viewId) == null){
+                // velocity
+                VelocityEngineUtils.mergeTemplate(velocityEngine, "vm/"+vm+".vm", "UTF-8", map, writer);
+                swfViewBuilder.setViewVm(viewId, writer.toString());
+            }
+
+            returnData.put("code", "S");
+            returnData.put("data", swfViewBuilder.getViewVm(viewId));
 
         }catch(Exception e){
             e.printStackTrace();
+            returnData.put("code", "E");
+            returnData.put("msg" , e.getMessage());
+
+        }finally {
+            response.getWriter().write(returnData.toJSONString());
         }
-
     }
 
-    private String getSearchInfoScript(String module) throws Exception{
-        List<SearchEntry> searchEntries = viewInfoManager.getSearchEntry(module);
-        SearchCreator searchCreator = new SearchCreator(searchEntries);
 
-        String script = searchCreator.bindComponent();
-
-        return script;
-
-    }
-
-    private String getSearchInfoHtml(String module) throws Exception{
-        List<SearchEntry> searchEntries = viewInfoManager.getSearchEntry(module);
-        SearchCreator searchCreator = new SearchCreator(searchEntries);
-
-        String html = searchCreator.drawSearch();
-
-        return html;
-    }
 
 
 }

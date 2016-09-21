@@ -6,27 +6,27 @@ import java.util.Map;
 /**
  * Created by seongdonghun on 2016. 9. 12..
  */
-public class EventEntry {
+class EventEntry {
     private String name;
     private String fnName;
 
-    public String getName() {
+    String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    void setName(String name) {
         this.name = name;
     }
 
-    public String getFnName() {
+    String getFnName() {
         return fnName;
     }
 
-    public void setFnName(String fnName) {
+    void setFnName(String fnName) {
         this.fnName = fnName;
     }
 
-    public Map toMap(){
+    Map toMap(){
         Map<String, String> map = new HashMap<String, String>();
         map.put("name", name);
         map.put("fnName", fnName);
@@ -34,8 +34,7 @@ public class EventEntry {
         return map;
     }
 
-    @Override
-    public String toString() {
+    String print() {
         return "EventEntry{" +
                 "name='" + name + '\'' +
                 ", fnName='" + fnName + '\'' +

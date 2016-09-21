@@ -1,0 +1,24 @@
+<!-- Title -->
+<div class="w3-row w3-padding-64" style="padding-bottom: 10px!important">
+    <div class="w3-container">
+        <h2 class="w3-text-teal">$title</h2>
+    </div>
+</div>
+
+<!-- Search Area -->
+<div class="w3-border w3-round w3-margin-left w3-margin-right" style="background: #f0f0f0">
+    <div id="searchArea1">
+        $searchs1
+    </div>
+</div>
+<p></p>
+<p></p>
+<!-- Search Area -->
+<div class="w3-border w3-round w3-margin-left w3-margin-right" style="background: #f0f0f0">
+    <div id="searchArea2">
+        $searchs2
+    </div>
+</div>
+<script>
+    $bindScript
+</script>
