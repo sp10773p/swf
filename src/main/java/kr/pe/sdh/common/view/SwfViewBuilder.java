@@ -4,10 +4,14 @@ import kr.pe.sdh.common.util.DOMUtil;
 import kr.pe.sdh.common.util.FileUtil;
 import kr.pe.sdh.common.util.StringUtils;
 import kr.pe.sdh.common.view.factory.SearchFactory;
+import org.apache.velocity.Template;
+import org.apache.velocity.app.VelocityEngine;
+import org.springframework.ui.velocity.VelocityEngineUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.io.File;
+import java.io.StringWriter;
 import java.util.*;
 
 /**
@@ -82,6 +86,12 @@ public class SwfViewBuilder {
                 }
             }
 
+            // search column size
+            String colSizeAtt = DOMUtil.getAttribute(searchsEle, "colSize");
+            if(StringUtils.isNotEmpty(colSizeAtt)){
+                searchsInfo.setColSize(Integer.parseInt(colSizeAtt));
+            }
+
             List<Element> searchList = DOMUtil.getChildrenByPath(searchsEle, "search");
 
             // 조회조건 영역 파싱
@@ -116,6 +126,9 @@ public class SwfViewBuilder {
         String title  = DOMUtil.getAttribute(searchEle, "title");
         String isMand = DOMUtil.getAttribute(searchEle, "isMand");
         String length = DOMUtil.getAttribute(searchEle, "length");
+        String from   = DOMUtil.getAttribute(searchEle, "from");
+        String to     = DOMUtil.getAttribute(searchEle, "to");
+        String def    = DOMUtil.getAttribute(searchEle, "default");
         String style  = DOMUtil.getElementTextByPath(searchEle, "style");
 
         searchEntry.setId(id);
@@ -124,6 +137,9 @@ public class SwfViewBuilder {
         searchEntry.setTitle(title);
         searchEntry.setLength(length);
         searchEntry.setStyle(style);
+        searchEntry.setFromDate(from);
+        searchEntry.setToDate(to);
+        searchEntry.setDefaultDate(def);
 
         // event 저장
         List<Element> eventList = DOMUtil.getChildrenByPath(searchEle, "event");
@@ -200,26 +216,6 @@ public class SwfViewBuilder {
         return bool;
     }
 
-
-    public Map<String, String> getSearchInfoScript(String viewId) throws Exception{
-        Map<String, String> scriptMap = new HashMap<String, String>();
-
-        SearchsInfo searchsInfo = viewInfoManager.getViewEntry(viewId).getSearchsInfo();
-
-        for(String searchsId : searchsInfo.getSearchsIds()){
-            if(searchsInfo.getSearchScript(searchsId) == null){
-                SearchFactory searchFactory = SearchFactory.getSearchFactory(layout, searchsInfo.getSearch(searchsId));
-                searchsInfo.setSearchScript(searchsId, searchFactory.bindComponent());
-            }
-
-            scriptMap.put(searchsId, searchsInfo.getSearchScript(searchsId));
-        }
-
-
-        return scriptMap;
-
-    }
-
     public Map<String, String> getSearchInfoHtml(String viewId) throws Exception{
         Map<String, String> htmlMap = new HashMap<String, String>();
 
@@ -228,15 +224,42 @@ public class SwfViewBuilder {
         for(String searchsId : searchsInfo.getSearchsIds()){
             if(searchsInfo.getSearchHtml(searchsId) == null){
                 SearchFactory searchFactory = SearchFactory.getSearchFactory(layout, searchsInfo.getSearch(searchsId));
-                searchsInfo.setSearchHtml(searchsId, searchFactory.drawSearch());
+
+                // set column size
+                searchFactory.setSearchColSize(searchsInfo.getColSize());
+
+                // html code 생성
+                Map<String, String> codeMap = searchFactory.drawSearch();
+
+                searchsInfo.appendScript(codeMap.get("bindScript"));
+
+                searchsInfo.setSearchHtml(searchsId, codeMap.get("search"));
             }
 
             htmlMap.put(searchsId, searchsInfo.getSearchHtml(searchsId));
         }
 
+        //bindComponent Script
+        htmlMap.put("bindScript", searchsInfo.getSearchScript());
 
         return htmlMap;
 
+    }
+
+    public void mergeLayout(String viewId, VelocityEngine velocityEngine, Map map){
+        String layout = getViewType(viewId) + ".vm";
+
+        Template template = velocityEngine.getTemplate(layout, "UTF-8");
+
+        // 첫 로드이거나 layout이 변경되었을때  Auto Reload
+        if(viewVm.get(viewId) == null || template.requiresChecking()){
+            System.out.println("### View Layout Reload : " + viewId);
+
+            StringWriter writer = new StringWriter();
+            VelocityEngineUtils.mergeTemplate(velocityEngine, layout, "UTF-8", map, writer);
+
+            viewVm.put(viewId, writer.toString());
+        }
     }
 
     public String getViewVm(String viewId){

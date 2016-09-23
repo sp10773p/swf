@@ -57,20 +57,12 @@ public class ViewController {
 
             Map map = new HashMap();
             map.put("title"     , swfViewBuilder.getTitle(viewId));
-            map.put("bindScript", swfViewBuilder.getSearchInfoScript(viewId));
 
-            // searchs
+            // searchs (bindComponent 자동추가)
             map.putAll(swfViewBuilder.getSearchInfoHtml(viewId));
 
-            StringWriter writer = new StringWriter();
 
-            String vm = swfViewBuilder.getViewType(viewId);
-
-            if(swfViewBuilder.getViewVm(viewId) == null){
-                // velocity
-                VelocityEngineUtils.mergeTemplate(velocityEngine, "vm/"+vm+".vm", "UTF-8", map, writer);
-                swfViewBuilder.setViewVm(viewId, writer.toString());
-            }
+            swfViewBuilder.mergeLayout(viewId, velocityEngine, map);
 
             returnData.put("code", "S");
             returnData.put("data", swfViewBuilder.getViewVm(viewId));

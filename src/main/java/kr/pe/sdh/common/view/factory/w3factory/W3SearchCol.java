@@ -28,6 +28,24 @@ public class W3SearchCol extends SearchCol {
     }
 
     public void makeCol() {
+        switch (colSize){
+            case 1:
+                colDivClass = "w3-all";
+                break;
+
+            case 2:
+                colDivClass = "w3-half";
+                break;
+
+            case 4:
+                colDivClass = "w3-quarter";
+                break;
+
+            default:
+                colDivClass = "w3-third";
+                break;
+        }
+
         colBuffer.append(HtmlUtil.openDiv(colDivClass));
         colBuffer.append("\t").append(HtmlUtil.openDiv(thClass));
         colBuffer.append("\t\t").append(createLabel(searchEntry.toMap()));
@@ -36,7 +54,8 @@ public class W3SearchCol extends SearchCol {
 
         // 조회조건 입력란
         String orgId = searchEntry.getId();
-        if("duedate".equals(searchEntry.getType())){
+        String type  = searchEntry.getType();
+        if("duedate".equals(type) || "dueyearmonth".equals(type)){
             searchEntry.setId("from_" + orgId);
 
             colBuffer.append("\t\t").append(HtmlUtil.createInput(searchEntry.toMap(), dateClass));
@@ -55,6 +74,7 @@ public class W3SearchCol extends SearchCol {
 
         }else{
             colBuffer.append("\t\t").append(HtmlUtil.createInput(searchEntry.toMap(), inputClass));
+
         }
 
         colBuffer.append("\t").append(HtmlUtil.closeDiv()); // close Td Div

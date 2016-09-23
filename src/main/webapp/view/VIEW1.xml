@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <view id="view01" type="LIST_1" title="List1 type">
 
-    <searchs>
+    <searchs colSize="3">
         <search id="search1" type="duedate" title="Due Date" isMand="Y" form="-7" to="0" />
-        <search id="search2" type="select"  title="Seleect Box" isMand="Y">
+        <search id="search2" type="select"  title="Select Box" isMand="Y">
             <style>width: 150px</style>
             <select>
                 [':All', 'A:A:S', 'B:B']

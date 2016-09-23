@@ -3,9 +3,7 @@ package kr.pe.sdh.common.view.factory;
 import kr.pe.sdh.common.view.SearchEntry;
 
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by seongdonghun on 2016. 9. 20..
@@ -38,10 +36,15 @@ public abstract class SearchFactory {
         this.searchColSize = searColSize;
     }
 
-    public String drawSearch() throws Exception {
+    public Map<String , String> drawSearch() throws Exception {
+        Map<String , String> codeMap = new HashMap<String, String>();
+
         if(this.searchEntries == null){
             throw new Exception("SearchEntry is null");
         }
+
+        StringBuffer buffer = new StringBuffer();
+
 
         SearchRow searchRow = this.createRow();
         for(int i=0; i < this.searchEntries.size(); i++) {
@@ -51,18 +54,27 @@ public abstract class SearchFactory {
                 searchRow.makeRow();
             }
 
-            searchRow.appendCol(this.createCol(data));
+            SearchCol searchCol = this.createCol(data);
+            searchCol.setColSize(this.searchColSize);
+
+            searchRow.appendCol(searchCol);
 
             if(((i+1)%this.searchColSize) == 0 || (i+1) == this.searchEntries.size()){
                 searchRow.closeRow();
             }
+
+            // bindComponent Script 생성
+            buffer.append(bindComponent(data));
         }
 
-        return searchRow.output();
+        codeMap.put("bindScript" , buffer.toString());
+        codeMap.put("search"     , searchRow.output());
+
+        return codeMap;
 
     }
 
-    public abstract String bindComponent() throws Exception;
+    public abstract String bindComponent(SearchEntry searchEntry) throws Exception;
 
     public abstract SearchRow createRow();
     public abstract SearchCol createCol(SearchEntry data);

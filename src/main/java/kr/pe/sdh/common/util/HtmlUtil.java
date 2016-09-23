@@ -160,9 +160,7 @@ public class HtmlUtil {
             att += getAttribute("length", String.valueOf(length));
         }
 
-        if(StringUtils.isNotEmpty(style)){
-            att += getAttribute("style", style);
-        }
+
 
         if(StringUtils.isNotEmpty(value)){
             att += getAttribute("value", value);
@@ -174,7 +172,12 @@ public class HtmlUtil {
 
         if(type.equals("date") || type.equals("duedate")){
             type = "input";
+            style = "width: 100px; text-align: center;" + String.valueOf(style); // 날짜 타입
 
+        }
+
+        if(StringUtils.isNotEmpty(style)){
+            att += getAttribute("style", style);
         }
 
         att += getAttribute("type", type);
@@ -186,6 +189,35 @@ public class HtmlUtil {
 
     public static String closeDiv() {
         return "</div>"+LF;
+    }
+
+    public static String getBindScript(String id, String type){
+        StringBuffer scriptBuffer = new StringBuffer();
+        if(type.equals("D") || type.equals("Y")){
+            scriptBuffer.append("$('#").append(id).append("').datepicker({").append(LF);
+            scriptBuffer
+                    .append(createJqueryOption("showOn", "both"))
+                    .append(createJqueryOption("changeMonth", true))
+                    .append(createJqueryOption("changeYear", true))
+                    .append(createJqueryOption("dateFormat", "yy-mm-dd", true));
+            scriptBuffer.append("});").append(LF);
+        }
+
+        return scriptBuffer.toString();
+    }
+
+    public static String createJqueryOption(String key, Object value){
+        return createJqueryOption(key, value, true);
+    }
+
+    public static String createJqueryOption(String key, Object value, boolean isComman){
+        String valStr = "'" + String.valueOf(value) +"'";
+
+        if(!(value instanceof String)){
+            valStr = String.valueOf(value);
+        }
+
+        return "\t" + key + ":" + valStr + (isComman ? "," : "") +LF;
     }
 
 }

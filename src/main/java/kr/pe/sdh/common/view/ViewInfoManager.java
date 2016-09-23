@@ -26,7 +26,7 @@ class ViewInfoManager {
     }
 
     void setViewLoadManage(String viewId, String fileName){
-        String fileInfo = fileName+":"+String.valueOf(new File(fileName).lastModified());
+        String fileInfo = fileName+"@"+String.valueOf(new File(fileName).lastModified());
         viewLoadManage.put(viewId, fileInfo);
     }
 
@@ -48,7 +48,7 @@ class ViewInfoManager {
     }
 
     private String[] getFileManager(String viewId){
-        return viewLoadManage.get(viewId).split(":");
+        return viewLoadManage.get(viewId).split("@");
     }
 
     void removeViewInfo(String viewId){

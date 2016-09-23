@@ -218,27 +218,27 @@ public class SearchEntry {
         this.eventEntries.add(eventEntry);
     }
 
-    String getFromDate() {
+    public String getFromDate() {
         return fromDate;
     }
 
-    void setFromDate(String fromDate) {
+    public void setFromDate(String fromDate) {
         this.fromDate = fromDate;
     }
 
-    String getToDate() {
+    public String getToDate() {
         return toDate;
     }
 
-    void setToDate(String toDate) {
+    public void setToDate(String toDate) {
         this.toDate = toDate;
     }
 
-    String getDefaultDate() {
+    public String getDefaultDate() {
         return defaultDate;
     }
 
-    void setDefaultDate(String defaultDate) {
+    public void setDefaultDate(String defaultDate) {
         this.defaultDate = defaultDate;
     }
 

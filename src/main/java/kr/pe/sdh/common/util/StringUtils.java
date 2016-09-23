@@ -5,10 +5,7 @@ import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.Vector;
+import java.util.*;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
@@ -293,4 +290,27 @@ public class StringUtils {
 		
 		return false;
 	}
+
+    public static String arrayToString(Object arr) {
+    	StringBuffer buffer = new StringBuffer();
+		buffer.append("[");
+
+		if(arr instanceof List){
+			for(Object o : (List)arr){
+				buffer.append("\"").append((String)o).append("\",");
+			}
+		}else if(arr instanceof String[]){
+			for(Object s : (String[])arr){
+				buffer.append("\"").append(s).append("\",");
+			}
+		}
+
+		if(buffer.length() > 1){
+			buffer.deleteCharAt(buffer.length()-1);
+		}
+
+		buffer.append("]");
+
+		return buffer.toString();
+    }
 }

@@ -14,7 +14,9 @@ class SearchsInfo {
     private Map<String, String> searchsHtml = new HashMap<String, String>();
 
     // searchs script code - searchs id, searchs script code
-    private Map<String, String> searchsScript = new HashMap<String, String>();
+    private StringBuffer searchsScript = new StringBuffer();
+
+    private int colSize = 3;
 
     void addSearch(String searchId, List<SearchEntry> searchEntries){
         this.searchs.put(searchId, searchEntries);
@@ -46,11 +48,19 @@ class SearchsInfo {
         return this.searchsHtml.get(searchsId);
     }
 
-    void setSearchScript(String searchsId, String script){
-        this.searchsScript.put(searchsId, script);
+    void appendScript(String script){
+        this.searchsScript.append(script);
     }
 
-    String getSearchScript(String searchsId){
-        return this.searchsScript.get(searchsId);
+    String getSearchScript(){
+        return this.searchsScript.toString();
+    }
+
+    public void setColSize(int colSize) {
+        this.colSize = colSize;
+    }
+
+    public int getColSize() {
+        return colSize;
     }
 }

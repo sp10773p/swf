@@ -7,17 +7,27 @@
 --%>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<link rel="stylesheet" href="css/w3.css">
-<link rel="stylesheet" href="css/w3-theme-black.css">
+<link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
+<link rel="stylesheet" href="http://www.w3schools.com/lib/w3-theme-black.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
 <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
 
-<script src="js/jquery.js"></script>
+<link rel="stylesheet" href="css/jquery-ui.css">
+<link rel="stylesheet" href="css/jquery-ui.structure.css">
+<link rel="stylesheet" href="css/jquery-ui.theme.css">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+
+<script src="js/jquery-ui.js"></script>
+<script src="js/date.js"></script>
+<script src="js/util.js"></script>
+<script src="js/string.js"></script>
 
 <style>
     html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif}
     .w3-sidenav a,.w3-sidenav h4{padding:12px;}
     .w3-navbar a{padding-top:12px !important;padding-bottom:12px !important;}
+    .w3-all {width: 99.99999%}
 
     .th3 {padding-top: 2px; font-size: 14px; font-weight:bold; color: #111d1a;}
 
@@ -40,5 +50,10 @@
 
     .w3-border {border:  2px solid #009688 !important;}
 
+    .ui-datepicker {font-size: 12px;  width: 220px;}
+    .ui-datepicker select.ui-datepicker-month {width: 30%; font-size: 11px; padding-left: 5px;}
+    .ui-datepicker select.ui-datepicker-year  {width: 40%; font-size: 11px; padding-left: 5px;}
+    .ui-datepicker-trigger {width: 17px; margin-left: 2px; cursor: pointer}
+    .ui-datepicker th {color: white}
 
 </style>

@@ -33,7 +33,7 @@
             -->
         </search>
     </searchs>
-    <searchs>
+    <searchs colSize="2">
         <search id="search6" type="text" title="검색조건6" length="10"/>
         <search id="search7" type="date" title="Date" default="-7"/>
         <search id="search8" type="text" title="검색조건8" length="10"/>
