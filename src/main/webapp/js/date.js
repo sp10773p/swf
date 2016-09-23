@@ -1189,8 +1189,9 @@ function gfn_getDate(element){
 	try {
 		date = $.datepicker.parseDate( "yy-mmd-dd", element.value );
 	} catch( error ) {
+		alert("error : " +error);
 		date = null;
 	}
-
+alert("18 : " + date);
 	return date;
 }

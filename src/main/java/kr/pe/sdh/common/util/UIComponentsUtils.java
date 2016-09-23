@@ -96,7 +96,7 @@ public class UIComponentsUtils {
 
         }
 
-        scriptBuffer.append(";");
+        scriptBuffer.append(";").append(LF);
 
         return scriptBuffer;
     }
