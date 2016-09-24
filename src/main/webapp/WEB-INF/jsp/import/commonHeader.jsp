@@ -5,7 +5,11 @@
   Time: 오후 8:23
   To change this template use File | Settings | File Templates.
 --%>
+<META http-equiv="Expires" content="-1">
+<META http-equiv="Pragma" content="no-cache">
+<META http-equiv="Cache-Control" content="No-Cache">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 
 <link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
 <link rel="stylesheet" href="http://www.w3schools.com/lib/w3-theme-black.css">
@@ -16,8 +20,8 @@
 <link rel="stylesheet" href="css/jquery-ui.structure.css">
 <link rel="stylesheet" href="css/jquery-ui.theme.css">
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 
+<script src="js/jquery.js"></script>
 <script src="js/jquery-ui.js"></script>
 <script src="js/date.js"></script>
 <script src="js/util.js"></script>

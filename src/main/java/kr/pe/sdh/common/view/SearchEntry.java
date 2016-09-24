@@ -176,11 +176,11 @@ public class SearchEntry {
     }
 
     void setMand(String mandStr) {
-        if(mandStr != null && mandStr.length() > 0){
+        if(StringUtils.isNotEmpty(mandStr)){
             if(!"Y".equals(mandStr) && !"N".equals(mandStr)){
                 System.err.print("::: <search> Tag의 'isMand(" + mandStr + ")속성의 값이 유효하지 않습니다");
             }
-        }else{
+
             isMand = "Y".equals(mandStr) ? true : false;
         }
     }

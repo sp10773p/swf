@@ -1,5 +1,6 @@
 package kr.pe.sdh.common.util;
 
+import jdk.internal.org.objectweb.asm.tree.analysis.Value;
 import kr.pe.sdh.common.view.SearchEntry;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class UIComponentsUtils {
         // 날짜
         if(type.indexOf("date") > -1){
             scriptBuffer = getDateTypeScript(searchEntry);
-
+            scriptBuffer.append(getDateDefaultDateSetting(searchEntry));
         // 연도
         }else if(type.indexOf("year") > -1){
 
@@ -29,6 +30,29 @@ public class UIComponentsUtils {
         }
 
         return scriptBuffer.toString();
+    }
+
+    private static String getDateDefaultDateSetting(SearchEntry searchEntry) {
+        String id = searchEntry.getId();
+        String type = searchEntry.getType();
+
+        String defaultDate = null;
+        if(type.equals("duedate")){
+            if(id.startsWith("from_")){
+                defaultDate = searchEntry.getFromDate();
+            }else{
+                defaultDate = searchEntry.getToDate();
+            }
+
+        }else{
+            defaultDate = searchEntry.getDefaultDate();
+        }
+
+        if(StringUtils.isNotEmpty(defaultDate)){
+            return "$('#" + id + "').datepicker('setDate', '" + defaultDate + "');" + LF;
+        }else{
+            return "";
+        }
     }
 
     private static StringBuffer getDateTypeScript(SearchEntry searchEntry) {
@@ -42,21 +66,20 @@ public class UIComponentsUtils {
         String[] dayNames   = {"일","월","화","수","목","금","토"};
 
         scriptBuffer
-                .append(creatJqueryOption("showOn", "button")) // both
-                .append(creatJqueryOption("buttonImage", "images/common/calendar.png"))
-                .append(creatJqueryOption("buttonImageOnly", true))
-                .append(creatJqueryOption("changeYear", true))
-                .append(creatJqueryOption("changeMonth", true))
-                .append(creatJqueryOption("showButtonPanel", true))
+                .append(creatJqueryOption("showOn"            , "button")) // both
+                .append(creatJqueryOption("buttonImage"       , "images/common/calendar.png"))
+                .append(creatJqueryOption("buttonImageOnly"   , true))
+                .append(creatJqueryOption("changeYear"        , true))
+                .append(creatJqueryOption("changeMonth"       , true))
+                .append(creatJqueryOption("showButtonPanel"   , true))
                 .append(creatJqueryOption("showMonthAfterYear", true))
-                .append(creatJqueryOption("yearSuffix", "/"))
-                //.append(creatJqueryOption("prevText", "<"))
-                //.append(creatJqueryOption("nextText", ">"))
-                .append(creatJqueryOption("monthNames", monthNames))
-                .append(creatJqueryOption("monthNamesShort", monthNames))
-                .append(creatJqueryOption("dayNames", dayNames))
-                .append(creatJqueryOption("dayNamesShort", dayNames))
-                .append(creatJqueryOption("dayNamesMin", dayNames));
+                .append(creatJqueryOption("yearSuffix"        , "/"))
+                .append(creatJqueryOption("closeText"         , "Close"))
+                .append(creatJqueryOption("monthNames"        , monthNames))
+                .append(creatJqueryOption("monthNamesShort"   , monthNames))
+                .append(creatJqueryOption("dayNames"          , dayNames))
+                .append(creatJqueryOption("dayNamesShort"     , dayNames))
+                .append(creatJqueryOption("dayNamesMin"       , dayNames));
 
         // defaultDate Setting
         if(type.equals("duedate")){
@@ -82,14 +105,14 @@ public class UIComponentsUtils {
 
         // duedate 일때 기간 validation 추가
         if(type.equals("duedate")){
-            scriptBuffer = new StringBuffer("var " + id.split("_")[0] + "=" + scriptBuffer.toString());
+            scriptBuffer = new StringBuffer("var " + id + "=" + scriptBuffer.toString());
             scriptBuffer.append(".on(\"change\", function(){").append(LF);
 
             if(id.startsWith("from_")){
-                scriptBuffer.append("\tto.datepicker(\"option\", \"minDate\", gfn_getDate(this));").append(LF);
+                scriptBuffer.append("\tto").append(id.replaceAll("from", "")).append(".datepicker(\"option\", \"minDate\", gfn_getDate(this));").append(LF);
 
             }else{
-                scriptBuffer.append("\tfrom.datepicker(\"option\", \"maxDate\", gfn_getDate(this));").append(LF);
+                scriptBuffer.append("\tfrom").append(id.replaceAll("to", "")).append(".datepicker(\"option\", \"maxDate\", gfn_getDate(this));").append(LF);
 
             }
             scriptBuffer.append("})");

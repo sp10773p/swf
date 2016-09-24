@@ -24,17 +24,20 @@ public class SwfViewBuilder {
 
     private Map<String, String> viewVm = new HashMap<String, String>();
 
-    public SwfViewBuilder(String viewPath, String layout) {
+    public SwfViewBuilder(String viewPath, String layout) throws Exception {
         this.viewPath = viewPath;
         this.layout   = layout;
 
         build();
     }
 
-    private void build() {
+    private void build() throws Exception {
         System.out.println("### SWeb Framework View Build Start...");
         File f = new File(viewPath);
 
+        if(!f.exists()){
+            throw new Exception("### SWF View Path를 확인하세요.");
+        }
         String[] filenames = FileUtil.filenameFilesInDirectory(f);
 
         for(String filename : filenames){

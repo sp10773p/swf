@@ -31,9 +31,6 @@
  ● gfn_getOneMonthAfter  : 한달후 날짜 구하는 함수
  */
 
-
-
-
  /**
  * @class 날짜에 대한 형식 체크
  * @param sDate  - 일자(yyyy-MM-dd 등)
@@ -250,11 +247,12 @@ function gfn_getLastDateNum (sDate)
  */   
 function gfn_addDate (sDate, nOffSet)
 {
-	var nYear = parseInt(sDate.substr(0, 4));
-	var nMonth = parseInt(sDate.substr(4, 2));
-	var nDate = parseInt(sDate.substr(6, 2)) + nOffSet;
+	var objDate = new Date(sDate.substr(0, 4), sDate.substr(4, 2), sDate.substr(6, 2));
+	var rDate  = objDate.getFullYear().toString();
+		rDate += gfn_right("0" + (objDate.getMonth() + 1), 2);
+		rDate += gfn_right("0" + (objDate.getDate() + nOffSet), 2);
 
-	return gfn_datetime(nYear, nMonth, nDate);
+	return rDate;
 }
 
 /**
@@ -265,53 +263,28 @@ function gfn_addDate (sDate, nOffSet)
  */ 
 function gfn_addMonth (sDate, nOffSet)
 {
-	var nYear = parseInt(sDate.substr(0, 4));
-	var nMonth = parseInt(sDate.substr(4, 2)) + nOffSet;
-	var nDate = parseInt(sDate.substr(6, 2));
+	var objDate = new Date(sDate.substr(0, 4), sDate.substr(4, 2), sDate.substr(6, 2));
+	var rDate  = objDate.getFullYear().toString();
+		rDate += gfn_right("0" + (objDate.getMonth() + 1 + nOffSet), 2);
+		rDate += gfn_right("0" + objDate.getDate(), 2);
 
-	return gfn_datetime(nYear, nMonth, nDate);
+	return rDate;
 }
 
 /**
- * @class MiPlatform에서 사용하던 Datetime형식으로 변환 Date Type을 String으로 변환
- * @param nYear  - nYear (년도)
- * @param nMonth - nMonth (월)
- * @param nDate  - nDate (일)
- * @return string 조합한 날짜를 리턴
- */  
-function gfn_datetime (nYear, nMonth, nDate)
+ * @class 입력된 날자에 OffSet 으로 지정된 만큼의 년을 더한다.
+ * @param sDate  - 일자(yyyyMMdd)
+ * @param nOffSet  - 날짜로부터 증가 감소값. 지정하지 않으면 Default Value = 1 로 적용
+ * @return string Date에 nOffset이 더해진 결과를 'yyyyMMdd'로 표현된 날자.
+ */
+function gfn_addYear (sDate, nOffSet)
 {
-	if (nYear.toString().trim().length >= 5) 
-	{
-		var sDate = new String(nYear);
-		var nYear = sDate.substr(0, 4);
-		var nMonth = sDate.substr(4, 2);
-		var nDate = ((sDate.substr(6, 2) == "") ? 1 : sDate.substr(6, 2));
-		var nHours = ((sDate.substr(8, 2) == "") ? 0 : sDate.substr(8, 2));
-		var nMinutes = ((sDate.substr(10, 2) == "") ? 0 : sDate.substr(10, 2));
-		var nSeconds = ((sDate.substr(12, 2) == "") ? 0 : sDate.substr(12, 2));
+	var objDate = new Date(sDate.substr(0, 4), sDate.substr(4, 2), sDate.substr(6, 2));
+	var rDate  = (objDate.getFullYear() + nOffSet).toString();
+		rDate += gfn_right("0" + (objDate.getMonth() + 1), 2);
+		rDate += gfn_right("0" + objDate.getDate(), 2);
 
-		var objDate = new Date(parseInt(nYear), parseInt(nMonth) - 1, parseInt(nDate), parseInt(nHours), parseInt(nMinutes), parseInt(nSeconds));
-	}
-	else 
-	{
-		var objDate = new Date(parseInt(nYear), parseInt(nMonth) - 1, parseInt(((nDate == null) ? 1 : nDate)));
-	}
-
-	var strYear = objDate.getYear().toString();
-	var strMonth = (objDate.getMonth() + 1).toString();
-	var strDate = objDate.getDate().toString();
-
-	if (strMonth.length == 1) 
-	{
-		strMonth = "0" + strMonth;
-	}
-	if (strDate.length == 1) 
-	{
-		strDate = "0" + strDate;
-	}
-
-	return strYear + strMonth + strDate;
+	return rDate;
 }
 
 /**
@@ -1184,14 +1157,18 @@ function _solarBase ()
 	return arr;
 }
 
+/***
+ * UIComponentsUtil.java
+ * @param element
+ * @returns {*}
+ */
 function gfn_getDate(element){
 	var date;
 	try {
-		date = $.datepicker.parseDate( "yy-mmd-dd", element.value );
+		date = $.datepicker.parseDate( "yy-mm-dd", element.value);
 	} catch( error ) {
-		alert("error : " +error);
 		date = null;
 	}
-alert("18 : " + date);
+
 	return date;
 }

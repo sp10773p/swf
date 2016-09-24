@@ -7,7 +7,7 @@
     <context:annotation-config/>
 
     <bean id="swfViewBuilder" class="kr.pe.sdh.common.view.SwfViewBuilder">
-        <constructor-arg value="/Users/seongdonghun/IdeaProjects/app/swf/src/main/webapp/view" />
+        <constructor-arg value="C:/projects/swf/src/main/webapp/view" />
         <constructor-arg value="kr.pe.sdh.common.view.factory.w3factory.W3SearchFactory" />
     </bean>
 </beans>
