@@ -22,7 +22,7 @@ public class W3SearchFactory extends SearchFactory {
 
     public String bindComponent(SearchEntry searchEntry) throws Exception {
         StringBuffer scriptBuffer = new StringBuffer();
-        if(searchEntry.getType().startsWith("due")){
+        if(searchEntry.getType().startsWith("due")) {
             String orgId = searchEntry.getId();
 
             searchEntry.setId("from_" + orgId);

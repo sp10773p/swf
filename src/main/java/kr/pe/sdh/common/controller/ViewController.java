@@ -16,7 +16,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -74,6 +76,46 @@ public class ViewController {
 
         }finally {
             response.getWriter().write(returnData.toJSONString());
+        }
+    }
+
+    @RequestMapping("/commonCode.do")
+    public void commonCode(@RequestParam(value = "term") String term,
+                         @RequestParam(value = "selectQKey") String selectQKey, HttpServletResponse response) throws IOException {
+
+        JSONObject jsonObject = new JSONObject();
+        String result = new String();
+        response.setCharacterEncoding("UTF-8");
+
+        try {
+
+            System.out.println("term : " + term);
+            System.out.println("select : " + selectQKey);
+            //TODO 조회 / 조회후 배열 처리
+            // sample
+            List<Map<String, String>> list = new ArrayList<Map<String, String>>();
+            Map<String, String> data = new HashMap<String, String>();
+            data.put("label", "Oh");
+            data.put("value", "K");
+
+            list.add(data);
+
+            data = new HashMap<String, String>();
+            data.put("label", "Seong");
+            data.put("value", "S");
+            list.add(data);
+
+            //jsonObject.put("data", StringUtils.listMapToString(list));
+            jsonObject.put("data", list);
+
+            result = jsonObject.toJSONString();
+            System.out.println("result : " + result);
+
+        }catch(Exception e){
+            e.printStackTrace();
+
+        }finally {
+            response.getWriter().write(result);
         }
     }
 

@@ -128,6 +128,7 @@ public class SwfViewBuilder {
         String type   = DOMUtil.getAttribute(searchEle, "type");
         String title  = DOMUtil.getAttribute(searchEle, "title");
         String isMand = DOMUtil.getAttribute(searchEle, "isMand");
+        String isMult = DOMUtil.getAttribute(searchEle, "isMult");
         String length = DOMUtil.getAttribute(searchEle, "length");
         String from   = DOMUtil.getAttribute(searchEle, "from");
         String to     = DOMUtil.getAttribute(searchEle, "to");
@@ -137,6 +138,7 @@ public class SwfViewBuilder {
         searchEntry.setId(id);
         searchEntry.setType(type);
         searchEntry.setMand(isMand);
+        searchEntry.setMand(isMult);
         searchEntry.setTitle(title);
         searchEntry.setLength(length);
         searchEntry.setStyle(style);
@@ -194,6 +196,12 @@ public class SwfViewBuilder {
             searchEntry.setRadio(radioStr);
             searchEntry.setRadioQKey(radioQKey);
 
+        }else if("autocomplete".equals(type)){
+            String selectQKey = DOMUtil.getElementTextByPath(searchEle, "selectQKey");
+
+            if(StringUtils.isNotEmpty(selectQKey)){
+                searchEntry.setSelectQKey(selectQKey);
+            }
         }
 
         return searchEntry;

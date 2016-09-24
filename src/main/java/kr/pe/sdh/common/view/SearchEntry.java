@@ -22,6 +22,7 @@ public class SearchEntry {
     private String radio;
     private String radioQKey;
 
+    private boolean isMult = false;
     private boolean isMand = false;
 
     private int length = 0;
@@ -177,11 +178,30 @@ public class SearchEntry {
 
     void setMand(String mandStr) {
         if(StringUtils.isNotEmpty(mandStr)){
-            if(!"Y".equals(mandStr) && !"N".equals(mandStr)){
+            if(!"Y".equals(mandStr.toUpperCase()) && !"N".equals(mandStr.toUpperCase())){
                 System.err.print("::: <search> Tag의 'isMand(" + mandStr + ")속성의 값이 유효하지 않습니다");
             }
 
             isMand = "Y".equals(mandStr) ? true : false;
+        }
+    }
+
+
+    boolean isMult() {
+        return isMult;
+    }
+
+    void setMult(boolean mult) {
+        isMult = mult;
+    }
+
+    void setMult(String multStr) {
+        if(StringUtils.isNotEmpty(multStr)){
+            if(!"Y".equals(multStr.toUpperCase()) && !"N".equals(multStr.toUpperCase())){
+                System.err.print("::: <search> Tag의 'isMult(" + multStr + ")속성의 값이 유효하지 않습니다");
+            }
+
+            isMult = "Y".equals(multStr) ? true : false;
         }
     }
 
@@ -242,6 +262,7 @@ public class SearchEntry {
         this.defaultDate = defaultDate;
     }
 
+
     String print() {
         return "SearchEntry{" +
                 "id='" + id + '\'' +
@@ -255,6 +276,7 @@ public class SearchEntry {
                 ", radio='" + radio + '\'' +
                 ", radioQKey='" + radioQKey + '\'' +
                 ", isMand=" + isMand +
+                ", isMult=" + isMult +
                 ", length=" + length +
                 ", fromDate='" + fromDate + '\'' +
                 ", toDate='" + toDate + '\'' +

@@ -27,9 +27,64 @@ public class UIComponentsUtils {
         // 월
         }else if(type.indexOf("month") > -1){
 
+        // autocomplete
+        }else if(type.equals("autocomplete")){
+            scriptBuffer = getAutocompleteTypeScript(searchEntry);
         }
 
         return scriptBuffer.toString();
+    }
+
+    private static StringBuffer getAutocompleteTypeScript(SearchEntry searchEntry) {
+        StringBuffer scriptBuffer = new StringBuffer();
+        scriptBuffer
+                .append("$('#"+searchEntry.getId()+"')").append(LF)
+                .append(".on( \"keydown\", function( event ) {")
+                .append("\tif ( event.keyCode === $.ui.keyCode.TAB &&")
+                .append("\t\t$( this ).autocomplete( \"instance\" ).menu.active ) {")
+                .append("\t\tevent.preventDefault();")
+                .append("\t}")
+                .append("})")
+
+                .append(".autocomplete({").append(LF)
+                .append("\tsource: function( request, response ) {").append(LF)
+                .append("\t\t$.ajax( {").append(LF)
+                .append("\t\t\turl: \"commonCode.do\",").append(LF)
+                .append("\t\t\tdataType: \"json\",").append(LF)
+                .append("\t\t\tdata: {").append(LF)
+                .append("\t\t\t\tterm: request.term,").append(LF)
+                .append("\t\t\t\tselectQKey: 'selectQKey'").append(LF)
+                .append("\t\t\t},").append(LF)
+                .append("\t\t\tsuccess: function( data ) {").append(LF)
+                .append("\t\t\t\tresponse( eval(data['data']) );").append(LF)
+                .append("\t\t\t},").append(LF)
+                .append("\t\t\terror : function(xhr, status, error) {").append(LF)
+                .append("\t\t\t\talert('error : ' + status +'/'+error);").append(LF)
+                .append("\t\t\t}").append(LF)
+                .append("\t\t})").append(LF)
+                .append("\t},").append(LF)
+
+                .append("\tsearch: function() {").append(LF)
+                .append("\t\tvar term = this.value.split( /,\\s*/ ).pop();").append(LF)
+                .append("\t\tif ( term.length < 1 ) {").append(LF)
+                .append("\t\t\treturn false;").append(LF)
+                .append("\t\t}").append(LF)
+                .append("\t},").append(LF)
+
+                .append("\tfocus: function() { return false; },").append(LF)
+
+                .append("\tselect: function( event, ui ) {").append(LF)
+                .append("\t\tvar terms = this.value.split( /,\\s*/ );").append(LF)
+                .append("\t\tterms.pop();").append(LF)
+                .append("\t\tterms.push( ui.item.value );").append(LF)
+                .append("\t\tterms.push( \"\" );").append(LF)
+                .append("\t\tthis.value = terms.join( \", \" );").append(LF)
+                .append("\t\treturn false;").append(LF)
+                .append("\t}").append(LF)
+
+                .append("});").append(LF);
+
+        return scriptBuffer;
     }
 
     private static String getDateDefaultDateSetting(SearchEntry searchEntry) {

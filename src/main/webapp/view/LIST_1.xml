@@ -28,11 +28,15 @@
             <radio>
                 ['M:Milk', 'S:Sugar:C']
             </radio>
-            <!-- CODE, VALUE, DEFAULT
+            <!-- CODE, LABEL, DEFAULT
                 <radioQKey>module1.select</radioQKey>
             -->
         </search>
-        <search id="search6" type="text" title="검색조건6" length="10" />
+        <search id="search6" type="autocomplete" title="Autocomplete" isMulti="Y">
+            <selectQKey>
+                <!-- VALUE, LABEL -->
+            </selectQKey>
+        </search>
         <search id="search7" type="date" title="Date" default="-7" />
         <search id="search8" type="text" title="검색조건8" length="10" />
         <search id="search9" type="text" title="검색조건9" length="10" />

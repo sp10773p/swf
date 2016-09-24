@@ -313,4 +313,29 @@ public class StringUtils {
 
 		return buffer.toString();
     }
+
+    public static String listMapToString(List<Map<String, String>> list){
+		StringBuffer buffer = new StringBuffer();
+		buffer.append("[");
+
+		for(Map<String, String> data : list){
+			buffer.append("{");
+			Iterator<String> iterator = data.keySet().iterator();
+			while(iterator.hasNext()){
+				String key = iterator.next();
+				buffer.append(key).append(": \"").append(data.get(key)).append("\",");
+			}
+			buffer.deleteCharAt(buffer.length()-1);
+			buffer.append("},");
+		}
+
+		if(buffer.length() > 1){
+			buffer.deleteCharAt(buffer.length()-1);
+		}
+
+		buffer.append("]");
+
+		return buffer.toString();
+
+	}
 }
