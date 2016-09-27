@@ -15,30 +15,9 @@
 
 
         function fn_subMenu(menuId) {
-            var dataString = $('#mainform').serialize();
-            var params = "view=" + menuId + "&param=" + dataString;
+            var params = "view=" + menuId;
+            new ajaxUtil.Request("/mainView.do", params, "gfn_drawMain");
 
-            jQuery.ajax({
-                type:"POST",
-                url:"/mainView.do",
-                data:params,
-                dataType:"JSON", // 옵션이므로 JSON으로 받을게 아니면 안써도 됨
-                success : function(data) {
-                    var code = data["code"];
-                    if(code == "S"){
-                        $('#mainFrame').html(data["data"]);
-                    }else{
-                        alert(data["msg"]);
-                    }
-                },
-                complete : function(data) {
-                    // 통신이 실패했어도 완료가 되었을 때 이 함수를 타게 된다.
-                    // TODO
-                },
-                error : function(xhr, status, error) {
-                    alert("에러발생");
-                }
-            });
         }
 
         var mySidenav, overlayBg;
@@ -89,8 +68,8 @@
         <i class="fa fa-remove"></i>
     </a>
     <h4><b>Menu</b></h4>
-    <a href="#" class="w3-hover-black" onclick="fn_subMenu('view01')">Default List</a>
-    <a href="#" class="w3-hover-black" onclick="fn_subMenu('view02')">Due List</a>
+    <a href="#" class="w3-hover-black" onclick="fn_subMenu('sampleDefaultList')">Default List</a>
+    <a href="#" class="w3-hover-black" onclick="fn_subMenu('sam1pleDueList')">Due List</a>
     <a href="#" class="w3-hover-black">Link</a>
     <a href="#" class="w3-hover-black">Link</a>
 </nav>

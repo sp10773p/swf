@@ -15,12 +15,7 @@ public class SearchEntry {
     private String type;
     private String title;
     private String style;
-    private String select;
     private String selectQKey;
-    private String check;
-    private String checkQKey;
-    private String radio;
-    private String radioQKey;
 
     private boolean isMult = false;
     private boolean isMand = false;
@@ -28,6 +23,8 @@ public class SearchEntry {
     private int length = 0;
 
     private List<EventEntry> eventEntries;
+
+    private List<Map<String, String>> list;
 
     /* 날짜관련 속성 */
     // due ~
@@ -53,23 +50,10 @@ public class SearchEntry {
         if(selectQKey != null){
             map.put("selectQKey", selectQKey);
         }else{
-            map.put("select", select);
+            map.put("list", list);
         }
 
         // 쿼리 id를 우선으로 처리
-        if(checkQKey != null){
-            map.put("checkQKey", checkQKey);
-        }else{
-            map.put("check", check);
-        }
-
-        // 쿼리 id를 우선으로 처리
-        if(radioQKey != null){
-            map.put("radioQKey", radioQKey);
-        }else{
-            map.put("radio", radio);
-        }
-
         List list = new ArrayList();
         if(eventEntries != null){
             for(EventEntry eventEntry : eventEntries){
@@ -120,52 +104,12 @@ public class SearchEntry {
         this.style = style;
     }
 
-    String getSelect() {
-        return select;
-    }
-
-    void setSelect(String select) {
-        this.select = select;
-    }
-
     String getSelectQKey() {
         return selectQKey;
     }
 
     void setSelectQKey(String selectQKey) {
         this.selectQKey = selectQKey;
-    }
-
-    String getCheck() {
-        return check;
-    }
-
-    void setCheck(String check) {
-        this.check = check;
-    }
-
-    String getCheckQKey() {
-        return checkQKey;
-    }
-
-    void setCheckQKey(String checkQKey) {
-        this.checkQKey = checkQKey;
-    }
-
-    String getRadio() {
-        return radio;
-    }
-
-    void setRadio(String radio) {
-        this.radio = radio;
-    }
-
-    String getRadioQKey() {
-        return radioQKey;
-    }
-
-    void setRadioQKey(String radioQKey) {
-        this.radioQKey = radioQKey;
     }
 
     boolean isMand() {
@@ -262,6 +206,13 @@ public class SearchEntry {
         this.defaultDate = defaultDate;
     }
 
+    public List<Map<String, String>> getList() {
+        return list;
+    }
+
+    public void setList(List<Map<String, String>> list) {
+        this.list = list;
+    }
 
     String print() {
         return "SearchEntry{" +
@@ -269,18 +220,14 @@ public class SearchEntry {
                 ", type='" + type + '\'' +
                 ", title='" + title + '\'' +
                 ", style='" + style + '\'' +
-                ", select='" + select + '\'' +
                 ", selectQKey='" + selectQKey + '\'' +
-                ", check='" + check + '\'' +
-                ", checkQKey='" + checkQKey + '\'' +
-                ", radio='" + radio + '\'' +
-                ", radioQKey='" + radioQKey + '\'' +
                 ", isMand=" + isMand +
                 ", isMult=" + isMult +
                 ", length=" + length +
                 ", fromDate='" + fromDate + '\'' +
                 ", toDate='" + toDate + '\'' +
                 ", defaultDate='" + defaultDate + '\'' +
+                ", list=" + (list == null ? "" : list.toString())+
                 ", eventEntries=" + (eventEntries == null ? "" : eventEntries.toString())+
                 '}';
     }

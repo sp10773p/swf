@@ -72,21 +72,75 @@ public class HtmlUtil {
         String input;
 
         if(type.equals("select")){
-            String select = StringUtils.isEmpty(data.get("selectQKey")) ? (String)data.get("select") : (String)data.get("selectQKey");
-            input = getSelectTag(id, name, style, select, className);
+            List<Map<String, String>> list = null;
+            if(StringUtils.isNotEmpty(data.get("selectQKey"))){
+                list = null; // TODO 조회하여 list 생성
+
+            }else{
+                list = (List<Map<String, String>>)data.get("list");
+
+            }
+
+
+            input = getSelectTag(id, name, style, list, className);
         }else{
-            input = getInputTag(type, id, name, length, style, className);
+            if(type.equals("autocomplete")){
+                input  = getInputTag(type    , id + "_VIEW", name, length, style, className);
+                input += getInputTag("hidden", id          , name, 0     , ""   , "");
+
+            }else{
+                input  = getInputTag(type, id, name, length, style, className);
+            }
         }
 
         return input;
     }
 
-    private static String getSelectTag(String id, String name, String style, String select, String className){
-        String att = getAttribute("id", id);
+    public static String createCheckNRadio(Map data, String className){
+        String id    = StringUtils.trimStr(data.get("id"));
+        String type  = StringUtils.trimStr(data.get("type"));
+        String style = StringUtils.trimStr(data.get("style"));
 
-        if(StringUtils.isNotEmpty(name)){
-            att += getAttribute("name", name);
+        List<Map<String, String>> list = null;
+        if(StringUtils.isNotEmpty(data.get("selectQKey"))){
+            list = null; // TODO 조회하여 list 생성
+
+        }else{
+            list = (List<Map<String, String>>)data.get("list");
+
         }
+
+        int idx = 0;
+        StringBuffer sb = new StringBuffer();
+        for(Map<String, String> map : list){
+
+            String code  = map.get("code");
+            String label = map.get("label");
+
+            String checked = null;
+            if(map.containsKey("checked") && map.get("checked").equals("true")){
+                checked = "checked";
+
+            }
+
+            String inp = HtmlUtil.getInputTag(type, id+(++idx), id, 0, style, className, code, checked);
+
+            sb.append(inp);
+
+            Map<String, String> labelData = new HashMap<String, String>();
+            labelData.put("title"    , label);
+            labelData.put("className", "w3-validate");
+            labelData.put("style"    , "margin-left: 3px; margin-right: 3px;");
+
+            sb.append(createLabel(labelData));
+
+        }
+
+        return sb.toString();
+    }
+
+    private static String getSelectTag(String id, String name, String style, List<Map<String, String>> list, String className){
+        String att = getAttribute("id", id);
 
         if(StringUtils.isNotEmpty(style)){
             att += getAttribute("style", style);
@@ -94,34 +148,27 @@ public class HtmlUtil {
 
         return "<select class=\"" + className + "\"" + att + ">"
                 + LF
-                + getOptions(select)
+                + getOptions(list)
                 + "</select>"
                 + LF;
     }
 
-    private static String getOptions(String select) {
+    private static String getOptions(List<Map<String, String>> list) {
         StringBuffer sb = new StringBuffer();
 
-        List<String[]> objArrList = getStringArray(select);
-
-        for(String[] objArr : objArrList){
-            if(objArr.length < 2){
-                System.err.println("<select> or <sekectKey> 내용을 확인하세요");
-                return null;
-            }
-
-            String code  = objArr[0];
-            String value = objArr[1];
+        for(Map<String, String> map : list){
+            String code  = map.get("code");
+            String label = map.get("label");
 
             String att = getAttribute("value", code);
-            if(objArr.length > 2 && objArr[2].equals("S")){
+            if(map.containsKey("selected") && map.get("selected").equals("true")){
                 att += " selected";
             }
 
             sb.append("\t<option ").
                     append(att).
                     append(">").
-                    append(value).
+                    append(label).
                     append("</option>").
                     append(LF);
 
@@ -160,8 +207,6 @@ public class HtmlUtil {
             att += getAttribute("length", String.valueOf(length));
         }
 
-
-
         if(StringUtils.isNotEmpty(value)){
             att += getAttribute("value", value);
         }
@@ -180,8 +225,11 @@ public class HtmlUtil {
             att += getAttribute("style", style);
         }
 
+        if(StringUtils.isNotEmpty(className)){
+            att += getAttribute("class", className);
+        }
+
         att += getAttribute("type", type);
-        att += getAttribute("class", className);
 
         return "<input" + att + "/>" + LF;
     }

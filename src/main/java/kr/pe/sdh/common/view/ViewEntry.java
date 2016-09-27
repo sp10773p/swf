@@ -9,6 +9,7 @@ class ViewEntry {
     private String id;      // 화면 id
     private String type;    // View type
     private String title;   // 화면 제목
+    private String script;
 
     ViewEntry(String id, String type, String title) {
         this.id = id;
@@ -46,5 +47,13 @@ class ViewEntry {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getScript() {
+        return script;
+    }
+
+    public void setScript(String script) {
+        this.script = script;
     }
 }

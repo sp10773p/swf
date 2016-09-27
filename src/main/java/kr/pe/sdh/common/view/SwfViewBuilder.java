@@ -13,11 +13,13 @@ import org.w3c.dom.Element;
 import java.io.File;
 import java.io.StringWriter;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by seongdonghun on 2016. 9. 21..
  */
 public class SwfViewBuilder {
+    private final String SEARCHS_ID = "SEARCHS";
     private String viewPath;
     private String layout;
     private ViewInfoManager viewInfoManager = new ViewInfoManager();
@@ -66,11 +68,15 @@ public class SwfViewBuilder {
         //조회 정보
         viewEntry.setSearchsInfo(buildSearchInfo(root));
 
+        //SCRIPT
+        String script = DOMUtil.getElementTextByPath(root, "script");
+        viewEntry.setScript(script);
+
         viewInfoManager.setViewEntryMap(viewId, viewEntry);
         viewInfoManager.setViewLoadManage(viewId, filename);
     }
 
-    private SearchsInfo buildSearchInfo(Element root) {
+    private SearchsInfo buildSearchInfo(Element root) throws Exception {
         SearchsInfo searchsInfo = new SearchsInfo();
 
         List<Element> searchsList = DOMUtil.getChildrenByPath(root, "searchs");
@@ -82,17 +88,30 @@ public class SwfViewBuilder {
             String searchId = null;
             if(StringUtils.isEmpty(searchId)){
                 if(searchsList.size() == 1){
-                    searchId = "searchs";
+                    searchId = SEARCHS_ID;
 
                 }else{
-                    searchId = "searchs" + (++idx);
+                    searchId = SEARCHS_ID + (++idx);
                 }
+            }
+
+            //[필수 속성]select Query key
+            String qKeyAtt = DOMUtil.getAttribute(searchsEle, "qKey");
+            if(StringUtils.isEmpty(qKeyAtt)){
+                String viewId = DOMUtil.getAttribute(root, "id");
+                throw new Exception("::: <searchs> Tag의 qKey는 필수 속성입니다. [" + viewId +"]");
             }
 
             // search column size
             String colSizeAtt = DOMUtil.getAttribute(searchsEle, "colSize");
             if(StringUtils.isNotEmpty(colSizeAtt)){
                 searchsInfo.setColSize(Integer.parseInt(colSizeAtt));
+            }
+
+            // function
+            String functionAtt = DOMUtil.getAttribute(searchsEle, "function");
+            if(StringUtils.isNotEmpty(functionAtt)){
+                searchsInfo.setFunction(functionAtt);
             }
 
             List<Element> searchList = DOMUtil.getChildrenByPath(searchsEle, "search");
@@ -160,47 +179,36 @@ public class SwfViewBuilder {
         }
 
         // type에 따른 유형 처리
-        if("select".equals(type)){
-            String selectStr  = DOMUtil.getElementTextByPath(searchEle, "select");
+        if("select".equals(type) || "checkbox".equals(type) || "radio".equals(type) || "autocomplete".equals(type)){
+            List<Element> itemList = DOMUtil.getChildrenByPath(searchEle, "list/item");
             String selectQKey = DOMUtil.getElementTextByPath(searchEle, "selectQKey");
 
-            if(selectStr == null && selectQKey == null){
-                System.err.println("::: type 이 select 일때 '<select>' 나 '<selectQKey>' Tag정의가 있어야 합니다.");
+            if(itemList == null && StringUtils.isEmpty(selectQKey)){
+                System.err.println("::: type 이 select/checkbox/radio/autocomplete 일때 '<list>' 나 '<selectQKey>' Tag정의가 있어야 합니다.");
                 return null;
             }
-
-            searchEntry.setSelect(selectStr);
-            searchEntry.setSelectQKey(selectQKey); // TODO selectQKey 쿼리 실행후 select의 배열처리해서 set 할것
-
-        }else if("checkbox".equals(type)){
-            String checkStr  = DOMUtil.getElementTextByPath(searchEle, "check");
-            String checkQKey = DOMUtil.getElementTextByPath(searchEle, "checkQKey");
-
-            if(checkStr == null && checkQKey == null){
-                System.err.println("::: type 이 checkbox 일때 '<check>' 나 '<checkQKey>' Tag정의가 있어야 합니다.");
-                return null;
-            }
-
-            searchEntry.setCheck(checkStr);
-            searchEntry.setCheckQKey(checkQKey);
-
-        }else if("radio".equals(type)){
-            String radioStr  = DOMUtil.getElementTextByPath(searchEle, "radio");
-            String radioQKey = DOMUtil.getElementTextByPath(searchEle, "radioQKey");
-
-            if(radioStr == null && radioQKey == null){
-                System.err.println("::: type 이 radio 일때 '<radio>' 나 '<radioQKey>' Tag정의가 있어야 합니다.");
-                return null;
-            }
-
-            searchEntry.setRadio(radioStr);
-            searchEntry.setRadioQKey(radioQKey);
-
-        }else if("autocomplete".equals(type)){
-            String selectQKey = DOMUtil.getElementTextByPath(searchEle, "selectQKey");
 
             if(StringUtils.isNotEmpty(selectQKey)){
-                searchEntry.setSelectQKey(selectQKey);
+                searchEntry.setSelectQKey(selectQKey); // TODO selectQKey 쿼리 실행후 select의 배열처리해서 set 할것
+
+            }else{
+                List<Map<String, String>> list = new ArrayList<Map<String, String>>();
+                for(Element ele : itemList){
+                    String code     = DOMUtil.getAttribute(ele, "code");
+                    String selected = DOMUtil.getAttribute(ele, "selected");
+                    String checked  = DOMUtil.getAttribute(ele, "checked");
+                    String label    = DOMUtil.getElementText(ele);
+
+                    Map<String, String> map = new HashMap<String, String>();
+                    map.put("code"    , code);
+                    map.put("label"   , label);
+                    map.put("selected", selected);
+                    map.put("checked" , checked);
+
+                    list.add(map);
+                }
+
+                searchEntry.setList(list);
             }
         }
 
@@ -245,13 +253,27 @@ public class SwfViewBuilder {
                 searchsInfo.appendScript(codeMap.get("bindScript"));
 
                 searchsInfo.setSearchHtml(searchsId, codeMap.get("search"));
+
+                // 조회 함수 지정
+                String targetObjId = TARGET.valueOf(searchsId).getTarget();
+                if(StringUtils.isNotEmpty(searchsInfo.getFunction())){
+                    String function = searchsInfo.getFunction() + "('" + searchsId + "' , '" + targetObjId + "', '" + searchsInfo.getqKey() + "')";
+                    searchsInfo.setFunction(function);
+
+                }else{
+                    searchsInfo.setFunction("gfn_gridSelectList('" + searchsId + "' , '" + targetObjId + "', '" + searchsInfo.getqKey() + "')");
+                }
             }
 
+            htmlMap.put("selectFn", searchsInfo.getFunction());
+            htmlMap.put(searchsId + "_FORM", searchsId); // form id
             htmlMap.put(searchsId, searchsInfo.getSearchHtml(searchsId));
         }
 
         //bindComponent Script
         htmlMap.put("bindScript", searchsInfo.getSearchScript());
+        htmlMap.put("script"    , viewInfoManager.getViewEntry(viewId).getScript());
+
 
         return htmlMap;
 
@@ -325,4 +347,26 @@ public class SwfViewBuilder {
 // 필수 속성
 enum SEARCH{
     id,type
+}
+
+enum TARGET {
+    //DEFAULT_LIST 일때
+    SEARCHS("SEARCHS_GRID"),
+
+    // DUE_LIST ~ 일때
+    SEARCHS1("SEARCHS_GRID1"),
+    SEARCHS2("SEARCHS_GRID2"),
+    SEARCHS3("SEARCHS_GRID3"),
+    SEARCHS4("SEARCHS_GRID4"),
+    SEARCHS5("SEARCHS_GRID5");
+
+    private String key;
+    private TARGET(String key){
+        this.key = key;
+    }
+
+    public String getTarget(){
+        return this.key;
+    }
+
 }

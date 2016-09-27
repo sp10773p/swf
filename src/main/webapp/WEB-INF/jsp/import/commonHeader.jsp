@@ -26,6 +26,7 @@
 <script src="js/date.js"></script>
 <script src="js/util.js"></script>
 <script src="js/string.js"></script>
+<script src="js/serverUtils.js"></script>
 
 <style>
     html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif}
@@ -49,6 +50,7 @@
 
     .search-input {width: 98%; height: 24px; font-size: 14px; font-weight: normal}
     .search-date  {width: 100px; height: 24px; font-size: 14px; font-weight: normal; text-align: center}
+    .searchForm {margin-bottom: 0px;}
 
     input[type=checkbox].w3-check, input[type=radio].w3-radio {top: 3px; width: 18px; height: 18px}
 
@@ -59,5 +61,7 @@
     .ui-datepicker select.ui-datepicker-year  {width: 40%; font-size: 11px; padding-left: 5px;}
     .ui-datepicker-trigger {width: 17px; margin-left: 2px; cursor: pointer}
     .ui-datepicker th {color: white}
+
+    .select_btn {padding-top: 30px; padding-right: 15px; width: 10%; float: right; text-align: right}
 
 </style>

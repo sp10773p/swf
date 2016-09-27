@@ -18,6 +18,9 @@ class SearchsInfo {
 
     private int colSize = 3;
 
+    private String function;
+    private String qKey;
+
     void addSearch(String searchId, List<SearchEntry> searchEntries){
         this.searchs.put(searchId, searchEntries);
     }
@@ -62,5 +65,21 @@ class SearchsInfo {
 
     public int getColSize() {
         return colSize;
+    }
+
+    public String getFunction() {
+        return function;
+    }
+
+    public void setFunction(String function) {
+        this.function = function;
+    }
+
+    public String getqKey() {
+        return qKey;
+    }
+
+    public void setqKey(String qKey) {
+        this.qKey = qKey;
     }
 }

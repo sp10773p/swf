@@ -426,8 +426,8 @@
 	</div>
 </div>
 
-<script src="external/jquery/jquery.js"></script>
-<script src="jquery-ui.js"></script>
+<script src="js/jquery.js"></script>
+<script src="js/jquery-ui.js"></script>
 <script>
 
 	$( "#accordion" ).accordion();
@@ -554,6 +554,14 @@
 				$( this ).removeClass( "ui-state-hover" );
 			}
 	);
+
+	$(document).ready(function () {
+		alert('3333');
+		$( "#autocomplete" ).autocomplete('option', 'appendTo', '#Sdh');
+
+		var appendTo = $( "#autocomplete" ).autocomplete( "option", "appendTo" );
+		alert(appendTo);
+	});
 </script>
 </body>
 </html>
