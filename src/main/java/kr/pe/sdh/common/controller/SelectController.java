@@ -61,7 +61,6 @@ public class SelectController {
 
         JSONObject jsonObject = new JSONObject();
         String result = new String();
-        response.setCharacterEncoding("UTF-8");
 
         try {
 

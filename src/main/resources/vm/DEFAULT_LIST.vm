@@ -26,4 +26,17 @@
 <script>
     $bindScript
     $script
+
+    $(function(){
+        $("#SEARCH_GRID").jqGrid({
+            colNames: ["검색버튼을 눌러주세요."],
+            colModel: [
+                { name: "invid", width: "100%", sortable: false, align: "left" }
+            ],
+            gridview: true,
+            autowidth: true,
+            autoencode: true
+        });
+
+    });
 </script>

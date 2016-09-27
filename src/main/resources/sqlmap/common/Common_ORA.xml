@@ -1,0 +1,4641 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Common">
+	<sql id="listSearchWhr">
+		) a
+		<isNotEmpty property="defaultSortCol" prepend=" ORDER BY ">
+			$defaultSortCol$ $defaultSortDirect$, SYS_GUID() ASC
+		</isNotEmpty>
+		) k
+		<dynamic prepend="where">
+			<isNotEmpty prepend="and" removeFirstPrepend="true" property="currPage">
+			<isNotEmpty property="pageCnt">
+				<![CDATA[
+					ROWNUM <= ((#pageCnt#) * (#currPage#) )
+				]]>
+			</isNotEmpty>
+			</isNotEmpty>
+		</dynamic>
+		) b
+		<dynamic prepend="where">
+			<isNotEmpty prepend="and" removeFirstPrepend="true" property="currPage">
+			<isNotEmpty property="pageCnt">
+				<![CDATA[
+					RM <= (#pageCnt# * #currPage#) and RM > ( #pageCnt# * (#currPage# -1))
+				]]>
+			</isNotEmpty>
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+
+	<sql id="listSearchCol">
+		select * from (
+		select ROWNUM RM, rownum ROW_ID, k.* from (
+			select * from (
+	</sql>
+
+	<select id="selectMenuList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+	SELECT '0' CHK,
+			   M.*,
+       		   DECODE(SCREEN_PATH, NULL, '', SUBSTR(SYS_CONNECT_BY_PATH(M.MENU_NM,' > '), 4))  AS NAVIGATOR
+  	  FROM (
+				SELECT 	MENU_ID,
+							<isNotEmpty property="GV_LANG_CODE">
+								DECODE('$GV_LANG_CODE$', 'KR', MENU_NM_KR, 'EN', MENU_NM_EN, 'CN', MENU_NM_CN, 'JP', MENU_NM_JP, '') AS MENU_NM,
+			        			DECODE('$GV_LANG_CODE$', 'KR', ABBR_MENU_NM_KR, 'EN', ABBR_MENU_NM_EN, 'CN', ABBR_MENU_NM_CN, 'JP', ABBR_MENU_NM_JP, '') AS ABBR_MENU_NM,
+			        		</isNotEmpty>
+			        		<isEmpty  property="GV_LANG_CODE">
+			        			MENU_NM_KR AS MENU_NM,
+			        			ABBR_MENU_NM_KR AS ABBR_MENU_NM,
+			        		</isEmpty>
+							MENU_NM_KR,
+							MENU_NM_EN,
+							MENU_NM_CN,
+							MENU_NM_JP,
+							ABBR_MENU_NM_KR,
+							ABBR_MENU_NM_EN,
+							ABBR_MENU_NM_CN,
+							ABBR_MENU_NM_JP,
+							UPPER_MENU_ID,
+							MENU_LVL,
+							SORT_ORDER,
+							MENU_SEARCH_ID,
+							SCREEN_PATH,
+							MENU_SERVICE,
+							MENU_IMG_PATH1,
+							MENU_IMG_PATH2,
+							MENU_IMG_PATH3,
+							MENU_SITE,
+							PRGM_NM,
+							MANUAL_YN,
+							DETAIL_YN,
+							STATUS,
+							NVL(MOD_USER_ID, REG_USER_ID) AS REG_USER_ID,
+							TO_CHAR(NVL(MOD_DATE, REG_DATE), 'YYYY-MM-DD') AS REG_DATE,
+							MOD_USER_ID,
+							MOD_DATE
+				   FROM  CM_MENU
+				 WHERE 1=1
+				 <isNotEmpty prepend="AND" property="MENU_ID">
+				 		MENU_ID = #MENU_ID#
+				 </isNotEmpty>
+				 <isNotEmpty prepend="AND" property="MENU_SITE">
+				 		MENU_SITE = #MENU_SITE#
+				 </isNotEmpty>
+				 ) M
+		      CONNECT BY PRIOR MENU_ID = UPPER_MENU_ID
+		      START WITH UPPER_MENU_ID = 'TOP'
+		      ORDER SIBLINGS BY TO_NUMBER(SORT_ORDER), MENU_ID
+	</select>
+
+	<insert id="insertCmMenu" parameterClass="java.util.Map">
+		INSERT INTO CM_MENU(
+			MENU_ID,
+			MENU_NM_KR,
+			MENU_NM_EN,
+			MENU_NM_CN,
+			MENU_NM_JP,
+			ABBR_MENU_NM_KR,
+			ABBR_MENU_NM_EN,
+			ABBR_MENU_NM_CN,
+			ABBR_MENU_NM_JP,
+			UPPER_MENU_ID,
+			MENU_LVL,
+			SORT_ORDER,
+			MENU_SEARCH_ID,
+			SCREEN_PATH,
+			MENU_SERVICE,
+			MENU_IMG_PATH1,
+			MENU_IMG_PATH2,
+			MENU_IMG_PATH3,
+			MENU_SITE,
+			PRGM_NM,
+			MANUAL_YN,
+			DETAIL_YN,
+			STATUS,
+			REG_USER_ID,
+			REG_DATE
+		)VALUES(
+			#MENU_ID#,
+			#MENU_NM_KR#,
+			#MENU_NM_EN#,
+			#MENU_NM_CN#,
+			#MENU_NM_JP#,
+			#ABBR_MENU_NM_KR#,
+			#ABBR_MENU_NM_EN#,
+			#ABBR_MENU_NM_CN#,
+			#ABBR_MENU_NM_JP#,
+			#UPPER_MENU_ID#,
+			#MENU_LVL#,
+			#SORT_ORDER#,
+			#MENU_SEARCH_ID#,
+			#SCREEN_PATH#,
+			#MENU_SERVICE#,
+			#MENU_IMG_PATH1#,
+			#MENU_IMG_PATH2#,
+			#MENU_IMG_PATH3#,
+			#MENU_SITE#,
+			#PRGM_NM#,
+			#MANUAL_YN#,
+			#DETAIL_YN#,
+			#STATUS#,
+			#SS_USER_ID#,
+			#REG_DATE#
+		)
+	</insert>
+
+	<update id="updateCmMenu" parameterClass="java.util.Map">
+		  UPDATE    CM_MENU
+			 SET    MENU_ID = #MENU_ID#,
+					MENU_NM_KR = #MENU_NM_KR#,
+					MENU_NM_EN = #MENU_NM_EN#,
+					MENU_NM_CN = #MENU_NM_CN#,
+					MENU_NM_JP = #MENU_NM_JP#,
+					ABBR_MENU_NM_KR = #ABBR_MENU_NM_KR#,
+					ABBR_MENU_NM_EN = #ABBR_MENU_NM_EN#,
+					ABBR_MENU_NM_CN = #ABBR_MENU_NM_CN#,
+					ABBR_MENU_NM_JP = #ABBR_MENU_NM_JP#,
+					UPPER_MENU_ID = #UPPER_MENU_ID#,
+					MENU_LVL = #MENU_LVL#,
+					SORT_ORDER = #SORT_ORDER#,
+					MENU_SEARCH_ID = #MENU_SEARCH_ID#,
+					SCREEN_PATH = #SCREEN_PATH#,
+					MENU_SERVICE = #MENU_SERVICE#,
+					MENU_IMG_PATH1 = #MENU_IMG_PATH1#,
+					MENU_IMG_PATH2 = #MENU_IMG_PATH2#,
+					MENU_IMG_PATH3 = #MENU_IMG_PATH3#,
+					MENU_SITE = #MENU_SITE#,
+					PRGM_NM = #PRGM_NM#,
+					MANUAL_YN = #MANUAL_YN#,
+					DETAIL_YN = #DETAIL_YN#,
+					STATUS = #STATUS#,
+					REG_USER_ID = #SS_USER_ID#,
+					REG_DATE = #REG_DATE#,
+					MOD_USER_ID = #SS_USER_ID#,
+					MOD_DATE = #MOD_DATE#
+		WHERE   	MENU_ID = #MENU_ID#
+	</update>
+
+	<delete id="deleteCmMenu" parameterClass="java.util.Map">
+		DELETE CM_MENU
+		 WHERE MENU_ID = #MENU_ID#
+		<!-- UPDATE CM_MENU
+		   SET STATUS = 'N',
+		       MOD_USER_ID = #SS_USER_ID#,
+			   MOD_DATE = SYSDATE
+		 WHERE MENU_ID = #MENU_ID# -->
+	</delete>
+
+
+	<select id="selectCodeMaster" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT '0' AS CHK,
+			   MASTER_CODE,
+			   SERVICE_TYPE,
+			   MASTER_NM_KR,
+			   MASTER_NM_EN,
+			   MASTER_NM_CN,
+			   MASTER_NM_JP,
+			   DESCRIPTION,
+			   STATUS,
+			   REG_USER_ID,
+			   REG_DATE,
+			   MOD_USER_ID,
+			   MOD_DATE
+		  FROM CM_MASTER_CODE
+		 WHERE 1=1
+		<isNotEmpty property="MASTER_TYPE">
+			<isNotEmpty  prepend="AND"   property="MASTER_VALUE">
+				$MASTER_TYPE$ LIKE '%'||#MASTER_VALUE#||'%'
+			</isNotEmpty>
+		</isNotEmpty>
+		ORDER BY MASTER_CODE
+	</select>
+
+	<insert id="insertCodeMaster" parameterClass="java.util.Map">
+		INSERT INTO CM_MASTER_CODE(
+			MASTER_CODE,
+			SERVICE_TYPE,
+			MASTER_NM_KR,
+			MASTER_NM_EN,
+			MASTER_NM_CN,
+			MASTER_NM_JP,
+			DESCRIPTION,
+			STATUS,
+			REG_USER_ID,
+			REG_DATE,
+			MOD_USER_ID,
+			MOD_DATE
+		)VALUES(
+			#MASTER_CODE#,
+			#SERVICE_TYPE#,
+			#MASTER_NM_KR#,
+			#MASTER_NM_EN#,
+			#MASTER_NM_CN#,
+			#MASTER_NM_JP#,
+			#DESCRIPTION#,
+			#STATUS#,
+			#SS_USER_ID#,
+			SYSDATE,
+			#SS_USER_ID#,
+			SYSDATE
+		)
+	</insert>
+
+	<update id="updateCodeMaster" parameterClass="java.util.Map">
+		UPDATE CM_MASTER_CODE
+		   SET
+			   MASTER_CODE = #MASTER_CODE#,
+			   SERVICE_TYPE = #SERVICE_TYPE#,
+			   MASTER_NM_KR = #MASTER_NM_KR#,
+			   MASTER_NM_EN = #MASTER_NM_EN#,
+			   MASTER_NM_CN = #MASTER_NM_CN#,
+			   MASTER_NM_JP = #MASTER_NM_JP#,
+			   DESCRIPTION = #DESCRIPTION#,
+			   STATUS = #STATUS#,
+			   MOD_USER_ID = #SS_USER_ID#,
+			   MOD_DATE = SYSDATE
+	     WHERE MASTER_CODE = #DORG_MASTER_CODE#
+	</update>
+
+	<delete id="deleteCodeMaster" parameterClass="java.util.Map">
+		UPDATE 	CM_MASTER_CODE
+		   SET  STATUS = 'N',
+				MOD_USER_ID = #SS_USER_ID#,
+				MOD_DATE = SYSDATE
+	     WHERE 	MASTER_CODE = #MASTER_CODE#
+	</delete>
+
+	<select id="selectCmCodeList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT '0' AS CHK,
+					LANG_CODE,
+					MASTER_CODE,
+					CODE,
+					CODE_NM,
+					ABBR_CODE_NM,
+					P_MASTER_CODE,
+					P_CODE,
+					SORT_ORDER,
+					REMARK,
+					STATUS,
+					REG_USER_ID,
+					TO_CHAR(REG_DATE, 'YYYY-MM-DD') AS REG_DATE,
+					MOD_USER_ID,
+					TO_CHAR(MOD_DATE, 'YYYY-MM-DD') AS MOD_DATE
+		   FROM CM_CODE
+		 WHERE 1=1
+		   <isNotEmpty prepend="AND" property="LANG_CODE">
+		   		LANG_CODE = #LANG_CODE#
+		   </isNotEmpty>
+		   <isNotEmpty prepend="AND" property="MASTER_CODE">
+		   		MASTER_CODE = #MASTER_CODE#
+		   </isNotEmpty>
+		   <isNotEmpty prepend="AND" property="CODE">
+		   		CODE = #CODE#
+		   </isNotEmpty>
+		   <isNotEmpty prepend="AND" property="P_MASTER_CODE">
+		   		P_MASTER_CODE = #P_MASTER_CODE#
+		   </isNotEmpty>
+		   <isNotEmpty prepend="AND" property="P_CODE">
+		   		P_CODE = #P_CODE#
+		   </isNotEmpty>
+		ORDER BY SORT_ORDER
+	</select>
+
+	<select id="selectCmCodeList_cnt" parameterClass="java.util.Map" resultClass="Integer">
+		SELECT	COUNT(*)
+		  FROM	CM_CODE
+		 WHERE	LANG_CODE = #LANG_CODE#
+		   AND  MASTER_CODE = #MASTER_CODE#
+		   AND  CODE = #CODE#
+		<isNotEmpty property="P_MASTER_CODE">
+		   AND  P_MASTER_CODE = #P_MASTER_CODE#
+		</isNotEmpty>
+		<isNotEmpty property="P_CODE">
+		   AND  P_CODE = #P_CODE#
+		</isNotEmpty>
+	</select>
+
+	<insert id="insertCmCode" parameterClass="java.util.Map">
+		INSERT INTO CM_CODE(
+			LANG_CODE,
+			MASTER_CODE,
+			CODE,
+			CODE_NM,
+			ABBR_CODE_NM,
+			P_MASTER_CODE,
+			P_CODE,
+			SORT_ORDER,
+			REMARK,
+			STATUS,
+			REG_USER_ID,
+			REG_DATE
+		)VALUES(
+			#LANG_CODE#,
+			#MASTER_CODE#,
+			#CODE#,
+			#CODE_NM#,
+			#ABBR_CODE_NM#,
+			#P_MASTER_CODE#,
+			#P_CODE#,
+			#SORT_ORDER#,
+			#REMARK#,
+			#STATUS#,
+			#SS_USER_ID#,
+			SYSDATE
+		)
+	</insert>
+
+	<update id="updateCmCode" parameterClass="java.util.Map">
+		UPDATE CM_CODE
+		   SET
+			   	LANG_CODE = #LANG_CODE#,
+				CODE = #CODE#,
+				CODE_NM = #CODE_NM#,
+				ABBR_CODE_NM = #ABBR_CODE_NM#,
+				P_MASTER_CODE = #P_MASTER_CODE#,
+				P_CODE = #P_CODE#,
+				SORT_ORDER = #SORT_ORDER#,
+				REMARK = #REMARK#,
+				STATUS = #STATUS#,
+			   	MOD_USER_ID = #SS_USER_ID#,
+			   	MOD_DATE = SYSDATE
+	     WHERE  LANG_CODE = #DORG_LANG_CODE#
+	       AND	MASTER_CODE = #DORG_MASTER_CODE#
+	       AND 	CODE = #DORG_CODE#
+	</update>
+
+	<delete id="deleteCmCode" parameterClass="java.util.Map">
+		UPDATE 	CM_CODE
+		   SET  STATUS = 'N',
+			  	MOD_USER_ID = #SS_USER_ID#,
+			  	MOD_DATE = SYSDATE
+	     WHERE 	LANG_CODE = #LANG_CODE#
+	       AND 	MASTER_CODE = #MASTER_CODE#
+	       AND 	CODE = #CODE#
+	</delete>
+
+	<select id="selectCmCodeMap_cnt" parameterClass="java.util.Map" resultClass="Integer">
+		SELECT 	COUNT(*)
+		  FROM 	CM_CODE_MAP
+		 WHERE 	LANG_CODE = #LANG_CODE#
+		   AND  CORP_CD = #CORP_CD#
+		   AND  MASTER_CODE = #MASTER_CODE#
+		   AND  CODE = #CODE#
+	</select>
+
+	<update id="updateCmCodeMap"  parameterClass="java.util.Map">
+		UPDATE CM_CODE_MAP
+		SET
+				CODE = #CODE#,
+				ABBR_CODE_NM = NVL(#ABBR_CODE_NM#, #CODE_NM#),
+				LANG_CODE = #LANG_CODE#,
+				SORT_ORDER = #SORT_ORDER#,
+				P_MASTER_CODE = #P_MASTER_CODE#,
+				P_CODE = #P_CODE#,
+				STATUS = #STATUS#,
+			  	MOD_USER_ID = #SS_USER_ID#,
+			  	MOD_DT = SYSDATE
+		WHERE	LANG_CODE = #DORG_LANG_CODE#
+		  AND 	CORP_CD = #CORP_CD#
+		  AND	MASTER_CODE = #DORG_MASTER_CODE#
+		  AND 	CODE = #DORG_CODE#
+	</update>
+
+	<insert id="insertCmCodeMap" parameterClass="java.util.Map">
+		INSERT INTO CM_CODE_MAP(
+				LANG_CODE,
+				CORP_CD,
+				MASTER_CODE,
+				CODE,
+				ABBR_CODE_NM,
+				P_MASTER_CODE,
+				P_CODE,
+				SORT_ORDER,
+				STATUS,
+				REG_USER_ID,
+				REG_DT)
+			VALUES(
+				#LANG_CODE#,
+				#CORP_CD#,
+				#MASTER_CODE#,
+				#CODE#,
+				#ABBR_CODE_NM#,
+				#P_MASTER_CODE#,
+				#P_CODE#,
+				#SORT_ORDER#,
+				#STATUS#,
+				#SS_USER_ID#,
+				SYSDATE
+			)
+	</insert>
+
+	<delete id="deleteCmCodeMap" parameterClass="java.util.Map">
+		DELETE FROM CM_CODE_MAP
+		 WHERE MASTER_CODE = #MASTER_CODE#
+	</delete>
+
+	<select id="selectCmRoleMapMenuList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT  A.MENU_ID,
+					<isNotEmpty property="GV_LANG_CODE">
+						DECODE('$GV_LANG_CODE$', 'KR', A.MENU_NM_KR, 'EN', A.MENU_NM_EN, 'CN', A.MENU_NM_CN, 'JP', A.MENU_NM_JP, '') || '[' || MENU_ID || ']' AS MENU_NM_STR,
+	        		</isNotEmpty>
+	        		<isEmpty  property="GV_LANG_CODE">
+	        			MENU_NM_KR|| '[' || MENU_ID || ']'  AS MENU_NM,
+	        		</isEmpty>
+	                A.MENU_NM_KR,
+	                A.MENU_NM_EN,
+	                A.MENU_NM_CN,
+	                A.MENU_NM_JP,
+	                A.ABBR_MENU_NM_KR,
+	                A.ABBR_MENU_NM_EN,
+	                A.ABBR_MENU_NM_CN,
+	                A.ABBR_MENU_NM_JP,
+	                A.UPPER_MENU_ID,
+	                A.MENU_LVL,
+	                A.SORT_ORDER,
+	                A.MENU_SEARCH_ID,
+	                A.SCREEN_PATH,
+	                A.MENU_SERVICE,
+	                A.MENU_IMG_PATH1,
+	                A.MENU_IMG_PATH2,
+	                A.MENU_IMG_PATH3,
+	                A.MENU_SITE,
+	                A.PRGM_NM,
+	                A.MANUAL_YN,
+	                A.DETAIL_YN,
+	                A.STATUS,
+	                DECODE((SELECT B.GRANT_YN FROM CM_ROLE_MAP B WHERE B.GROUP_ID = #GROUP_ID# AND A.MENU_ID = B.MENU_ID), NULL, '0', '1') AS GRANT_YN
+	          FROM	CM_MENU A
+	         WHERE  STATUS = 'Y'
+	         CONNECT BY PRIOR MENU_ID = UPPER_MENU_ID
+			      START WITH UPPER_MENU_ID = 'TOP'
+			      ORDER SIBLINGS BY TO_NUMBER(SORT_ORDER), MENU_ID
+	</select>
+
+	<insert id="insertUserAccessLog" parameterClass="map">
+	  INSERT INTO CM_USER_ACCLOG(
+			  SID,
+			  SRV,
+			  SESSION_ID,
+			  U_ID,
+			  PRGM_ID,
+			  U_IP,
+			  ACCESS_DATETIME,
+			  MENU_ID,
+			  ACT_NM
+	  )VALUES(
+			  #SID#,
+			   #SRV#,
+			   #SESSION_ID#,
+			  #USER_ID#,
+			  #PRGM_ID#,
+			  #U_IP#,
+			  SYSDATE,
+			  #MENU_ID#,
+			  (SELECT NVL(DESCRIPTION, DOMAIN_NM)
+			  	 FROM CM_SCREEN_ITEM
+			    WHERE LANG_CODE = #LANG_CODE#
+			      AND SCREEN_ID = #MENU_ID#
+			      AND DOMAIN_CD = #DOMAIN_CD#)
+			 )
+	</insert>
+
+	<insert id="insertAutoLogoutLog" parameterClass="map">
+		INSERT INTO CM_USER_ACCLOG(SID, U_ID, U_IP, PRGM_ID, ACCESS_DATETIME, SRV, SESSION_ID)
+		SELECT  #SID#, U_ID, U_IP, 'LOGOUT', SYSDATE, SRV, #SESSION_ID# FROM CM_USER_ACCLOG
+		  WHERE SID > TO_CHAR(SYSDATE - (#SESSION_TIMEOUT# * (1/( 60* 24))), 'YYYYMMDDHH24MISS') AND PRGM_ID != 'LOGOUT' AND SESSION_ID NOT IN (
+		  SELECT LOGIN.SESSION_ID FROM CM_USER_ACCLOG LOGIN LEFT JOIN CM_USER_ACCLOG LOGOUT ON
+		      LOGIN.SESSION_ID = LOGOUT.SESSION_ID
+		    WHERE LOGIN.SID > TO_CHAR(SYSDATE - (#SESSION_TIMEOUT# * (1/(60* 24))), 'YYYYMMDDHH24MISS') AND LOGOUT.SID > TO_CHAR(SYSDATE - (#SESSION_TIMEOUT# * (1/( 60* 24))), 'YYYYMMDDHH24MISS') AND LOGIN.PRGM_ID != 'LOGOUT' AND LOGOUT.PRGM_ID = 'LOGOUT'
+		) AND SESSION_ID = #SESSION_ID# AND ROWNUM = 1
+	</insert>
+
+	<insert id="logoutAll" parameterClass="map">
+		INSERT INTO CM_USER_ACCLOG(SID, U_ID, U_IP, PRGM_ID, ACCESS_DATETIME, SRV, SESSION_ID)
+		SELECT  #SID#, U_ID, U_IP, 'LOGOUT', SYSDATE, SRV, #SESSION_ID# FROM CM_USER_ACCLOG
+		  WHERE SID > TO_CHAR(SYSDATE - (#SESSION_TIMEOUT# * (1/( 60* 24))), 'YYYYMMDDHH24MISS') AND PRGM_ID != 'LOGOUT' AND SESSION_ID NOT IN (
+		  SELECT LOGIN.SESSION_ID FROM CM_USER_ACCLOG LOGIN LEFT JOIN CM_USER_ACCLOG LOGOUT ON
+		      LOGIN.SESSION_ID = LOGOUT.SESSION_ID
+		    WHERE LOGIN.SID > TO_CHAR(SYSDATE - (#SESSION_TIMEOUT# * (1/(60* 24))), 'YYYYMMDDHH24MISS') AND LOGOUT.SID > TO_CHAR(SYSDATE - (#SESSION_TIMEOUT# * (1/( 60* 24))), 'YYYYMMDDHH24MISS') AND LOGIN.PRGM_ID != 'LOGOUT' AND LOGOUT.PRGM_ID = 'LOGOUT'
+		) AND SESSION_ID = #SESSION_ID# AND ROWNUM = 1
+	</insert>
+
+	<select id="selectCmMessageList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT 	KEY_NO,
+				ID,
+				TEXT_KR,
+				TEXT_EN,
+				TEXT_CN,
+				TEXT_JP
+		  FROM  CM_SYSTEM_MESSAGE
+		 WHERE 	USE_YN = 'Y'
+	</select>
+
+	<select id="selectCmKrMessage" parameterClass="int" resultClass="hashmap">
+		SELECT
+			KEY_NO,
+			ID,
+			TEXT_KR
+		FROM
+			CM_SYSTEM_MESSAGE
+		 WHERE
+		 	KEY_NO = #string#
+	</select>
+
+	<select id="selectCmMessageByPk" parameterClass="hashmap" resultClass="hashmap">
+		SELECT
+			KEY_NO,
+			ID,
+			DECODE('$GV_LANG_CODE$','KR',TEXT_KR,TEXT_EN) TEXT,
+			TEXT_KR,
+			TEXT_EN,
+			TEXT_CN,
+			TEXT_JP
+		FROM
+			CM_SYSTEM_MESSAGE
+		 WHERE
+		 	KEY_NO = #KEY_NO#
+	</select>
+
+	<select id="selectCommonCodeList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT A.*,
+		      (SELECT SUBSTR(xmlagg(xmlelement(CORP_CD,','||CORP_CD) order by SORT_ORDER).extract('//text()').getStringVal(), 2)
+		        FROM CM_CODE_MAP
+		       WHERE LANG_CODE = A.LANG_CODE
+		         AND MASTER_CODE = A.MASTER_CODE
+		         AND STATUS = 'Y'
+		         AND CODE = A.CODE) AS AUTH_CORP
+		  FROM (
+		        SELECT DISTINCT *
+		          FROM (
+		              SELECT D.LANG_CODE,
+		                       D.MASTER_CODE,
+		                       D.CODE,
+		                       D.ABBR_CODE_NM AS VALUE,
+		                       '[' || D.CODE || ']' || D.ABBR_CODE_NM AS CODE_VALUE,
+		                       D.ABBR_CODE_NM || '[' || D.CODE || ']' AS VALUE_CODE,
+		                       D.ABBR_CODE_NM,
+		                       SORT_ORDER
+		                FROM  CM_CODE_MAP D
+		               WHERE  D.MASTER_CODE IN ($MASTER_CODE$)
+		                  AND  D.LANG_CODE = #GV_LANG_CODE#
+		                  AND  D.STATUS = 'Y'
+		                  AND  D.CORP_CD IN ($GV_CORP_CD$)
+		              )
+		        ) A
+		    ORDER BY MASTER_CODE, SORT_ORDER
+	</select>
+
+	<select id="selectCmCommCodeList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT #GV_LANG_CODE# AS LANG_CODE,
+		       M.CODE AS MASTER_CODE,
+		       D.CODE,
+		       DECODE(#GV_LANG_CODE#, 'KR', D.CODE_NM, D.CODE_NM_EN)  AS VALUE,
+		       '['||D.CODE||']'||DECODE(#GV_LANG_CODE#, 'KR', D.CODE_NM, D.CODE_NM_EN) AS CODE_VALUE,
+		       DECODE(#GV_LANG_CODE#, 'KR', D.CODE_NM, D.CODE_NM_EN)||'['||D.CODE||']' AS VALUE_CODE,
+		       DECODE(#GV_LANG_CODE#, 'KR', D.CODE_NM, D.CODE_NM_EN) AS ABBR_CODE_NM,
+		       D.SORT_ORDER,
+		       D.PLANT_CD AS AUTH_CORP
+		  FROM CM_ITEM_COMM M, CM_ITEM_COMM D
+		 WHERE M.CODE = D.P_CODE
+		   AND M.ITEM_TYPE = '0'
+		   <isNotEmpty property="PLANT_CD">
+			   AND D.PLANT_CD = #PLANT_CD#
+		   </isNotEmpty>
+		   <isEmpty property="PLANT_CD">
+		   		AND D.PLANT_CD IN ($GV_PLANT_CD$)
+		   </isEmpty>
+		   AND M.CODE IN ($MASTER_CODE$)
+		   AND M.STATUS = 'Y'
+		   AND D.STATUS = 'Y'
+	</select>
+
+	<select id="selectDomain" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+	  SELECT *
+	    FROM CM_SCREEN_ITEM
+   	   WHERE LANG_CODE = #GV_LANG_CODE#
+         AND SCREEN_ID = #SCREEN_ID#
+       	<isNotEmpty property="DOMAIN_CD">
+     	 AND DOMAIN_CD = #DOMAIN_CD#
+     	</isNotEmpty>
+    </select>
+
+	<select id="selectCmCodeMapMngList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT '0' AS CHK,
+               A.LANG_CODE,
+               A.MASTER_CODE,
+               A.MASTER_CODE_NM,
+               A.CODE,
+               A.P_MASTER_CODE,
+               A.P_CODE,
+               NVL(B.ABBR_CODE_NM, NVL(A.ABBR_CODE_NM, A.CODE_NM)) AS  ABBR_CODE_NM,
+               NVL(B.SORT_ORDER, A.SORT_ORDER) SORT_ORDER,
+               A.CORP_CD,
+               DECODE(B.CORP_CD, NULL, '0', DECODE(B.STATUS, 'Y', '1', '0')) AS USE_YN
+          FROM (SELECT A.*, B.CORP_CD
+                  FROM (SELECT  C.LANG_CODE,
+                                MC.MASTER_CODE,
+                                DECODE('$GV_LANG_CODE$', 'KR', MC.MASTER_NM_KR, 'CN', MC.MASTER_NM_CN, 'EN', MC.MASTER_NM_EN, 'JP', MC.MASTER_NM_JP) MASTER_CODE_NM,
+                                C.CODE,
+                                C.ABBR_CODE_NM,
+                                C.CODE_NM,
+                                C.SORT_ORDER,
+                                C.P_MASTER_CODE,
+                                C.P_CODE
+                          FROM CM_MASTER_CODE MC, CM_CODE C
+                         WHERE MC.MASTER_CODE = C.MASTER_CODE
+	                        <isNotEmpty prepend="AND" property="LANG_CODE">
+						   		C.LANG_CODE = #LANG_CODE#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="MASTER_CODE">
+								MC.MASTER_CODE = #MASTER_CODE#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="P_MASTER_CODE">
+								C.P_MASTER_CODE = #P_MASTER_CODE#
+							</isNotEmpty>
+							<isNotEmpty prepend="AND" property="P_CODE">
+								C.P_CODE = #P_CODE#
+							</isNotEmpty>
+                           AND C.STATUS = 'Y'
+                       ) A, CM_CORP_MASTER B
+               ) A, CM_CODE_MAP B
+         WHERE A.MASTER_CODE = B.MASTER_CODE(+)
+           AND A.LANG_CODE = B.LANG_CODE(+)
+           AND A.CODE = B.CODE(+)
+           AND A.CORP_CD = B.CORP_CD(+)
+           ORDER BY A.CODE, A.LANG_CODE
+	</select>
+
+
+	<update id="updateCmCodeMapMng"  parameterClass="java.util.Map">
+		UPDATE  CM_CODE_MAP
+		   SET
+			   	SORT_ORDER = #SORT_ORDER#,
+				STATUS = #STATUS#,
+			   	MOD_USER_ID = #SS_USER_ID#,
+			   	MOD_DT = SYSDATE
+	     WHERE 	LANG_CODE = #DORG_LANG_CODE#
+	       AND 	CORP_CD = #DORG_CORP_CD#
+	       AND 	MASTER_CODE = #DORG_MASTER_CODE#
+	       AND 	CODE = #DORG_CODE#
+	</update>
+
+	<update id="mergeCmCodeMapMng"  parameterClass="java.util.Map">
+		MERGE INTO CM_CODE_MAP CM
+		USING DUAL
+		ON (CM.LANG_CODE = #LANG_CODE# AND CM.CORP_CD = #CORP_CD# AND CM.MASTER_CODE = #MASTER_CODE# AND CM.CODE = #CODE#)
+		WHEN MATCHED THEN
+			UPDATE SET
+				SORT_ORDER = #SORT_ORDER#,
+				STATUS = #STATUS#,
+			  	MOD_USER_ID = #SS_USER_ID#,
+			  	MOD_DT = SYSDATE
+		WHEN NOT MATCHED THEN
+			INSERT(
+				LANG_CODE,
+				CORP_CD,
+				MASTER_CODE,
+				CODE,
+				ABBR_CODE_NM,
+				P_MASTER_CODE,
+				P_CODE,
+				SORT_ORDER,
+				STATUS,
+				REG_USER_ID,
+				REG_DT)
+			VALUES(
+				#LANG_CODE#,
+				#CORP_CD#,
+				#MASTER_CODE#,
+				#CODE#,
+				#ABBR_CODE_NM#,
+				#P_MASTER_CODE#,
+				#P_CODE#,
+				#SORT_ORDER#,
+				#STATUS#,
+				#REG_USER_ID#,
+				SYSDATE
+			)
+	</update>
+
+	<select id="selectUserTables" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT A.*
+		  FROM USER_TABLES A
+	</select>
+
+	<select id="selectUserColumns" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT A.COLUMN_ID,A.TABLE_NAME,A.COLUMN_NAME,A.DATA_TYPE,A.DATA_LENGTH,B.COMMENTS
+		  FROM USER_TAB_COLS A, USER_COL_COMMENTS B
+		 WHERE A.TABLE_NAME = B.TABLE_NAME(+)
+		   AND A.COLUMN_NAME = B.COLUMN_NAME(+)
+		<isNotEmpty property="TABLE_NAME">
+		   AND A.TABLE_NAME = #TABLE_NAME#
+		</isNotEmpty>
+		 ORDER BY A.COLUMN_ID
+	</select>
+
+	<select id="selectAddrJibun" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT CRT_DONG_CODE, SIDO_NAME, SIGUNGU_NAME, CRT_EUPMYUN_NAME, CRT_LI_NAME,DECODE(MOUTAIN_YN,'0','','산') MOUTAIN_YN, JIBUN_MAIN||'번지' JIBUN_MAIN,DECODE(JIBUN_DET,'0','',JIBUN_DET||'호') JIBUN_DET, STREET_CODE, STREET_NAME||' '||BD_MAIN STREET_NAME,
+				BASE_YN, BD_MAIN, BD_DET,DECODE(SIGUN_BD_NAME,'', BD_RECORD_NAME,SIGUN_BD_NAME) BD_RECORD_NAME, BD_DETAIL_NAME, BD_MANAGE_CODE, EUPMYUN_SEQ, GOV_DONG_CODE, GOV_DONG_NAME, POST_CODE, POST_SEQ,
+				MASS_DLV_NAME, MOVE_REAS_CODE, NOTI_DATE, BF_STREET_NAME, SIGUN_BD_NAME, PUBLIC_YN, REP_YN
+		  FROM STREET_ADDR
+		 WHERE 1=1
+		<isNotEmpty property="CRT_EUPMYUN_NAME">
+		   AND CRT_EUPMYUN_NAME LIKE '%'||#CRT_EUPMYUN_NAME#||'%'
+		</isNotEmpty>
+		<isNotEmpty property="SIDO_CODE">
+			<isNotEmpty property="GUNGU_CODE">
+			  AND CRT_DONG_CODE LIKE #GUNGU_CODE#||'%'
+			</isNotEmpty>
+			<isEmpty property="GUNGU_CODE">
+			  AND CRT_DONG_CODE LIKE #SIDO_CODE#||'%'
+			</isEmpty>
+		</isNotEmpty>
+		<isNotEmpty property="JIBUN_MAIN">
+		   AND JIBUN_MAIN = #JIBUN_MAIN#
+		</isNotEmpty>
+		<isNotEmpty property="JIBUN_DET">
+		   AND JIBUN_DET = #JIBUN_DET#
+		</isNotEmpty>
+		<isNotEmpty property="STREET_NAME">
+		   AND STREET_NAME LIKE '%'||#STREET_NAME#||'%'
+		</isNotEmpty>
+		<isNotEmpty property="BD_MAIN">
+		   AND BD_MAIN = #BD_MAIN#
+		</isNotEmpty>
+		<isNotEmpty property="BD_DET">
+		   AND BD_DET = #BD_DET#
+		</isNotEmpty>
+		<isNotEmpty property="BD_RECORD_NAME">
+		   AND SIGUN_BD_NAME LIKE '%'||#BD_RECORD_NAME#||'%'
+		</isNotEmpty>
+		<isNotEmpty property="POST_CODE">
+		   AND POST_CODE LIKE #POST_CODE#||'%'
+		</isNotEmpty>
+	</select>
+
+	<select id="selectSidoCombo" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT B.CODE AS "CODE", B.CODE_NM AS "VALUE", B.MASTER_CODE
+		  FROM CM_CODE B
+		 WHERE B.MASTER_CODE = 'IJ000075'
+		   AND B.LANG_CODE = #GV_LANG_CODE#
+	</select>
+
+	<select id="selectGunguCombo" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT B.CODE AS "CODE", B.CODE_NM AS "VALUE", B.MASTER_CODE, B.P_CODE
+		  FROM CM_CODE B
+		 WHERE B.MASTER_CODE = 'IJ000076'
+		   AND B.LANG_CODE = #GV_LANG_CODE#
+	</select>
+
+	<select id="selectCommonCodePop"  parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		<include refid="listSearchCol"/>
+			SELECT ROWNUM,
+			       COUNT(*) OVER() AS TOT_CNT, A.*
+			  FROM (
+					SELECT DISTINCT *
+					  FROM (
+								SELECT D.LANG_CODE,
+									   D.MASTER_CODE,
+									   D.CODE,
+									   D.ABBR_CODE_NM AS VALUE,
+									   '[' || D.CODE || ']' || D.ABBR_CODE_NM AS CODE_VALUE,
+									   D.ABBR_CODE_NM ||'[' || D.CODE || ']'  AS VALUE_CODE,
+									   D.ABBR_CODE_NM,
+									   SORT_ORDER
+								  FROM CM_CODE_MAP D
+								 WHERE D.LANG_CODE = #GV_LANG_CODE#
+							       AND D.MASTER_CODE IN ($MASTER_CODE$)
+								   AND D.CORP_CD IN ($GV_CORP_CD$)
+								   AND D.STATUS = 'Y'
+								   <isNotEmpty prepend="AND" property="CODE">
+								   		D.CODE LIKE '%'||#CODE#||'%'
+								   </isNotEmpty>
+								   <isNotEmpty prepend="AND" property="CODE_NM">
+								 		D.ABBR_CODE_NM LIKE '%'||#CODE_NM#||'%'
+								 	</isNotEmpty>
+								)
+					) A
+			ORDER BY SORT_ORDER, MASTER_CODE, CODE
+		<include refid="listSearchWhr"/>
+	</select>
+
+	<select id="selectCommonCodePopCurCd"  parameterClass="java.util.Map" resultClass="java.util.HashMap">
+			SELECT ROWNUM,
+			       COUNT(*) OVER() AS TOT_CNT, A.*
+			  FROM (
+					SELECT DISTINCT *
+					  FROM (
+								SELECT D.LANG_CODE,
+									   D.MASTER_CODE,
+									   D.CODE,
+									   D.ABBR_CODE_NM AS VALUE,
+									   '[' || D.CODE || ']' || D.ABBR_CODE_NM AS CODE_VALUE,
+									   D.ABBR_CODE_NM ||'[' || D.CODE || ']'  AS VALUE_CODE,
+									   D.ABBR_CODE_NM,
+									   SORT_ORDER
+								  FROM CM_CODE_MAP D
+								 WHERE D.LANG_CODE = #GV_LANG_CODE#
+							       AND D.MASTER_CODE = #MASTER_CODE#
+								   AND D.CORP_CD IN ($GV_CORP_CD$)
+								   AND D.STATUS = 'Y'
+								   <isNotEmpty prepend="AND" property="CODE">
+								   		D.CODE LIKE '%'||#CODE#||'%'
+								   </isNotEmpty>
+								   <isNotEmpty prepend="AND" property="CODE_NM">
+								 		UPPER(D.ABBR_CODE_NM) LIKE '%'||#CODE_NM#||'%'
+								 	</isNotEmpty>
+								)
+					) A
+			ORDER BY SORT_ORDER, CODE
+	</select>
+
+	<select id="selectCmFieldManageList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT B.MENU_ID,
+		       B.TYPE,
+           	   DECODE(A.TYPE, NULL, 'N', 'Y') AS USE_YN,
+		       B.COL_ID,
+		       B.COL_NM
+		  FROM CM_FIELD_MANAGE A,
+           (
+            SELECT A.SCREEN_ID AS MENU_ID, A.DOMAIN_CD AS COL_ID,
+                   A.DOMAIN_NM AS COL_NM, B.TYPE
+              FROM CM_SCREEN_ITEM A,
+                  (
+                    SELECT '$MENU_ID$' AS MENU_ID, 'A' AS TYPE FROM DUAL
+                    UNION ALL
+                    SELECT '$MENU_ID$' AS MENU_ID, 'B' AS TYPE FROM DUAL
+                    UNION ALL
+                    SELECT '$MENU_ID$' AS MENU_ID, 'C' AS TYPE FROM DUAL
+                    UNION ALL
+                    SELECT '$MENU_ID$' AS MENU_ID, 'D' AS TYPE FROM DUAL
+                    UNION ALL
+                    SELECT '$MENU_ID$' AS MENU_ID, 'E' AS TYPE FROM DUAL
+                  ) B
+            WHERE A.SCREEN_ID = B.MENU_ID
+              AND A.LANG_CODE = #GV_LANG_CODE#
+              AND A.STATUS = 'Y'
+          ) B
+		 WHERE B.MENU_ID = A.MENU_ID(+)
+	       AND B.TYPE = A.TYPE(+)
+	       AND B.COL_ID = A.COL_ID(+)
+	       AND A.SID(+) = #SS_USER_ID#
+	</select>
+
+	<insert id="insertCmFieldManage"  parameterClass="java.util.Map">
+		INSERT INTO CM_FIELD_MANAGE(
+			SID,
+			MENU_ID,
+			TYPE,
+			COL_ID
+		)VALUES(
+			#SS_USER_ID#,
+			#MENU_ID#,
+			#TYPE#,
+			#COL_ID#
+		)
+	</insert>
+
+	<delete id="deleteCmFieldManage"  parameterClass="java.util.Map">
+		DELETE FROM CM_FIELD_MANAGE
+		 WHERE SID = #SS_USER_ID#
+		   AND MENU_ID = #MENU_ID#
+		   AND TYPE = #TYPE#
+	</delete>
+
+	<select id="selectCmMyMenuList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT MENU_ID,
+	           DECODE('$GV_LANG_CODE$', 'KR', MENU_NM_KR, 'EN', MENU_NM_EN, 'CN', MENU_NM_CN, 'JP', MENU_NM_JP, '') AS MENU_NM,
+	           DECODE('$GV_LANG_CODE$', 'KR', ABBR_MENU_NM_KR, 'EN', ABBR_MENU_NM_EN, 'CN', ABBR_MENU_NM_CN, 'JP', ABBR_MENU_NM_JP, '') AS ABBR_MENU_NM,
+	           MENU_NM_KR,
+			   MENU_NM_EN,
+			   MENU_NM_CN,
+			   MENU_NM_JP,
+			   ABBR_MENU_NM_KR,
+			   ABBR_MENU_NM_EN,
+			   ABBR_MENU_NM_CN,
+			   ABBR_MENU_NM_JP,
+	           SORT_ORDER,
+	           SCREEN_PATH,
+	           PRGM_NM,
+	           '0' AS MENU_LVL
+		  FROM CM_MY_MENU
+		 WHERE USER_ID = #SID#
+		ORDER BY SORT_ORDER
+	</select>
+
+	<select id="selectAuthEmpInfoList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT *
+		  FROM (
+				SELECT 'C' AS TYPE,
+				       CORP_CD AS CODE,
+				       DECODE('$GV_LANG_CODE$', 'KR', CORP_NM, CORP_NM_EN) AS VALUE,
+				       '[' || CORP_CD || ']' || DECODE('$GV_LANG_CODE$', 'KR', CORP_NM, CORP_NM_EN) AS CODE_VALUE,
+				       DECODE('$GV_LANG_CODE$', 'KR', CORP_NM, CORP_NM_EN)||'[' || CORP_CD || ']'   AS VALUE_CODE,
+				       ' ' AS PARENT_CD,
+				       SORT_ORDER,
+				       (SELECT NATION_CD FROM CM_PLANT_MASTER WHERE CORP_CD = CM_CORP_MASTER.CORP_CD GROUP BY NATION_CD) AS NATION_CD
+				  FROM CM_CORP_MASTER
+				 WHERE STATUS ='Y'
+				UNION ALL
+				SELECT 'P' AS TYPE,
+				       PLANT_CD AS CODE,
+				       DECODE('$GV_LANG_CODE$', 'KR', NVL(ABBR_PLANT_NM, PLANT_NM), NVL(ABBR_PLANT_NM_EN, PLANT_NM_EN)) AS VALUE,
+				       '[' || PLANT_CD || ']' || DECODE('$GV_LANG_CODE$', 'KR', NVL(ABBR_PLANT_NM, PLANT_NM), NVL(ABBR_PLANT_NM_EN, PLANT_NM_EN)) AS CODE_VALUE,
+				       DECODE('$GV_LANG_CODE$', 'KR', NVL(ABBR_PLANT_NM, PLANT_NM), NVL(ABBR_PLANT_NM_EN, PLANT_NM_EN)) || '[' || PLANT_CD || ']' AS VALUE_CODE,
+				       CORP_CD AS PARENT_CD,
+				       SORT_ORDER,
+				       NATION_CD
+				  FROM CM_PLANT_MASTER
+				 WHERE STATUS ='Y'
+				UNION ALL
+				SELECT * FROM
+				(
+					SELECT 'D' AS TYPE,
+					       DEPT_CD AS CODE,
+					       DECODE('$GV_LANG_CODE$', 'KR', DEPT_NM, DEPT_NM_EN) AS VALUE,
+					       '[' || DEPT_CD || ']' || DECODE('$GV_LANG_CODE$', 'KR', DEPT_NM, DEPT_NM_EN) AS CODE_VALUE,
+					       DECODE('$GV_LANG_CODE$', 'KR', DEPT_NM, DEPT_NM_EN) ||'[' || DEPT_CD || ']'  AS VALUE_CODE,
+					       PLANT_CD AS PARENT_CD,
+					       1 AS SORT_ORDER,
+					       NULL AS NATION_CD
+					  FROM CM_DEPT_MASTER
+					 WHERE STATUS ='Y'
+					 ORDER  BY SORT_ORDER
+				 )
+				UNION ALL
+				SELECT * FROM
+				(
+					SELECT 'O' AS TYPE,
+					   OGNZ_CD AS CODE,
+					   DECODE('$GV_LANG_CODE$', 'KR', OGNZ_NM, OGNZ_NM_EN) AS VALUE,
+					   '[' || OGNZ_CD || ']' || DECODE('$GV_LANG_CODE$', 'KR', OGNZ_NM, OGNZ_NM_EN) AS CODE_VALUE,
+					   DECODE('$GV_LANG_CODE$', 'KR', OGNZ_NM, OGNZ_NM_EN) ||'[' || OGNZ_CD || ']'  AS VALUE_CODE,
+					   DEPT_CD AS PARENT_CD,
+					   1 AS SORT_ORDER,
+					   NULL AS NATION_CD
+					FROM HR_OGNZ_DEPT
+					WHERE STATUS ='Y'
+					AND RECNT_YN = 'Y'
+					AND (EMPTY_OGNZ_YN IS NULL OR EMPTY_OGNZ_YN != 'Y')
+					ORDER  BY DECODE('$GV_LANG_CODE$', 'KR', OGNZ_NM, OGNZ_NM_EN)
+				)
+			) WHERE 1=1
+			<isNotEmpty prepend="AND" property="TYPE">
+			  		TYPE IN ($TYPE$)
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="CODE">
+			  		CODE IN ($CODE$)
+			</isNotEmpty>
+			ORDER BY TYPE, SORT_ORDER
+	</select>
+	<select id="selectEmpInfoList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT *
+		  FROM (
+				SELECT 'C' AS TYPE,
+				       CORP_CD AS CODE,
+				       DECODE('$GV_LANG_CODE$', 'KR', NVL(ABBR_CORP_NM, CORP_NM), NVL(ABBR_CORP_NM_EN, CORP_NM_EN)) AS VALUE,
+				       '[' || CORP_CD || ']' || DECODE('$GV_LANG_CODE$', 'KR', NVL(ABBR_CORP_NM, CORP_NM), NVL(ABBR_CORP_NM_EN, CORP_NM_EN)) AS CODE_VALUE,
+				       DECODE('$GV_LANG_CODE$', 'KR', NVL(ABBR_CORP_NM, CORP_NM), NVL(ABBR_CORP_NM_EN, CORP_NM_EN)) || '[' || CORP_CD || ']' AS VALUE_CODE,
+				       CORP_GROUP_CD AS PARENT_CD,
+				       SORT_ORDER,
+				       (SELECT NATION_CD FROM CM_PLANT_MASTER WHERE CORP_CD = CM_CORP_MASTER.CORP_CD GROUP BY NATION_CD) AS NATION_CD
+				  FROM CM_CORP_MASTER
+				 WHERE STATUS ='Y'
+				UNION ALL
+				SELECT 'P' AS TYPE,
+				       PLANT_CD AS CODE,
+				       DECODE('$GV_LANG_CODE$', 'KR', NVL(ABBR_PLANT_NM, PLANT_NM), NVL(ABBR_PLANT_NM_EN, PLANT_NM_EN)) AS VALUE,
+				       '[' || PLANT_CD || ']' || DECODE('$GV_LANG_CODE$', 'KR', NVL(ABBR_PLANT_NM, PLANT_NM), NVL(ABBR_PLANT_NM_EN, PLANT_NM_EN)) AS CODE_VALUE,
+				       DECODE('$GV_LANG_CODE$', 'KR', NVL(ABBR_PLANT_NM, PLANT_NM), NVL(ABBR_PLANT_NM_EN, PLANT_NM_EN)) || '[' || PLANT_CD || ']' AS VALUE_CODE,
+				       CORP_CD AS PARENT_CD,
+				       SORT_ORDER,
+				       NATION_CD
+				  FROM CM_PLANT_MASTER
+				 WHERE STATUS ='Y'
+				UNION ALL
+				SELECT * FROM
+				(
+					SELECT 'D' AS TYPE,
+					       DEPT_CD AS CODE,
+					       DECODE('$GV_LANG_CODE$', 'KR', NVL(ABBR_DEPT_NM, DEPT_NM), NVL(ABBR_DEPT_NM_EN, DEPT_NM_EN)) AS VALUE,
+					       '[' || DEPT_CD || ']' || DECODE('$GV_LANG_CODE$', 'KR', NVL(ABBR_DEPT_NM, DEPT_NM), NVL(ABBR_DEPT_NM_EN, DEPT_NM_EN)) AS CODE_VALUE,
+					       DECODE('$GV_LANG_CODE$', 'KR', NVL(ABBR_DEPT_NM, DEPT_NM), NVL(ABBR_DEPT_NM_EN, DEPT_NM_EN)) ||'[' || DEPT_CD || ']'  AS VALUE_CODE,
+					       PLANT_CD AS PARENT_CD,
+					       1 AS SORT_ORDER,
+					       NULL AS NATION_CD
+					  FROM CM_DEPT_MASTER
+					 WHERE STATUS ='Y'
+					 ORDER BY SORT_ORDER
+				 )
+				UNION ALL
+				SELECT * FROM
+				(
+					SELECT 'O' AS TYPE,
+					   OGNZ_CD AS CODE,
+					   DECODE('$GV_LANG_CODE$', 'KR', NVL(ABBR_OGNZ_NM, OGNZ_NM), NVL(ABBR_OGNZ_NM_EN, OGNZ_NM_EN)) AS VALUE,
+					   '[' || OGNZ_CD || ']' || DECODE('$GV_LANG_CODE$', 'KR', NVL(ABBR_OGNZ_NM, OGNZ_NM), NVL(ABBR_OGNZ_NM_EN, OGNZ_NM_EN)) AS CODE_VALUE,
+					   DECODE('$GV_LANG_CODE$', 'KR', NVL(ABBR_OGNZ_NM, OGNZ_NM), NVL(ABBR_OGNZ_NM_EN, OGNZ_NM_EN)) || '[' || OGNZ_CD || ']' AS VALUE_CODE,
+					   DEPT_CD AS PARENT_CD,
+					   1 AS SORT_ORDER,
+					   NULL AS NATION_CD
+					FROM HR_OGNZ_DEPT
+					WHERE STATUS ='Y'
+					AND RECNT_YN = 'Y'
+					AND (EMPTY_OGNZ_YN IS NULL OR EMPTY_OGNZ_YN != 'Y')
+					ORDER BY DECODE('$GV_LANG_CODE$', 'KR', NVL(ABBR_OGNZ_NM, OGNZ_NM), NVL(ABBR_OGNZ_NM_EN, OGNZ_NM_EN))
+				)
+			) WHERE 1=1
+			<isNotEmpty prepend="AND" property="TYPE">
+			  		TYPE IN ($TYPE$)
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="CODE">
+			  		CODE IN ($CODE$)
+			</isNotEmpty>
+			ORDER BY TYPE, SORT_ORDER
+	</select>
+
+	<select id="selectIfKey" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT * FROM IF_SSO WHERE SID = #GUID#
+	</select>
+
+	<insert id="insertIfKey"  parameterClass="map">
+		<selectKey keyProperty="SID" resultClass="string">
+			SELECT #SEQ_UUID# FROM DUAL
+		</selectKey>
+		INSERT INTO IF_SSO(SID, EMP_NO) VALUES(#SID#, #SS_EMP_NO#)
+	</insert>
+
+	<insert id="createIfKey"  parameterClass="map">
+		INSERT INTO IF_SSO(SID, EMP_NO) VALUES(#SID#, #SS_EMP_NO#)
+	</insert>
+
+	<insert id="insertIfDoc"  parameterClass="map">
+		INSERT INTO IF_DOC(SN, DOC_TYPE, TITLE,  Q_ID_STATUS_UPDATE, CONTENT) VALUES(#SN#, #DOC_TYPE#, #TITLE#, #Q_ID_STATUS_UPDATE#, #CONTENT:CLOB#)
+	</insert>
+
+	<select id="selectIfDocForUpdateAppStatus" resultClass="hashmap">
+		SELECT
+			SN, STATUS, Q_ID_STATUS_UPDATE
+		FROM
+			IF_DOC
+		WHERE
+			CHANGE_YN = 'Y'
+		ORDER BY REG_DT DESC NULLS LAST
+	</select>
+
+	<update id="updateIfDocChangeN" parameterClass="map">
+		UPDATE
+			IF_DOC
+		SET
+			CHANGE_YN = #CHANGE_YN#
+		WHERE
+			SN = #SN#
+	</update>
+
+	<select id="insertIfDocCnt" parameterClass="map" resultClass="int">
+		SELECT COUNT(1) CNT
+		FROM
+			IF_DOC
+		WHERE
+			SN = #SN#
+	</select>
+
+	<update id="updateIfDoc" parameterClass="map">
+		UPDATE
+			IF_DOC
+		SET
+			DOC_TYPE = #DOC_TYPE#,
+			TITLE = #TITLE#,
+			STATUS = #APPROVE_STATUS#,
+			Q_ID_STATUS_UPDATE = #Q_ID_STATUS_UPDATE#,
+			CONTENT = #CONTENT:CLOB#,
+			MOD_DT = SYSDATE
+		WHERE
+			SN = #SN# AND STATUS IN ('000', '015', '004')
+	</update>
+
+	<select id="insertIfDocIngCnt" parameterClass="map" resultClass="int">
+		SELECT COUNT(1) CNT
+		FROM
+			IF_DOC
+		WHERE
+			SN = #SN# AND STATUS NOT IN ('000', '015', '004')
+	</select>
+
+	<select id="insertIfDocIngCntMap" parameterClass="map" resultClass="hashmap">
+		SELECT COUNT(1) CNT
+		FROM
+			IF_DOC
+		WHERE
+			SN = #SN# AND STATUS NOT IN ('000', '015', '004')
+	</select>
+
+	<insert id="insertIfDocAttach"  parameterClass="map">
+		INSERT INTO IF_DOC_ATTACH(DOC_SN, FILE_PATH, FILE_SIZE, CONTENT) VALUES(#SN#, #FILE_PATH#, #FILE_SIZE#, #CONTENT:BLOB#)
+	</insert>
+
+	<insert id="deleteIfDocAttach"  parameterClass="map">
+		DELETE FROM
+			IF_DOC_ATTACH
+		WHERE
+			DOC_SN = #SN#
+	</insert>
+
+	<update id="updateCronStart" parameterClass="map">
+		UPDATE
+			CRON_INFO
+		SET
+			SRV = #SRV#,
+			START_DT = SYSDATE,
+			STATUS = 'R'
+		WHERE
+			PRG_ID = #PRG_ID# AND STATUS = 'E' AND USE_YN = 'Y'
+	</update>
+
+	<update id="updateCronEnd" parameterClass="map">
+		UPDATE
+			CRON_INFO
+		SET
+			END_DT = SYSDATE,
+			STATUS = 'E'
+		WHERE
+			PRG_ID = #PRG_ID#
+			AND SRV = #SRV#
+			AND STATUS = 'R'
+	</update>
+
+	<select id="selectCronInfo" resultClass="hashmap">
+		SELECT
+			SN, PRG_ID, SRV, START_DT, END_DT, STATUS
+		FROM
+			CRON_INFO
+		WHERE
+			PRG_ID = #PRG_ID# AND USE_YN = 'Y'
+		<isNotEmpty prepend="AND" property="SRV">
+			SRV = #SRV#
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="STATUS">
+			STATUS = #STATUS#
+		</isNotEmpty>
+	</select>
+
+	<select id="selectCorpCodeList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT *
+		  FROM CM_CORP_MASTER
+		 WHERE STATUS = 'Y'
+	</select>
+
+
+	<select id="selectCmBtnRollMapList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT 	*
+		  FROM 	CM_BTN_ROLE_MAP
+		 WHERE 	SID = #SID#
+	</select>
+
+	<select id="insertIfBoardCnt" parameterClass="map" resultClass="int">
+		SELECT COUNT(1) CNT
+		FROM
+			IF_BOARD
+		WHERE
+			SN = #SN#
+		  AND DOC_TYPE = '01'
+	</select>
+
+	<update id="updateIfBoard" parameterClass="map">
+		UPDATE
+			IF_BOARD
+		SET
+			TITLE = #TITLE#,
+			CONTENT = #CONTENT:CLOB#,
+			MOD_DT = SYSDATE,
+			EMP_NO = #EMP_NO#,
+			IF_YN = 'N'
+		WHERE
+			SN = #SN#
+		  AND DOC_TYPE = '01'
+	</update>
+
+	<delete id="deleteIfBoardAttach"  parameterClass="map">
+		DELETE FROM
+			IF_BOARD_ATTACH
+		WHERE
+			DOC_SN = #SN#
+		AND DOC_TYPE = '01'
+	</delete>
+
+	<insert id="insertBoardDoc"  parameterClass="map">
+		INSERT INTO IF_BOARD(SN, DOC_TYPE, TITLE,  EMP_NO, CONTENT) VALUES(#SN#, '01', #TITLE#, #EMP_NO#, #CONTENT:CLOB#)
+	</insert>
+
+	<insert id="insertIfBoardAttach"  parameterClass="map">
+		INSERT INTO IF_BOARD_ATTACH(DOC_SN, FILE_PATH, FILE_SIZE, CONTENT, DOC_TYPE) VALUES(#SN#, #FILE_PATH#, #FILE_SIZE#, #CONTENT:BLOB#, '01')
+	</insert>
+
+	<update id="closeSSO" parameterClass="map">
+		UPDATE
+			IF_SSO
+		SET
+			USE_YN = 'N'
+		WHERE
+			USE_YN = 'Y' AND (SYSDATE - REG_DT) * (24 * 60 * 60) &gt; #LOCK_SEC#
+	</update>
+
+	<delete id="deleteSSO" parameterClass="map">
+		DELETE FROM
+			IF_SSO
+		WHERE
+			USE_YN = 'N' AND (SYSDATE - REG_DT) &gt; 6
+	</delete>
+
+	<insert id="insertFileAttach"  parameterClass="map">
+		INSERT INTO CM_FILE_ATTACH(
+			FILE_SN,
+			FILE_KEY,
+			ORG_FILE_NAME,
+			NEW_FILE_NAME,
+			FILE_SIZE,
+			FILE_SEQ,
+			STATUS,
+			REG_USER_ID,
+			REG_DATE,
+			MOD_USER_ID,
+			MOD_DATE
+		)VALUES(
+			#SN#,
+			#FILE_KEY#,
+			#ORG_FILE_NAME#,
+			#NEW_FILE_NAME#,
+			#FILE_SIZE#,
+			NVL((SELECT MAX(FILE_SEQ)+1 FROM CM_FILE_ATTACH WHERE FILE_SN = #SN#), 0),
+			'Y',
+			#SS_USER_ID#,
+			SYSDATE,
+			#SS_USER_ID#,
+			SYSDATE
+		)
+	</insert>
+
+	<select id="selectFileAttachList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT FILE_SN AS SN,
+			   FILE_KEY,
+			   ORG_FILE_NAME AS FILE_LOGC_NM,
+			   NEW_FILE_NAME,
+			   FILE_SIZE,
+			   'Y' AS IS_DEL
+		  FROM CM_FILE_ATTACH
+		 WHERE FILE_SN = #SN#
+		   AND STATUS = 'Y'
+		ORDER BY FILE_SEQ
+	</select>
+
+	<select id="selectAttachFile" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT FILE_SN, FILE_KEY, ORG_FILE_NAME, NEW_FILE_NAME, FILE_SIZE, FILE_SEQ, STATUS, REG_USER_ID, REG_DATE, MOD_USER_ID, MOD_DATE
+		  FROM CM_FILE_ATTACH
+		 WHERE FILE_SN = #APP_KEY#
+	</select>
+
+	<delete id="deleteFileAttachList" parameterClass="map">
+		DELETE FROM CM_FILE_ATTACH
+		 WHERE FILE_SN = #SN#
+		   AND NEW_FILE_NAME = #NEW_FILE_NAME#
+	</delete>
+
+	<select id="selectMainMenuList" parameterClass="map" resultClass="hashmap">
+	SELECT '0' CHK,
+			   M.*,
+       		   DECODE(SCREEN_PATH, NULL, '', SUBSTR(SYS_CONNECT_BY_PATH(M.MENU_NM,' > '), 4))  AS NAVIGATOR
+  	  FROM (
+				SELECT 	MENU_ID,
+							<isNotEmpty property="GV_LANG_CODE">
+								DECODE('$GV_LANG_CODE$', 'KR', MENU_NM_KR, 'EN', MENU_NM_EN, 'CN', MENU_NM_CN, 'JP', MENU_NM_JP, '') AS MENU_NM,
+			        			DECODE('$GV_LANG_CODE$', 'KR', ABBR_MENU_NM_KR, 'EN', ABBR_MENU_NM_EN, 'CN', ABBR_MENU_NM_CN, 'JP', ABBR_MENU_NM_JP, '') AS ABBR_MENU_NM,
+			        		</isNotEmpty>
+			        		<isEmpty  property="GV_LANG_CODE">
+			        			MENU_NM_KR AS MENU_NM,
+			        			ABBR_MENU_NM_KR AS ABBR_MENU_NM,
+			        		</isEmpty>
+							MENU_NM_KR,
+							MENU_NM_EN,
+							MENU_NM_CN,
+							MENU_NM_JP,
+							ABBR_MENU_NM_KR,
+							ABBR_MENU_NM_EN,
+							ABBR_MENU_NM_CN,
+							ABBR_MENU_NM_JP,
+							UPPER_MENU_ID,
+							MENU_LVL,
+							SORT_ORDER,
+							SCREEN_PATH,
+							MENU_SERVICE,
+							MENU_SITE,
+							PRGM_NM,
+							DETAIL_YN,
+							STATUS,
+							NVL(MOD_USER_ID, REG_USER_ID) AS REG_USER_ID,
+							TO_CHAR(NVL(MOD_DATE, REG_DATE), 'YYYY-MM-DD') AS REG_DATE,
+							MOD_USER_ID,
+							MOD_DATE
+				   FROM  CM_MAIN_MENU
+				 WHERE 1=1
+				 <isNotEmpty prepend="AND" property="MENU_ID">
+				 		MENU_ID = #MENU_ID#
+				 </isNotEmpty>
+				 <isNotEmpty prepend="AND" property="MENU_SITE">
+				 		MENU_SITE = #MENU_SITE#
+				 </isNotEmpty>
+				 ) M
+		      CONNECT BY PRIOR MENU_ID = UPPER_MENU_ID
+		      START WITH UPPER_MENU_ID = 'TOP'
+		      ORDER SIBLINGS BY TO_NUMBER(SORT_ORDER), MENU_ID
+	</select>
+
+	<insert id="insertCmMainMenu" parameterClass="java.util.Map">
+		INSERT INTO CM_MAIN_MENU(
+			MENU_ID,
+			MENU_NM_KR,
+			MENU_NM_EN,
+			MENU_NM_CN,
+			MENU_NM_JP,
+			ABBR_MENU_NM_KR,
+			ABBR_MENU_NM_EN,
+			ABBR_MENU_NM_CN,
+			ABBR_MENU_NM_JP,
+			UPPER_MENU_ID,
+			MENU_LVL,
+			SORT_ORDER,
+			SCREEN_PATH,
+			MENU_SERVICE,
+			MENU_SITE,
+			PRGM_NM,
+			DETAIL_YN,
+			STATUS,
+			REG_USER_ID,
+			REG_DATE
+		)VALUES(
+			#MENU_ID#,
+			#MENU_NM_KR#,
+			#MENU_NM_EN#,
+			#MENU_NM_CN#,
+			#MENU_NM_JP#,
+			#ABBR_MENU_NM_KR#,
+			#ABBR_MENU_NM_EN#,
+			#ABBR_MENU_NM_CN#,
+			#ABBR_MENU_NM_JP#,
+			#UPPER_MENU_ID#,
+			#MENU_LVL#,
+			#SORT_ORDER#,
+			#SCREEN_PATH#,
+			#MENU_SERVICE#,
+			#MENU_SITE#,
+			#PRGM_NM#,
+			#DETAIL_YN#,
+			#STATUS#,
+			#SS_USER_ID#,
+			SYSDATE
+		)
+	</insert>
+
+	<update id="updateCmMainMenu" parameterClass="java.util.Map">
+		  UPDATE    CM_MAIN_MENU
+			 SET    MENU_ID = #MENU_ID#,
+					MENU_NM_KR = #MENU_NM_KR#,
+					MENU_NM_EN = #MENU_NM_EN#,
+					MENU_NM_CN = #MENU_NM_CN#,
+					MENU_NM_JP = #MENU_NM_JP#,
+					ABBR_MENU_NM_KR = #ABBR_MENU_NM_KR#,
+					ABBR_MENU_NM_EN = #ABBR_MENU_NM_EN#,
+					ABBR_MENU_NM_CN = #ABBR_MENU_NM_CN#,
+					ABBR_MENU_NM_JP = #ABBR_MENU_NM_JP#,
+					UPPER_MENU_ID = #UPPER_MENU_ID#,
+					MENU_LVL = #MENU_LVL#,
+					SORT_ORDER = #SORT_ORDER#,
+					SCREEN_PATH = #SCREEN_PATH#,
+					MENU_SERVICE = #MENU_SERVICE#,
+					MENU_SITE = #MENU_SITE#,
+					PRGM_NM = #PRGM_NM#,
+					DETAIL_YN = #DETAIL_YN#,
+					STATUS = #STATUS#,
+					REG_USER_ID = #SS_USER_ID#,
+					REG_DATE = #REG_DATE#,
+					MOD_USER_ID = #SS_USER_ID#,
+					MOD_DATE = SYSDATE
+		WHERE   	MENU_ID = #MENU_ID#
+	</update>
+
+	<delete id="deleteCmMainMenu" parameterClass="java.util.Map">
+		DELETE FROM CM_MAIN_MENU
+		 WHERE MENU_ID = #MENU_ID#
+	</delete>
+
+
+	<select id="selectCmRoleMapMainMenuList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT  A.MENU_ID,
+					<isNotEmpty property="GV_LANG_CODE">
+						DECODE('$GV_LANG_CODE$', 'KR', A.MENU_NM_KR, 'EN', A.MENU_NM_EN, 'CN', A.MENU_NM_CN, 'JP', A.MENU_NM_JP, '') || '[' || MENU_ID || ']' AS MENU_NM_STR,
+	        		</isNotEmpty>
+	        		<isEmpty  property="GV_LANG_CODE">
+	        			MENU_NM_KR|| '[' || MENU_ID || ']'  AS MENU_NM,
+	        		</isEmpty>
+	                A.MENU_NM_KR,
+	                A.MENU_NM_EN,
+	                A.MENU_NM_CN,
+	                A.MENU_NM_JP,
+	                A.ABBR_MENU_NM_KR,
+	                A.ABBR_MENU_NM_EN,
+	                A.ABBR_MENU_NM_CN,
+	                A.ABBR_MENU_NM_JP,
+	                A.UPPER_MENU_ID,
+	                A.MENU_LVL,
+	                A.SORT_ORDER,
+	                A.SCREEN_PATH,
+	                A.MENU_SERVICE,
+	                A.MENU_SITE,
+	                A.PRGM_NM,
+	                A.DETAIL_YN,
+	                A.STATUS,
+	                DECODE((SELECT B.GRANT_YN FROM CM_MAIN_ROLE_MAP B WHERE B.GROUP_ID = #GROUP_ID# AND A.MENU_ID = B.MENU_ID), NULL, '0', '1') AS GRANT_YN
+	          FROM	CM_MAIN_MENU A
+	         WHERE  STATUS = 'Y'
+	         CONNECT BY PRIOR MENU_ID = UPPER_MENU_ID
+			      START WITH UPPER_MENU_ID = 'TOP'
+			      ORDER SIBLINGS BY TO_NUMBER(SORT_ORDER), MENU_ID
+	</select>
+
+	<select id="selectCmUserRole" parameterClass="map" resultClass="hashmap">
+	  	SELECT M.*
+		FROM(
+		SELECT M.MENU_ID,
+		    DECODE('KR', 'KR', MENU_NM_KR, 'EN', MENU_NM_EN, 'CN', MENU_NM_CN, 'JP', MENU_NM_JP, '') AS MENU_NM,
+		    M.UPPER_MENU_ID,
+		    M.MENU_LVL,
+		    M.SORT_ORDER,
+		    M.MENU_SERVICE,
+		    M.MENU_SITE,
+		    M.PRGM_NM
+		  FROM CM_MAIN_MENU M,
+			    (SELECT MENU_ID
+			    FROM CM_MAIN_ROLE_MAP
+			    WHERE GROUP_ID IN
+			      (SELECT S.GROUP_ID
+			      FROM CM_USER U,
+			        CM_SERVICE S
+			      WHERE U.SID      = S.SID
+			      AND U.SID        = #SID#
+			      AND U.STATUS     = '1'
+			      AND S.GROUP_TYPE = 'G'
+			      )
+			    AND STATUS='Y'
+			    GROUP BY MENU_ID
+			    ) R
+		  WHERE M.STATUS != 'N'
+		  AND M.MENU_ID = R.MENU_ID
+		  AND MENU_LVL    = 3
+		  ORDER BY SORT_ORDER
+		)M
+		WHERE MENU_ID NOT IN(SELECT MENU_ID FROM CM_MAIN_USER_ROLE WHERE SID        = #SID# UNION SELECT 'MA_SY_MGMN_101' FROM DUAL)
+		<isNotEmpty property="CON">
+			AND MENU_SITE = #CON#
+		</isNotEmpty>
+	</select>
+
+	<update id="insertUserMainRole" parameterClass="java.util.Map">
+			INSERT INTO	CM_MAIN_USER_ROLE
+			(
+				SID,
+				MENU_ID,
+				GRANT_YN,
+				SORT_ORDER,
+				STATUS,
+				REG_USER_ID,
+				REG_DATE
+			)
+			VALUES
+			(
+				#SID#,
+				#MENU_ID#,
+				'Y',
+				#SORT_ORDER#,
+				'Y',
+				#SID#,
+				SYSDATE
+			)
+	</update>
+
+	<delete id="deleteUserMainRole" parameterClass="java.util.Map">
+		DELETE	FROM CM_MAIN_USER_ROLE
+		 WHERE	SID = #SID#
+	</delete>
+
+	<select id="selectCmUserRoleMap" parameterClass="map" resultClass="hashmap">
+		SELECT * FROM(
+			<!-- 공지사항 1번째 디폴트 -->
+			SELECT 'MA_SY_MGMN_101' MENU_ID,
+			  '공지사항' AS MENU_NM,
+			  'MA_HR' UPPER_MENU_ID,
+			  '3' MENU_LVL,
+			  '' MENU_SERVICE,
+			  'SY' MENU_SITE,
+			  '공지사항' PRGM_NM,
+			  'ma.main::MA_SY_MGMN_101.xfdl' SCREEN_PATH,
+			  NVL((SELECT SORT_ORDER FROM CM_MAIN_USER_ROLE WHERE SID = #SID# AND MENU_ID = 'MA_SY_MGMN_101'),'1') SORT_ORDER
+			FROM DUAL
+			<!--  -->
+			UNION
+			SELECT 	A.MENU_ID,
+	       		<isNotEmpty property="GV_LANG_CODE">
+						TO_CHAR(DECODE('$GV_LANG_CODE$', 'KR', MENU_NM_KR, 'EN', MENU_NM_EN, 'CN', MENU_NM_CN, 'JP', MENU_NM_JP, '')) AS MENU_NM,
+				</isNotEmpty>
+				<isEmpty  property="GV_LANG_CODE">
+						TO_CHAR(MENU_NM_KR) AS MENU_NM,
+				</isEmpty>
+	       				TO_CHAR(M.UPPER_MENU_ID) UPPER_MENU_ID,
+						M.MENU_LVL,
+						<!-- M.SORT_ORDER, -->
+						TO_CHAR(M.MENU_SERVICE) MENU_SERVICE,
+						M.MENU_SITE,
+						M.PRGM_NM,
+						TO_CHAR(M.SCREEN_PATH) SCREEN_PATH,
+						A.SORT_ORDER
+			FROM CM_MAIN_USER_ROLE A,
+			  CM_MAIN_MENU M,
+			  (SELECT MENU_ID
+			      FROM CM_MAIN_ROLE_MAP
+			      WHERE GROUP_ID IN
+			        (SELECT S.GROUP_ID
+			        FROM CM_USER U,
+			          CM_SERVICE S
+			        WHERE U.SID      = S.SID
+			        AND U.SID        = #SID#
+			        AND U.STATUS     = '1'
+			        AND S.GROUP_TYPE = 'G'
+			        )
+			      AND STATUS='Y'
+			      GROUP BY MENU_ID
+			      ) R
+			WHERE SID     = #SID#
+			AND A.MENU_ID = M.MENU_ID
+			AND R.MENU_ID = M.MENU_ID
+			AND M.MENU_ID != 'MA_SY_MGMN_101' <!-- 공지사항 1번째 디폴트 -->
+		)
+		ORDER BY SORT_ORDER
+	</select>
+
+	<insert id="registerDaemon"  parameterClass="map">
+		INSERT INTO DAEMON_INFO(SN, PRG_ID, PRG_NM,  ARGS, USER_ID) VALUES(#SEQ_UUID#, #PRG_ID#, #PRG_NM#, #ARGS#, 'EAPP')
+	</insert>
+
+	<select id="selectCmUserCnt" parameterClass="map" resultClass="int">
+		SELECT COUNT(*) FROM CM_USER WHERE SID = #SS_USER_ID# AND  PASSWD = #PASSWD#
+	</select>
+
+	<select id="selectCmUser" parameterClass="map" resultClass="hashmap">
+		SELECT B.*
+	      FROM CM_USER A, EMP_MASTER B
+	     WHERE A.EMP_NO = B.EMP_NO
+	       AND A.SID = #SS_USER_ID#
+	</select>
+
+	<update id="updateCmUserPasswdModify" parameterClass="java.util.Map">
+		UPDATE CM_USER
+		   SET PASSWD = #NEW_PASSWD#,
+		   	   PASSWD_MOD_DT = SYSDATE,
+		       MOD_USER_ID = #SS_USER_ID#,
+			   MOD_DATE = SYSDATE
+		 WHERE SID = #SS_USER_ID#
+		   AND PASSWD = #PASSWD#
+	</update>
+
+	<update id="updateCmUserPasswdModify2" parameterClass="java.util.Map">
+		UPDATE CM_USER
+		   SET PASSWD = #NEW_PASSWD#,
+		       MOD_USER_ID = #SS_USER_ID#,
+			   MOD_DATE = SYSDATE
+		 WHERE SID = #SS_USER_ID#
+	</update>
+
+	<select id="selectCmUserCurrAccCnt" parameterClass="map" resultClass="hashmap">
+		SELECT
+			'오늘 접속자 수 : '|| COUNT(DISTINCT U_ID) ||' 명' AS CNT
+		FROM
+			CM_USER_ACCLOG
+		WHERE
+			SID &gt; TO_CHAR(SYSDATE,'YYYYMMDD')||'000000000'
+	</select>
+
+	<select id="selectCmUserCurrAccUser" parameterClass="map" resultClass="hashmap">
+		SELECT * FROM (
+			SELECT
+				DISTINCT
+				MAX(SID) KEEP (DENSE_RANK LAST ORDER BY SID) OVER (PARTITION BY U_ID)SID,
+				MAX(EMP_NM) KEEP (DENSE_RANK LAST ORDER BY SID) OVER (PARTITION BY U_ID) || ' (' || MAX(LAST_USE_TIME) KEEP (DENSE_RANK LAST ORDER BY SID) OVER (PARTITION BY U_ID) || ')' EMP_NM,
+				MAX(EMP_NO) KEEP (DENSE_RANK LAST ORDER BY SID) OVER (PARTITION BY U_ID) EMP_NO
+			FROM (
+				SELECT DECODE(EM.EMP_NM_KR, NULL, CU.EMP_NM_KR, EM.EMP_NM_KR) ||'['||CDM.DEPT_NM||']' AS EMP_NM, 
+					   DECODE(EM.EMP_NO, NULL, CU.EMP_NO, EM.EMP_NO) EMP_NO, 
+					   TO_CHAR(ACCESS_DATETIME, 'HH24:MI:SS') LAST_USE_TIME, 
+					   CUA.SID SID, 
+					   CUA.U_ID U_ID 
+				  FROM (
+					SELECT DISTINCT
+						MAX(U_ID) KEEP (DENSE_RANK LAST ORDER BY SID) OVER (PARTITION BY SESSION_ID) U_ID,
+						MAX(PRGM_ID) KEEP (DENSE_RANK LAST ORDER BY SID) OVER (PARTITION BY SESSION_ID) PRGM_ID,
+						MAX(SID) KEEP (DENSE_RANK LAST ORDER BY SID) OVER (PARTITION BY SESSION_ID) SID,
+						MAX(ACCESS_DATETIME) KEEP (DENSE_RANK LAST ORDER BY SID) OVER (PARTITION BY SESSION_ID) ACCESS_DATETIME
+					FROM CM_USER_ACCLOG
+					WHERE SID > TO_CHAR(SYSDATE - (#SESSION_TIMEOUT# * (1/(60* 24))), 'YYYYMMDDHH24MISS')
+				) CUA
+					JOIN CM_USER CU ON CUA.U_ID = CU.SID
+					LEFT OUTER JOIN EMP_MASTER EM ON CU.EMP_NO = EM.EMP_NO
+					LEFT OUTER JOIN CM_DEPT_MASTER CDM ON DECODE(EM.EMP_NO, NULL, CU.DEPT_CD, EM.DEPT_CD) = CDM.DEPT_CD
+				WHERE PRGM_ID != 'LOGOUT'
+			)
+		) ORDER BY SID DESC
+	</select>
+
+	<select id="selectCurrUserSession" parameterClass = "map" resultClass="hashmap">
+		SELECT * FROM (
+			SELECT DISTINCT
+				MAX(U_ID) KEEP (DENSE_RANK LAST ORDER BY SID) OVER (PARTITION BY SESSION_ID) U_ID,
+				MAX(U_IP) KEEP (DENSE_RANK LAST ORDER BY SID) OVER (PARTITION BY SESSION_ID) U_IP,
+				MAX(PRGM_ID) KEEP (DENSE_RANK LAST ORDER BY SID) OVER (PARTITION BY SESSION_ID) PRGM_ID,
+				MAX(SID) KEEP (DENSE_RANK LAST ORDER BY SID) OVER (PARTITION BY SESSION_ID) SID
+			FROM CM_USER_ACCLOG
+			WHERE SID &gt; TO_CHAR(SYSDATE - (#SESSION_TIMEOUT# * (1/(60* 24))), 'YYYYMMDDHH24MISS') AND SRV = #SRV#
+		) WHERE PRGM_ID != 'LOGOUT'
+	</select>
+
+	<select id="selectCmPassMng" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT * FROM CM_PASSWD_MNG
+	</select>
+
+	<insert id="insertCmPassMng" parameterClass="java.util.Map">
+		INSERT INTO CM_PASSWD_MNG(
+			IS_NUM,
+			IS_LOW_ALP,
+			IS_UP_ALP,
+			IS_SP,
+			PASS_LEN,
+			PASS_EXPIRE,
+			EXPIRE_ALERT,
+			IS_PASS_LEN,
+			IS_PASS_EXPIRE,
+			IS_EXPIRE_ALERT
+		)VALUES(
+			#IS_NUM#,
+			#IS_LOW_ALP#,
+			#IS_UP_ALP#,
+			#IS_SP#,
+			#PASS_LEN#,
+			#PASS_EXPIRE#,
+			#EXPIRE_ALERT#,
+			#IS_PASS_LEN#,
+			#IS_PASS_EXPIRE#,
+			#IS_EXPIRE_ALERT#
+		)
+
+	</insert>
+
+	<update id="updateCmPassMng" parameterClass="java.util.Map">
+		UPDATE  CM_PASSWD_MNG
+		   SET  IS_NUM       = #IS_NUM#,
+				IS_LOW_ALP   = #IS_LOW_ALP#,
+				IS_UP_ALP    = #IS_UP_ALP#,
+				IS_SP        = #IS_SP#,
+				PASS_LEN     = #PASS_LEN#,
+				PASS_EXPIRE  = #PASS_EXPIRE#,
+				EXPIRE_ALERT = #EXPIRE_ALERT#,
+				IS_PASS_LEN  = #IS_PASS_LEN#,
+				IS_PASS_EXPIRE = #IS_PASS_EXPIRE#,
+				IS_EXPIRE_ALERT = #IS_EXPIRE_ALERT#
+	</update>
+
+
+	<select id="selectCmLineList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+	   SELECT '0' AS CHK,
+	   		  DEPT_CD AS LINE_CD,
+		      DEPT_NM AS LINE_NM
+		 FROM CM_DEPT_MASTER
+		WHERE STATUS = 'C'
+		 <isNotEmpty prepend="AND" property="CODE">
+		 	DEPT_CD LIKE '%'||#CODE#||'%'
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="NAME">
+		 	DEPT_NM LIKE '%'||#NAME#||'%'
+		 </isNotEmpty>
+	</select>
+
+
+	<select id="selectCmCarModelList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+	   SELECT	'0' AS CHK,
+	   			GUID,
+				CAR_CD,
+				CAR_NM,
+				MODEL_NM,
+				TYPE_NM,
+				MAKE_CUST_CD,
+				NATION_CD,
+				PROD_DT,
+				END_DT,
+				SALE_PLAN_GBN,
+				CAR_GROUP,
+				LANG_CODE,
+				USE_YN,
+				REG_USER_ID,
+				REG_DT,
+				MOD_USER_ID,
+				MOD_DT
+		 FROM	CM_CAR_MASTER
+		WHERE   1=1
+		 <isNotEmpty prepend="AND" property="CODE">
+		 	CAR_CD LIKE '%'||#CODE#||'%'
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="NAME">
+		 	CAR_NM LIKE '%'||#NAME#||'%'
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="PLANT_CD">
+		   	CAR_CD IN(
+		        SELECT DISTINCT CAR_CD FROM SM_CAR_BOM
+		        WHERE PLANT_CD = #PLANT_CD#
+		        AND DEL_YN = 'N'
+	       	)
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="MAKE_CUST_CD">
+		 	MAKE_CUST_CD = #MAKE_CUST_CD#
+		 </isNotEmpty>
+		   AND	USE_YN  = 'Y'
+		   AND	LANG_CODE = #GV_LANG_CODE#
+		ORDER BY CAR_CD
+	</select>
+
+	<select id="selectCmItemCommList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+	   SELECT	'0' AS CHK,
+	   			SN,
+				ITEM_TYPE,
+				CODE_TYPE,
+				GROUP_CD,
+				CODE,
+				DECODE(#GV_LANG_CODE#, 'KR', CODE_NM, CODE_NM_EN) AS CODE_NM,
+				P_GROUP_CD,
+				P_CODE,
+				LEG_CODE,
+				DESCRIPTION1,
+				DESCRIPTION2,
+				SORT_ORDER,
+				STATUS,
+				RESERVE1,
+				RESERVE2,
+				RESERVE3,
+				RESERVE4,
+				PLANT_CD,
+				(SELECT '[' || PLANT_CD || ']' || DECODE('$GV_LANG_CODE$', 'KR', ABBR_PLANT_NM, ABBR_PLANT_NM_EN)
+				  FROM CM_PLANT_MASTER
+				 WHERE STATUS ='Y'
+				   AND PLANT_CD = CM_ITEM_COMM.PLANT_CD) AS PLANT_NM,
+				REG_USER_ID,
+				REG_DATE,
+				MOD_USER_ID,
+				MOD_DATE
+		 FROM	CM_ITEM_COMM
+		WHERE   ITEM_TYPE = '0'
+		  AND   P_CODE = #MASTER_CODE#
+		 <isNotEmpty prepend="AND" property="CODE">
+		 	CODE LIKE '%'||#CODE#||'%'
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="NAME">
+		 	UPPER(CODE_NM) LIKE '%'||#NAME#||'%'
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="PLANT_CD">
+		 	PLANT_CD = #PLANT_CD#
+		 </isNotEmpty>
+		 <isEmpty prepend="AND" property="PLANT_CD">
+		 	PLANT_CD IN($GV_PLANT_CD$)
+		 </isEmpty>
+		   AND	STATUS  = 'Y'
+		ORDER BY SORT_ORDER, CODE
+	</select>
+
+	<select id="selectCmBoxcodeMasterList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+	   SELECT	'0' AS CHK,
+	   			GUID,
+				BOX_CD,
+				BOX_NM,
+				WIDTH||'/'||LENGTH||'/'||HEIGHT AS BOX_SIZE,
+				WIDTH,
+				LENGTH,
+				HEIGHT,
+				PROPERTY,
+				WEIGHT,
+				BOXDQTY,
+				PACKPRC,
+				REMARKS,
+				MEASURE,
+				BOXPRC,
+				(SELECT CODE_NM FROM CM_CODE
+				  WHERE MASTER_CODE = 'IJ000234'
+				    AND LANG_CODE = #GV_LANG_CODE#
+				    AND CODE = GUBUN
+				    AND STATUS = 'Y') AS GUBUN,
+				USE_YN,
+				REG_USER_ID,
+				REG_DT,
+				MOD_USER_ID,
+				MOD_DT
+		 FROM	CM_BOXCODE_MASTER
+		WHERE   1=1
+		 <isNotEmpty prepend="AND" property="CODE">
+		 	BOX_CD LIKE '%'||#CODE#||'%'
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="NAME">
+		 	UPPER(BOX_NM) LIKE '%'||#NAME#||'%'
+		 </isNotEmpty>
+		   AND	USE_YN  = 'Y'
+		ORDER BY BOX_CD
+	</select>
+
+	<select id="selectCmJobCodeList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+	   SELECT	'0' AS CHK,
+	   			(SELECT '[' || B.CORP_CD || ']' || DECODE('$GV_LANG_CODE$', 'KR', ABBR_CORP_NM, ABBR_CORP_NM_EN) AS CODE_VALUE
+				  FROM CM_CORP_MASTER
+				 WHERE STATUS ='Y'
+				   AND CORP_CD = B.CORP_CD) AS CORP_CD,
+				(SELECT '[' || B.PLANT_CD || ']' || DECODE('$GV_LANG_CODE$', 'KR', ABBR_PLANT_NM, ABBR_PLANT_NM_EN) AS CODE_VALUE
+				  FROM CM_PLANT_MASTER
+				 WHERE STATUS ='Y'
+				   AND PLANT_CD = B.PLANT_CD) AS PLANT_CD,
+		        B.JOBCODE,
+		        B.PLANT_JOBNAME AS JOBNAME,
+		        B.START_DT,
+		        B.END_DT,
+		        B.JOB_GBN,
+		        B.AUTO_GBN,
+		        B.MAN_HR_RATE,
+		        B.AVG_OP_RATE,
+		        B.OFNM_OP_RATE,
+		        B.CYCLE_TIME,
+		        B.LINE_CD,
+		        B.OUTS_GBN,
+		        B.PTNR_CD,
+		        B.DEPT_CD,
+		        B.REG_USER_ID,
+		        B.REG_DT,
+		        B.MOD_USER_ID,
+		        B.MOD_DT
+		  FROM CM_JOBCODE_MASTER A, CM_JOBCODE_PLANT B
+		 WHERE A.JOBCODE = B.JOBCODE
+		   AND B.CORP_CD IN ($GV_CORP_CD$)
+		 <isNotEmpty prepend="AND" property="PLANT_CD">
+		 	B.PLANT_CD = #PLANT_CD#
+		 </isNotEmpty>
+		 <isEmpty prepend="AND" property="PLANT_CD">
+		 	B.PLANT_CD IN ($GV_PLANT_CD$)
+		 </isEmpty>
+		 <isNotEmpty prepend="AND" property="CODE">
+		 	B.JOBCODE LIKE '%'||#CODE#||'%'
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="NAME">
+		 	UPPER(B.PLANT_JOBNAME) LIKE '%'||#NAME#||'%'
+		 </isNotEmpty>
+		   AND  A.USE_YN = 'Y'
+		   <![CDATA[
+		   AND  (B.END_DT IS NULL OR B.END_DT >= TO_CHAR(SYSDATE, 'YYYYMMDD'))
+		   ]]>
+		   <isNotEmpty prepend="AND" property="JOB_GBN">
+		   B.JOB_GBN  IN ($JOB_GBN$)
+		   </isNotEmpty>
+		ORDER BY B.JOBCODE
+	</select>
+
+	<select id="selectCatGroupCodeList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT DISTINCT
+			   LANG_CODE, MASTER_CODE, CODE, VALUE, CODE_VALUE, VALUE_CODE, ABBR_CODE_NM, SORT_ORDER, REMARK
+		  FROM (
+				SELECT D.LANG_CODE,
+					   D.MASTER_CODE,
+					   D.CODE,
+					   D.ABBR_CODE_NM AS VALUE,
+					   '[' || D.CODE || ']' || D.ABBR_CODE_NM AS CODE_VALUE,
+					   D.ABBR_CODE_NM ||'[' || D.CODE || ']'  AS VALUE_CODE,
+					   D.ABBR_CODE_NM,
+					   D.SORT_ORDER,
+					   A.REMARK
+				  FROM CM_CODE_MAP D, CM_CODE A
+				 WHERE D.MASTER_CODE = A.MASTER_CODE
+     			   AND D.CODE = A.CODE
+     			   AND D.LANG_CODE = A.LANG_CODE
+     			   <!-- AND D.MASTER_CODE = #MASTER_CODE# -->
+     			   <isNotEmpty prepend="AND" property="CODE">
+     			   		D.CODE = #CODE#
+     			   </isNotEmpty>
+     			   AND A.P_MASTER_CODE = #P_MASTER_CODE#
+     			   <isNotEmpty prepend="AND" property="P_CODE">
+			       		A.P_CODE = #P_CODE#
+			       </isNotEmpty>
+				   AND D.CORP_CD IN ($GV_CORP_CD$)
+				   AND D.LANG_CODE = #GV_LANG_CODE#
+			       AND D.STATUS = 'Y'
+		   		)
+		 WHERE 1=1
+		   <isNotEmpty property="SEARCH_TYPE">
+			   <isNotEmpty property="SEARCH_KEYWORD">
+		   		AND $SEARCH_TYPE$ LIKE '%'||#SEARCH_KEYWORD#||'%'
+			   </isNotEmpty>
+		   </isNotEmpty>
+		ORDER BY SORT_ORDER, CODE
+	</select>
+
+	<select id="selectUuid" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT #SEQ_UUID# AS SEQ_ID FROM DUAL
+	</select>
+
+	<select id="selectCmCustomerMasterList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+	   SELECT	'0' AS CHK,
+				CUST_CD,
+				CUST_NM,
+				CUST_NM_ABBR,
+				CUST_NM_EN,
+				OWNER_NM,
+				CUST_GROUP_CD,
+				BIZ_REG_NO,
+				MINOR_BIZ_REG_NO,
+				RES_REG_NO,
+				TEL_NO,
+				TEL_NO_EN,
+				HP_NO,
+				FAX_NO,
+				EMAIL,
+				POST_NO,
+				ADDR,
+				PLANT_ADDR,
+				ADDR_EN,
+				BANK_CD,
+				BANK_ACCOUNT_NO,
+				BIZ_KIND,
+				BIZ_TYPE,
+				SALE_YN,
+				OUTS_YN,
+				PUR_YN,
+				RELATE_YN,
+				START_DT,
+				END_DT,
+				SALE_EMP,
+				CREDIT_LMT,
+				NATION_CD,
+				ATTN_INFO,
+				ACCOUNT_ADD_INFO,
+				BOX_REMARK,
+				REMARK,
+				RELATE_GBN,
+				INSUR_YN,
+				CUSTOMS_YN,
+				CUSTOMS_FEE,
+				FI_CUST_CD,
+				EDI_ID,
+				LANG_CODE,
+				REG_USER_ID,
+				REG_DT,
+				MOD_USER_ID,
+				MOD_DT
+		 FROM	CM_CUSTOMER_MASTER
+		WHERE   1=1
+		 <isNotEmpty prepend="AND" property="CODE">
+		 	CUST_CD LIKE '%'||#CODE#||'%'
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="VALUE">
+		 	UPPER(CUST_NM) LIKE '%'||#VALUE#||'%'
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="NAME">
+		 	UPPER(CUST_NM) LIKE '%'||#NAME#||'%'
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="CUST_CD">
+		 	CUST_CD LIKE '%'||#CUST_CD#||'%'
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="CUST_NM_ABBR">
+		 	CUST_NM_ABBR LIKE '%'||#CUST_NM_ABBR#||'%'
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="SALE_YN">
+		 	SALE_YN = #SALE_YN#
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="OUTS_YN">
+		 	OUTS_YN = #OUTS_YN#
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="PUR_YN">
+		 	PUR_YN = #PUR_YN#
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="RELATE_YN">
+		 	RELATE_YN = #RELATE_YN#
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="CUSTOMS_YN">
+		 	CUSTOMS_YN = #CUSTOMS_YN#
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="INSUR_YN">
+		 	INSUR_YN = #INSUR_YN#
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="FORWARD_YN">
+		 	FORWARDER_YN = #FORWARD_YN#
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="CARRIER_YN">
+		 	CARRIER_YN = #CARRIER_YN#
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="RELATE_PLANT_YN">
+		 	RELATE_PLANT_CD IN ($GV_PLANT_CD$)
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="LANG_CODE">
+		 	LANG_CODE = #LANG_CODE#
+		 </isNotEmpty>
+		 <isEmpty prepend="AND" property="LANG_CODE">
+		 	LANG_CODE = #GV_LANG_CODE#
+		 </isEmpty>
+		 <isNotEmpty prepend="AND" property="OVER_CUST_YN">
+		 	<isEqual property="OVER_CUST_YN" compareValue="Y">
+			NATION_CD != 'KR'
+			</isEqual>
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="IMP_RELATE_CUSTOM_YN">
+		 	<isEqual property="IMP_RELATE_CUSTOM_YN" compareValue="Y">
+				 	( CUSTOMS_YN ='Y' OR  INSUR_YN = 'Y' OR FORWARDER_YN = 'Y' OR CARRIER_YN = 'Y' )
+			</isEqual>
+		 </isNotEmpty>
+		ORDER BY CUST_CD
+	</select>
+
+	<select id="selectCmItemcodeList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		/* Common.selectCmItemcodeList  */
+		<include refid="listSearchCol"/>
+			SELECT ROWNUM,
+			       COUNT(*) OVER() AS TOT_CNT, A.*
+			  FROM (
+			  		SELECT '0' AS CHK,
+						  B.ITEM_CD,
+						  B.PLANT_CD,
+						  B.PLANT_ITEM_NM AS ITEM_NM,
+						  B.PLANT_ITEM_NO AS ITEM_NO,
+						  A.TYPE_CD,
+						  A.TYPE_NM,
+						  A.PROC_CD,
+						  A.PROC_NM,
+						  A.QTY_UNIT,
+						  A.NET_WGT,
+						  A.GROSS_WGT,
+						  A.HS_CD,
+						  A.REMARK,
+						  B.SAFT_STOCK,
+						  B.MAINTAIN_DAY,
+						  B.MAX_STOCK,
+						  B.MIN_STOCK,
+						  B.PROC_STND_UNITCOST,
+						  B.PROD_STND_UNITCOST,
+						  B.ITEM_GBN,
+						  B.LONGTIME_YN,
+						  B.MERCH_YN,		<!-- 상품여부 -->
+						  B.PROD_YN,		<!-- 제품여부 -->
+						  B.SUPPLY_MATRL_YN	<!-- 유상사급여부 -->
+						 , B.BOX_PER_QTY
+						 , B.BOX_CD
+						 , B.MIN_LOT
+					 FROM CM_ITEMCODE_MASTER A, CM_ITEMCODE_PLANT B
+					WHERE A.PART_GBN = B.PART_GBN
+					  AND A.ITEM_CD = B.M_ITEM_CD
+			<!-- 		  <isNotEmpty prepend="AND" property="PLANT_CD">
+					  	B.PLANT_CD = #PLANT_CD#
+					  </isNotEmpty>
+					  <isEmpty prepend="AND" property="PLANT_CD">
+					  	B.PLANT_CD IN ($GV_PLANT_CD$)
+					  </isEmpty>  -->
+					  AND B.PLANT_CD IN ($GV_PLANT_CD$)
+					  <isNotEmpty prepend="AND" property="ITEM_GBN">
+						B.ITEM_GBN IN ($ITEM_GBN$)
+					  </isNotEmpty>
+					  <!-- 상품/ 제품 / 유상사급 여부 -->
+					  <isNotEmpty property="ITEM_ADD_YN">
+					  AND ($ITEM_ADD_YN$)
+					  </isNotEmpty>
+					  AND A.BOUT_DT IS NULL
+					  AND B.BOUT_DT IS NULL
+					  <isNotEmpty prepend="AND" property="CONDITION">
+					  		UPPER(B.ITEM_CD||B.PLANT_ITEM_NM||B.PLANT_ITEM_NO||A.PROC_CD|| A.PROC_NM) LIKE '%'||#CONDITION#||'%'
+					  </isNotEmpty>
+					ORDER BY B.ITEM_CD
+				) A
+		 <include refid="listSearchWhr"/>
+	</select>
+	
+	<select id="selectLotCodeList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		/* Common.selectLotCodeList  */
+		
+		 SELECT B.RLS_LOT_NO,
+		 			   A.ITEM_CD,
+     				   D.PLANT_ITEM_NO,
+     				   D.PLANT_ITEM_NM,
+     				   A.JOBCODE, 
+     				   C.PLANT_JOBNAME,
+       				   B.LOAD_QTY
+		    FROM QT_PASS A, QT_PASS_ITEM_LOT B, CM_JOBCODE_PLANT C,  CM_ITEMCODE_PLANT D
+			WHERE A.GUID = B.M_GUID
+  				AND A.DEL_YN = 'N'
+			    AND B.DEL_YN = 'N'
+  			    AND A.PLANT_CD = C.PLANT_CD
+ 			    AND A.JOBCODE = C.JOBCODE
+ 			    AND A.PLANT_CD = D.PLANT_CD
+  			    AND A.ITEM_CD = D.ITEM_CD
+  			    <isNotEmpty prepend="AND" property="CONDITION">
+  			    B.RLS_LOT_NO =#CONDITION#
+  			    </isNotEmpty>
+  			    <isNotEmpty prepend="AND" property="PLANT_CD">
+  			    B.PLANT_CD =#PLANT_CD#
+  			    </isNotEmpty>
+  			      GROUP BY B.RLS_LOT_NO, A.ITEM_CD,
+      			  D.PLANT_ITEM_NO, D.PLANT_ITEM_NM,
+      			  A.JOBCODE, C.PLANT_JOBNAME,
+       			  B.LOAD_QTY
+			ORDER BY B.RLS_LOT_NO
+		
+	</select>
+	
+	
+	
+	<select id="selectCmItemcodewithBomJobList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		/* Common.selectCmItemcodewithBomJobList  */
+		<include refid="listSearchCol"/>
+			SELECT ROWNUM,
+			       COUNT(*) OVER() AS TOT_CNT, A.*
+			  FROM (
+			  		SELECT '0' AS CHK,
+						  B.ITEM_CD,
+						  B.PLANT_CD,
+						  B.PLANT_ITEM_NM AS ITEM_NM,
+						  B.PLANT_ITEM_NO AS ITEM_NO,
+						  A.TYPE_CD,
+						  A.TYPE_NM,
+						  A.PROC_CD,
+						  A.PROC_NM,
+						  A.QTY_UNIT,
+						  A.NET_WGT,
+						  A.GROSS_WGT,
+						  A.HS_CD,
+						  A.REMARK,
+						  B.SAFT_STOCK,
+						  B.MAINTAIN_DAY,
+						  B.MAX_STOCK,
+						  B.MIN_STOCK,
+						  B.PROC_STND_UNITCOST,
+						  B.PROD_STND_UNITCOST,
+						  B.ITEM_GBN,
+						  B.LONGTIME_YN,
+						  B.MERCH_YN,		<!-- 상품여부 -->
+						  B.PROD_YN,		<!-- 제품여부 -->
+						  B.SUPPLY_MATRL_YN	<!-- 유상사급여부 -->
+						 , B.BOX_PER_QTY
+						 , B.BOX_CD
+						 , B.MIN_LOT
+					 FROM CM_ITEMCODE_MASTER A, CM_ITEMCODE_PLANT B,PD_BOM_JOBCODE J
+					WHERE A.PART_GBN = B.PART_GBN
+					  AND A.ITEM_CD = B.M_ITEM_CD
+					  <isNotEmpty prepend="AND" property="PLANT_CD">
+					  	B.PLANT_CD = #PLANT_CD#
+					  </isNotEmpty>
+					  <isEmpty prepend="AND" property="PLANT_CD">
+					  	B.PLANT_CD IN ($GV_PLANT_CD$)
+					  </isEmpty>
+					  <isNotEmpty prepend="AND" property="ITEM_GBN">
+						B.ITEM_GBN IN ($ITEM_GBN$)
+					  </isNotEmpty>
+					  <!-- 상품/ 제품 / 유상사급 여부 -->
+					  <isNotEmpty property="ITEM_ADD_YN">
+					  AND ($ITEM_ADD_YN$)
+					  </isNotEmpty>
+					  AND A.BOUT_DT IS NULL
+					  AND B.BOUT_DT IS NULL
+					  AND B.PLANT_CD = J.PLANT_CD
+  					  AND A.ITEM_CD = J.ITEM_CD
+  					  <isNotEmpty property="JOBCODE">
+					  AND J.JOBCODE = #JOBCODE#
+					  </isNotEmpty>
+					  <isNotEmpty prepend="AND" property="CONDITION">
+					  		UPPER(B.ITEM_CD||B.PLANT_ITEM_NM||B.PLANT_ITEM_NO||A.PROC_CD|| A.PROC_NM) LIKE '%'||#CONDITION#||'%'
+					  </isNotEmpty>
+					ORDER BY B.ITEM_CD
+				) A
+		 <include refid="listSearchWhr"/>
+	</select>
+	<select id="selectCmItemcodewithToolLifeList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		/* Common.selectCmItemcodewithToolLifeList  */
+		<include refid="listSearchCol"/>
+			SELECT ROWNUM,
+			       COUNT(*) OVER() AS TOT_CNT, A.*
+			FROM (
+
+					SELECT '0' AS CHK,T.PROD_ITEM_CD, T.TOOL_ITEM_CD ITEM_CD,P.PLANT_ITEM_NM AS ITEM_NM,P.SIZE_SPEC AS ITEM_NO,QTY_UNIT,T.TOOL_LIFE_QTY,SAFT_STOCK_QTY,DEPT_CD
+					 		,(SELECT DEPT_NM FROM CM_DEPT_MASTER WHERE DEPT_CD = T.DEPT_CD) AS DEPT_NM 
+					FROM
+					  CM_SUBMATERIAL_PLANT P,
+					  CM_SUBMATERIAL_MASTER M,TL_TOOL_LIFE T,SS_PAYMENT S
+					WHERE P.ITEM_CD = M.ITEM_CD	AND P.PLANT_CD =T.PLANT_CD  AND P.ITEM_CD =T.TOOL_ITEM_CD
+					      AND M.ITEM_GBN = '4'
+					      AND M.BOUT_DT IS NULL AND P.BOUT_DT IS NULL
+					      AND T.CORP_CD  IN ($GV_CORP_CD$)
+					      AND T.PLANT_CD IN  ($GV_PLANT_CD$)
+					      AND DEPT_CD IS NOT NULL
+					      AND T.TOOL_ITEM_CD = S.ITEM_CD(+)	
+						  AND T.PLANT_CD =S.PLANT_CD(+)  
+						  AND T.CORP_CD =S.CORP_CD(+)  
+						  <!-- AND NVL(S.OK_STOCK_QTY,0)>0 -->
+						  <isNotEmpty prepend="AND" property="PLANT_CD">
+						  	T.PLANT_CD = #PLANT_CD#
+						  </isNotEmpty>
+						  
+						  <isNotEmpty prepend="AND" property="CODE">
+						  <!-- 	UPPER(P.PLANT_ITEM_NM) LIKE '%' || #NAME# || '%' -->
+						  	UPPER(P.ITEM_CD||P.PLANT_ITEM_NM||P.SIZE_SPEC) LIKE '%'||#CODE#||'%'
+						  </isNotEmpty>
+						  <isNotEmpty prepend="AND" property="NAME">
+						  <!-- 	UPPER(P.PLANT_ITEM_NM) LIKE '%' || #NAME# || '%' -->
+						  	UPPER(P.ITEM_CD||P.PLANT_ITEM_NM||P.SIZE_SPEC) LIKE '%'||#NAME#||'%'
+						  </isNotEmpty>
+					ORDER BY  T.TOOL_ITEM_CD
+			) A
+
+		 <include refid="listSearchWhr"/>
+	</select>
+	<select id="selectCmItemcodeListForSearchMitem" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		<include refid="listSearchCol"/>
+			SELECT ROWNUM,
+			       COUNT(*) OVER() AS TOT_CNT, A.*
+			  FROM (
+			  		SELECT '0' AS CHK,
+						  B.ITEM_CD,
+						  B.PLANT_CD,
+						  B.PLANT_ITEM_NM AS ITEM_NM,
+						  B.PLANT_ITEM_NO AS ITEM_NO,
+						  A.TYPE_CD,
+						  A.TYPE_NM,
+						  A.PROC_CD,
+						  A.PROC_NM,
+						  A.QTY_UNIT,
+						  A.NET_WGT,
+						  A.GROSS_WGT,
+						  A.HS_CD,
+						  A.REMARK,
+						  B.SAFT_STOCK,
+						  B.MAINTAIN_DAY,
+						  B.MAX_STOCK,
+						  B.MIN_STOCK,
+						  B.PROC_STND_UNITCOST,
+						  B.PROD_STND_UNITCOST,
+						  B.ITEM_GBN,
+						  B.LONGTIME_YN,
+						  B.MERCH_YN,		<!-- 상품여부 -->
+						  B.PROD_YN,		<!-- 제품여부 -->
+						  B.SUPPLY_MATRL_YN	<!-- 유상사급여부 -->
+						  , B.BOX_PER_QTY
+						 , B.BOX_CD
+						 , B.MIN_LOT
+					 FROM CM_ITEMCODE_MASTER A, CM_ITEMCODE_PLANT B
+					WHERE A.PART_GBN = B.PART_GBN
+					  AND A.ITEM_CD = B.M_ITEM_CD
+					  <isNotEmpty prepend="AND" property="PLANT_CD">
+					  	B.PLANT_CD = #PLANT_CD#
+					  </isNotEmpty>
+					  <isEmpty prepend="AND" property="PLANT_CD">
+					  	B.PLANT_CD IN ($GV_PLANT_CD$)
+					  </isEmpty>
+					  <isNotEmpty prepend="AND" property="ITEM_GBN">
+						B.ITEM_GBN IN ($ITEM_GBN$)
+					  </isNotEmpty>
+					  <!-- 상품/ 제품 / 유상사급 여부 -->
+					  <isNotEmpty property="ITEM_ADD_YN">
+					  AND ($ITEM_ADD_YN$)
+					  </isNotEmpty>
+					  AND A.BOUT_DT IS NULL
+					  AND B.BOUT_DT IS NULL
+					  <isNotEmpty prepend="AND" property="CONDITION">
+					  		B.M_ITEM_CD = #CONDITION#
+					  </isNotEmpty>
+					  ORDER BY B.ITEM_CD
+				) A
+		 <include refid="listSearchWhr"/>
+	</select>
+
+	<select id="selectCmItemcodeListForMaster" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		<include refid="listSearchCol"/>
+			SELECT ROWNUM,
+			       COUNT(*) OVER() AS TOT_CNT, A.*
+			  FROM (
+			  		SELECT '0' AS CHK,
+						  ITEM_CD,
+						  '' AS PLANT_CD,
+						  ITEM_NM,
+						  ITEM_NO,
+						  A.TYPE_CD,
+						  A.TYPE_NM,
+						  A.PROC_CD,
+						  A.PROC_NM,
+						  A.QTY_UNIT,
+						  A.NET_WGT,
+						  A.GROSS_WGT,
+						  A.HS_CD,
+						  A.REMARK,
+						  '' AS LONGTIME_YN,
+						  '' AS SAFT_STOCK,
+						  '' AS MAINTAIN_DAY,
+						  '' AS MAX_STOCK,
+						  '' AS MIN_STOCK,
+						  '' AS PROC_STND_UNITCOST,
+						  '' AS PROD_STND_UNITCOST,
+						  '' AS ITEM_GBN,
+						  '' AS MERCH_YN,		<!-- 상품여부 -->
+						  '' AS PROD_YN,		<!-- 제품여부 -->
+						  '' AS SUPPLY_MATRL_YN	<!-- 유상사급여부 -->
+					 FROM CM_ITEMCODE_MASTER A
+					WHERE A.BOUT_DT IS NULL
+					  <isNotEmpty prepend="AND" property="CONDITION">
+					  		UPPER(A.ITEM_CD||A.ITEM_NM||A.ITEM_NO||A.PROC_CD||A.PROC_NM) LIKE '%'||#CONDITION#||'%'
+					  </isNotEmpty>
+					  <isNotEmpty prepend="AND" property="CORP_CD">
+					  	A.ITEM_CD IN (SELECT A.M_ITEM_CD
+								 	    FROM CM_ITEMCODE_PLANT A, CM_PLANT_MASTER B
+									   WHERE A.PLANT_CD = B.PLANT_CD
+										 AND B.CORP_CD = #CORP_CD#)
+					  </isNotEmpty>
+					ORDER BY A.ITEM_CD
+				) A
+		 <include refid="listSearchWhr"/>
+	</select>
+<!-- 품목정보+부자재 재고 -->
+	<select id="selectCmSubmaterialWithSsPaymentList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		<include refid="listSearchCol"/>
+			SELECT ROWNUM,
+			       COUNT(*) OVER() AS TOT_CNT, A.*
+			  FROM (
+					SELECT '0' AS CHK,
+						   B.ITEM_CD,
+						   B.PLANT_CD,
+						   B.PLANT_ITEM_NM AS ITEM_NM,
+						   B.SIZE_SPEC AS ITEM_NO,
+						   A.CONCRT_CD AS PROC_CD,
+						   A.CONCRT_NM AS PROC_NM,
+						   A.QTY_UNIT,
+						   A.ACCOUNT_CD,
+						   A.ITEM_GBN,
+						   B.REMARK,
+						   B.DRAW_NO,
+						   B.BOX_QTY,
+					       B.AUTO_ORDER_GBN,
+					       B.MONTH_UNITQTY,
+					       B.SAFT_STOCK,
+					       B.LEAD_TIME,
+					       B.WAREHOUSE_CD,
+					       B.LOCATION,
+					       B.MAX_STOCK,
+					       B.MIN_STOCK,S.Ok_Stock_Qty,S.RLS_UNITCOST
+					  FROM CM_SUBMATERIAL_MASTER A, CM_SUBMATERIAL_PLANT B,SS_PAYMENT S
+					 WHERE A.PART_GBN = B.PART_GBN
+					   AND A.ITEM_CD = B.ITEM_CD
+ 					   <isNotEmpty prepend="AND" property="PLANT_CD">
+					  	B.PLANT_CD = #PLANT_CD#
+					  </isNotEmpty>
+					  <isEmpty prepend="AND" property="PLANT_CD">
+					  	B.PLANT_CD IN ($GV_PLANT_CD$)
+					  </isEmpty>
+					  <isNotEmpty prepend="AND" property="ITEM_GBN">
+						A.ITEM_GBN IN ($ITEM_GBN$)
+					  </isNotEmpty>
+					  <isNotEmpty prepend="AND" property="CODE">
+ 					  	UPPER(B.ITEM_CD||B.PLANT_ITEM_NM||B.SIZE_SPEC) LIKE '%'||#CODE#||'%'
+					  </isNotEmpty>
+					  <isNotEmpty prepend="AND" property="NAME">
+ 					  	UPPER(B.ITEM_CD||B.PLANT_ITEM_NM||B.SIZE_SPEC) LIKE '%'||#NAME#||'%'
+					  </isNotEmpty>
+					   AND A.BOUT_DT IS NULL
+					   AND B.BOUT_DT IS NULL
+					   AND B.ITEM_CD = S.ITEM_CD
+					   AND B.PLANT_CD = S.PLANT_CD
+					   AND A.ITEM_CD=B.ITEM_CD
+					   AND S.OK_STOCK_QTY >0
+					   AND S.THSYEAR = TO_CHAR(SYSDATE,'YYYY')
+					   AND S.THSMONT = TO_CHAR(SYSDATE,'MM')
+					  <isNotEmpty prepend="AND" property="CONDITION">
+					  		UPPER(B.ITEM_CD||B.PLANT_ITEM_NM||B.SIZE_SPEC||A.CONCRT_CD|| A.CONCRT_NM) LIKE '%'||#CONDITION#||'%'
+					  </isNotEmpty>
+					  <!-- 연마/재연마 구분 -->
+					  <isNotEmpty prepend="AND" property="POLISH">
+					  	$POLISH$
+					  </isNotEmpty>
+					ORDER BY B.ITEM_CD
+				) A
+		 <include refid="listSearchWhr"/>
+	</select>
+	<select id="selectCmSubmaterialList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		/* Common.selectCmSubmaterialList */
+		<include refid="listSearchCol"/>
+			SELECT ROWNUM,
+			       COUNT(*) OVER() AS TOT_CNT, A.*
+			  FROM (
+					SELECT '0' AS CHK,
+						   B.ITEM_CD,
+						   B.PLANT_CD,
+						   B.PLANT_ITEM_NM AS ITEM_NM,
+						   B.SIZE_SPEC AS ITEM_NO,
+						   A.CONCRT_CD,
+						   A.CONCRT_NM,
+						   A.QTY_UNIT,
+						   A.ACCOUNT_CD,
+						   A.ITEM_GBN,
+						   B.REMARK,
+						   B.DRAW_NO,
+						   B.BOX_QTY,
+					       B.AUTO_ORDER_GBN,
+					       B.MONTH_UNITQTY,
+					       B.SAFT_STOCK,
+					       B.LEAD_TIME,
+					       B.WAREHOUSE_CD,
+					       B.LOCATION,
+					       B.MAX_STOCK,
+					       B.MIN_STOCK
+					       , B.BOX_CD  AS PROC_CD
+						   , B.BOX_PER_QTY  AS PROC_NM
+						   , B.BOX_CD
+						   , B.BOX_PER_QTY
+						   , B.MIN_LOT
+					  FROM CM_SUBMATERIAL_MASTER A, CM_SUBMATERIAL_PLANT B
+					 WHERE A.PART_GBN = B.PART_GBN
+					   AND A.ITEM_CD = B.ITEM_CD
+					   <isNotEmpty prepend="AND" property="PLANT_CD">
+					  	B.PLANT_CD = #PLANT_CD#
+					  </isNotEmpty>
+					  <isEmpty prepend="AND" property="PLANT_CD">
+					  	B.PLANT_CD IN ($GV_PLANT_CD$)
+					  </isEmpty>
+					  <isNotEmpty prepend="AND" property="ITEM_GBN">
+						A.ITEM_GBN IN ($ITEM_GBN$)
+					  </isNotEmpty>
+					   AND A.BOUT_DT IS NULL
+					   AND B.BOUT_DT IS NULL
+					  <isNotEmpty prepend="AND" property="CONDITION">
+					  		UPPER(B.ITEM_CD||B.PLANT_ITEM_NM||B.SIZE_SPEC||A.CONCRT_CD|| A.CONCRT_NM) LIKE '%'||#CONDITION#||'%'
+					  </isNotEmpty>
+					  <!-- 연마/재연마 구분 -->
+					  <isNotEmpty prepend="AND" property="POLISH">
+					  	$POLISH$
+					  </isNotEmpty>
+					ORDER BY B.ITEM_CD
+				) A
+		 <include refid="listSearchWhr"/>
+	</select>
+	<select id="selectCmSubmaterialListForMaster" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		<include refid="listSearchCol"/>
+			SELECT ROWNUM,
+			       COUNT(*) OVER() AS TOT_CNT, A.*
+			  FROM (
+					SELECT '0' AS CHK,
+						   ITEM_CD,
+						   '' AS PLANT_CD,
+						   ITEM_NM,
+						   A.SIZE_SPEC AS ITEM_NO,
+						   A.CONCRT_CD AS PROC_CD,
+						   A.CONCRT_NM AS PROC_NM,
+						   A.QTY_UNIT,
+						   A.ACCOUNT_CD,
+						   A.ITEM_GBN,
+						   A.REMARK,
+						   '' AS DRAW_NO,
+						   '' AS BOX_QTY,
+					       '' AS AUTO_ORDER_GBN,
+					       '' AS MONTH_UNITQTY,
+					       '' AS SAFT_STOCK,
+					       '' AS LEAD_TIME,
+					       '' AS WAREHOUSE_CD,
+					       '' AS LOCATION,
+					       '' AS MAX_STOCK,
+					       '' AS MIN_STOCK
+					  FROM CM_SUBMATERIAL_MASTER A
+					 WHERE A.BOUT_DT IS NULL
+					  <isNotEmpty prepend="AND" property="CONDITION">
+					  		UPPER(A.ITEM_CD||A.ITEM_NM||A.SIZE_SPEC||A.CONCRT_CD||A.CONCRT_NM) LIKE '%'||#CONDITION#||'%'
+					  </isNotEmpty>
+					 ORDER BY A.ITEM_CD
+				) A
+		 <include refid="listSearchWhr"/>
+	</select>
+
+	<select id="selectCmItemcodeData" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT '0' AS CHK,
+			  B.M_ITEM_CD AS ITEM_CD,
+			  B.PLANT_CD,
+			  B.PLANT_ITEM_NM AS ITEM_NM,
+			  B.PLANT_ITEM_NO AS ITEM_NO,
+			  A.TYPE_CD,
+			  A.TYPE_NM,
+			  A.PROC_CD,
+			  A.PROC_NM,
+			  A.QTY_UNIT,
+			  A.NET_WGT,
+			  A.GROSS_WGT,
+			  A.HS_CD,
+			  A.REMARK,
+			  B.SAFT_STOCK,
+			  B.MAINTAIN_DAY,
+			  B.MAX_STOCK,
+			  B.MIN_STOCK,
+			  B.PROC_STND_UNITCOST,
+			  B.PROD_STND_UNITCOST,
+			  B.LONGTIME_YN,
+			  B.ITEM_GBN,
+			  B.MERCH_YN,		<!-- 상품여부 -->
+			  B.PROD_YN,		<!-- 제품여부 -->
+			  B.SUPPLY_MATRL_YN	<!-- 유상사급여부 -->
+			 , B.BOX_PER_QTY
+			 , B.BOX_CD
+			 , B.MIN_LOT
+		 FROM CM_ITEMCODE_MASTER A, CM_ITEMCODE_PLANT B
+		WHERE A.PART_GBN = B.PART_GBN
+		  AND A.ITEM_CD = B.M_ITEM_CD
+		  AND A.ITEM_CD = #ITEM_CD#
+		  <isNotEmpty prepend="AND" property="PLANT_CD">
+		  	B.PLANT_CD = #PLANT_CD#
+		  </isNotEmpty>
+		  <isEmpty prepend="AND" property="PLANT_CD">
+		  	B.PLANT_CD IN ($GV_PLANT_CD$)
+		  </isEmpty>
+		  <isNotEmpty prepend="AND" property="ITEM_GBN">
+			B.ITEM_GBN IN ($ITEM_GBN$)
+		  </isNotEmpty>
+		  <!-- 상품/ 제품 / 유상사급 여부 -->
+		  <isNotEmpty property="ITEM_ADD_YN">
+		  AND ($ITEM_ADD_YN$)
+		  </isNotEmpty>
+		  AND A.BOUT_DT IS NULL
+		  AND B.BOUT_DT IS NULL
+	</select>
+
+	<select id="selectCmItemcodeDataForMaster" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT '0' AS CHK,
+			  ITEM_CD,
+			  '' AS PLANT_CD,
+			  ITEM_NM,
+			  ITEM_NO,
+			  TYPE_CD,
+			  TYPE_NM,
+			  PROC_CD,
+			  PROC_NM,
+			  QTY_UNIT,
+			  NET_WGT,
+			  GROSS_WGT,
+			  HS_CD,
+			  REMARK,
+			  '' AS SAFT_STOCK,
+			  '' AS MAINTAIN_DAY,
+			  '' AS MAX_STOCK,
+			  '' AS MIN_STOCK,
+			  '' AS PROC_STND_UNITCOST,
+			  '' AS PROD_STND_UNITCOST,
+			  '' AS ITEM_GBN,
+			  '' AS MERCH_YN,		<!-- 상품여부 -->
+			  '' AS PROD_YN,		<!-- 제품여부 -->
+			  '' AS SUPPLY_MATRL_YN	<!-- 유상사급여부 -->
+		 FROM CM_ITEMCODE_MASTER
+		WHERE ITEM_CD = #ITEM_CD#
+		  AND BOUT_DT IS NULL
+		  <isNotEmpty prepend="AND" property="CORP_CD">
+		  	ITEM_CD IN (SELECT A.M_ITEM_CD
+			   		      FROM CM_ITEMCODE_PLANT A, CM_PLANT_MASTER B
+						 WHERE A.PLANT_CD = B.PLANT_CD
+						   AND B.CORP_CD = #CORP_CD#)
+		  </isNotEmpty>
+	</select>
+
+	<select id="selectCmSubmaterialData" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT '0' AS CHK,
+			   B.ITEM_CD,
+			   B.PLANT_CD,
+			   B.PLANT_ITEM_NM AS ITEM_NM,
+			   B.SIZE_SPEC AS ITEM_NO,
+			   A.CONCRT_CD,
+			   A.CONCRT_NM,
+			   A.QTY_UNIT,
+			   A.ACCOUNT_CD,
+			   A.ITEM_GBN,
+			   B.REMARK,
+			   B.DRAW_NO,
+			   B.ACCOUNT_CD,
+			   B.BOX_QTY,
+		       B.AUTO_ORDER_GBN,
+		       B.MONTH_UNITQTY,
+		       B.SAFT_STOCK,
+		       B.LEAD_TIME,
+		       B.WAREHOUSE_CD,
+		       B.LOCATION,
+		       B.MAX_STOCK,
+		       B.MIN_STOCK
+		       , B.BOX_CD   AS PROC_CD
+			   , B.BOX_PER_QTY AS PROC_NM
+			   , B.BOX_CD
+			   , B.BOX_PER_QTY
+			   , B.MIN_LOT
+		  FROM CM_SUBMATERIAL_MASTER A, CM_SUBMATERIAL_PLANT B
+		 WHERE A.PART_GBN = B.PART_GBN
+		   AND A.ITEM_CD = B.ITEM_CD
+		   AND A.ITEM_CD = #ITEM_CD#
+		  <isNotEmpty prepend="AND" property="PLANT_CD">
+		  	B.PLANT_CD = #PLANT_CD#
+		  </isNotEmpty>
+		  <isEmpty prepend="AND" property="PLANT_CD">
+		  	B.PLANT_CD IN ($GV_PLANT_CD$)
+		  </isEmpty>
+		  <isNotEmpty prepend="AND" property="ITEM_GBN">
+			A.ITEM_GBN IN ($ITEM_GBN$)
+		  </isNotEmpty>
+		  <!-- 연마/재연마 구분 -->
+		  <isNotEmpty prepend="AND" property="POLISH">
+		  	$POLISH$
+		  </isNotEmpty>
+		   AND A.BOUT_DT IS NULL
+		   AND B.BOUT_DT IS NULL
+	</select>
+
+	<select id="selectCmSubmaterialDataForMaster" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT '0' AS CHK,
+			   A.ITEM_CD,
+			   '' AS PLANT_CD,
+			   ITEM_NM,
+			   ITEM_NO,
+			   A.CONCRT_CD AS PROC_CD,
+			   A.CONCRT_NM AS PROC_NM,
+			   A.QTY_UNIT,
+			   A.ACCOUNT_CD,
+			   A.ITEM_GBN,
+			   '' AS LONGTIME_YN,
+			   '' AS REMARK,
+			   '' AS DRAW_NO,
+			   '' AS ACCOUNT_CD,
+			   '' AS BOX_QTY,
+		       '' AS AUTO_ORDER_GBN,
+		       '' AS MONTH_UNITQTY,
+		       '' AS SAFT_STOCK,
+		       '' AS LEAD_TIME,
+		       '' AS WAREHOUSE_CD,
+		       '' AS LOCATION,
+		       '' AS MAX_STOCK,
+		       '' AS MIN_STOCK
+		  FROM CM_SUBMATERIAL_MASTER A
+		 WHERE A.ITEM_CD = #ITEM_CD#
+		   AND A.BOUT_DT IS NULL
+	</select>
+
+	<select id="selectPdBomDownList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		<include refid="listSearchCol"/>
+			SELECT ROWNUM,
+			       COUNT(*) OVER() AS TOT_CNT, A.*
+			  FROM (
+					SELECT  '0' AS CHK,
+							B.ITEM_CD,
+							B.PLANT_CD,
+							B.PLANT_ITEM_NM AS ITEM_NM,
+							B.PLANT_ITEM_NO AS ITEM_NO,
+							A.PROC_CD,
+							A.PROC_NM,
+							A.QTY_UNIT,
+							A.NET_WGT,
+							A.GROSS_WGT,
+							A.HS_CD,
+							A.REMARK,
+							B.SAFT_STOCK,
+							B.MAINTAIN_DAY,
+							B.MAX_STOCK,
+							B.MIN_STOCK,
+							B.PROC_STND_UNITCOST,
+							B.PROD_STND_UNITCOST,
+							B.ITEM_GBN,
+							C.UNITQTY,
+			                C.PUT_WGT,
+			                C.PROD_WGT
+					  FROM  (
+							SELECT  PLANT_CD,
+								    DN_ITEM_CD,
+								    LEVEL AS ITEM_LVL,
+								    UNITQTY,
+				                    PUT_WGT,
+				                    PROD_WGT
+							  FROM (
+									SELECT *
+								      FROM PD_BOM_MASTER
+								     <isNotEmpty prepend="WHERE" property="CORP_CD">
+								       	CORP_CD = #CORP_CD#
+								     </isNotEmpty>
+								     <isEmpty prepend="WHERE" property="CORP_CD">
+								     	CORP_CD IN ($GV_CORP_CD$)
+								     </isEmpty>
+								     <isNotEmpty prepend="AND" property="PLANT_CD">
+								       	PLANT_CD = #PLANT_CD#
+								     </isNotEmpty>
+								     <isEmpty prepend="AND" property="PLANT_CD">
+								     	PLANT_CD IN ($GV_PLANT_CD$)
+								     </isEmpty>
+								     <![CDATA[AND (END_DT IS NULL OR END_DT >= TO_CHAR(SYSDATE,'YYYYMMDD'))]]>
+								   )
+							  CONNECT BY PRIOR DN_ITEM_CD = UP_ITEM_CD
+							  START WITH UP_ITEM_CD = #ITEM_CD#
+							) C, CM_ITEMCODE_MASTER A, CM_ITEMCODE_PLANT B
+					 WHERE  A.PART_GBN = B.PART_GBN
+					   AND  A.ITEM_CD = B.M_ITEM_CD
+					   <isNotEmpty prepend="AND" property="PLANT_CD">
+					  	B.PLANT_CD = #PLANT_CD#
+					  </isNotEmpty>
+					  <isEmpty prepend="AND" property="PLANT_CD">
+					  	B.PLANT_CD IN ($GV_PLANT_CD$)
+					  </isEmpty>
+					  <isNotEmpty prepend="AND" property="ITEM_GBN">
+						B.ITEM_GBN IN ($ITEM_GBN$)
+					  </isNotEmpty>
+					  <!-- 상품/ 제품 / 유상사급 여부 -->
+					  <isNotEmpty property="ITEM_ADD_YN">
+					  AND ($ITEM_ADD_YN$)
+					  </isNotEmpty>
+					   AND  A.BOUT_DT IS NULL
+					   AND  B.BOUT_DT IS NULL
+					   AND  C.DN_ITEM_CD = B.ITEM_CD
+					   AND  C.PLANT_CD = B.PLANT_CD
+				) A
+		 <include refid="listSearchWhr"/>
+	</select>
+
+	<select id="selectDaemonList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT SN, PRG_ID, PRG_NM, ARGS, SRV, TO_CHAR(REG_DT,'YYYY-MM-DD HH24:MI') REG_DT,
+				TO_CHAR(START_DT,'YYYY-MM-DD HH24:MI') START_DT,
+				TO_CHAR(END_DT,'YYYY-MM-DD HH24:MI') END_DT,
+				DECODE(STATUS,'Q','Queued','R','Running','S','Success','E','Error','Unknown') STATUS, RESULT_MSG, USE_YN, USER_ID
+		  FROM DAEMON_INFO
+		 WHERE REG_DT &gt; SYSDATE -1
+		   AND PRG_ID IN ($PRG_ID$)
+		 ORDER BY REG_DT DESC NULLS LAST
+	</select>
+
+	<select id="selectEmpList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		<include refid="listSearchCol"/>
+			SELECT ROWNUM,
+			       COUNT(*) OVER() AS TOT_CNT, A.*
+			  FROM (
+					SELECT 	*
+					  FROM  (
+							SELECT	A.EMP_NO,				A.EMP_NM_KR,				A.EMP_NM_EN,				A.EMP_NM_CN,
+									A.EMP_FILE_NM,			A.EMP_FILE_PATH,			A.GENDER,					A.JUMIN_NO1,
+									A.JUMIN_NO2,			A.PASSPORT,					A.BIRTH_DATE,				A.BIRTH_DIVIDE,
+									A.EMP_STATUS,			A.SALARY_DIVIDE,			A.EMP_ACCOUNT,				A.HIRED_DATE,
+									A.HIRED_DIVIDE,			A.CAREER_RECOG_YEARS,		A.FINAL_PROMTN_DATE,		A.PBTN_CPLT_DATE,
+									A.RETM_DATE,			A.FINAL_APPOINT_DATE,		A.DRT_INDRT_CD,				A.WORK_CD,
+									A.CORP_CD,				A.PLANT_CD,					A.DEPT_CD,					A.RANK_CD,
+									A.POSITION_CD,			A.JOB_CD,					A.LABOR_UNION,				A.RETM_M_CAL_DATE,
+									A.RETM_M_CAL_NUM,		A.NATIONALITY,				A.FAMILY_REG,				A.FAMILY_REG_POST,
+									A.JUMIN_ADDR,			A.JUMIN_ADDR_POST,			A.JUMIN_ADDR_TEL,			A.CURR_ADDR,
+									A.CURR_ADDR_POST,		A.CURR_ADDR_TEL,			A.HOUSE_DIVIDE,				A.EXT_TEL,
+									A.TEL,					A.CELLULAR,					A.EMGC_TEL,					A.EMAIL,
+									A.RELIGION,				A.MARRIED,					A.WEDDING_ANNI,				A.HOBBY,
+									A.SPECIALTY,			A.MLTY_SRV,					A.MLTY_SRV_STATUS,			A.MLTY_TYPE,
+									A.MLTY_RANK,			A.MLTY_BRANCH,				A.MLTY_SQ,					A.MLTY_S_DATE,
+									A.MLTY_E_DATE,			A.MLTY_DISCHG_RESN,			A.MLTY_EXCEP_RESN,			A.PAT_VET_DIVIDE,
+									A.PAT_VET_RELTN,		A.PAT_VET_NO,				A.RETM_NOTIFY_DATE,			A.PAT_VET_NOTE,
+									A.DISAB_YN,				A.DISAB_TYPE,				A.DISAB_DEGREE,				A.DISAB_RECOG_DATE,
+									A.DISAB_CLASS,			A.DISAB_NOTE,				A.HEIGHT,					A.WEIGHT,
+									A.EYESIGHT_L,			A.EYESIGHT_R,				A.COLOR_BLIND,				A.BLOOD_TYPE,
+									A.REG_USER_ID,			A.REG_DT,					A.MOD_USER_ID,				A.MOD_DT,
+									A.REHIRED_DATE,			A.RANK_SORT_ORDER,			A.EMP_NM_JP,				A.RETM_RSON,
+									A.PAT_VET_YN,			A.IF_MAN_NO,				A.IF_RCRT_NO,				A.HIRED_CORP_CD,
+									A.HIRED_TYPE,			A.HIRED_LOCAL,				A.EMGC_REL,					B.CORP_NM,
+									B.ABBR_CORP_NM,			C.PLANT_NM,					D.DEPT_NM,
+									DECODE('$GV_LANG_CODE$', 'KR', A.EMP_NM_KR, 'EN', A.EMP_NM_EN, 'CN', A.EMP_NM_CN, 'JP', A.EMP_NM_JP, '') AS EMP_NM
+							  FROM	EMP_MASTER A, CM_CORP_MASTER B, CM_PLANT_MASTER C, CM_DEPT_MASTER D
+							 WHERE	A.CORP_CD  = B.CORP_CD(+)
+							   AND  A.CORP_CD  = C.CORP_CD (+)
+							   AND  A.PLANT_CD = C.PLANT_CD(+)
+							   AND  A.DEPT_CD  = D.DEPT_CD(+)
+					  		)
+					 WHERE  1=1
+					 <isNotEmpty prepend="AND" property="IS_EMP_STATUS">
+					 	<isEqual property="IS_EMP_STATUS" compareValue="Y">
+					   		EMP_STATUS != '9'
+					   	</isEqual>
+					 </isNotEmpty>
+					 <isNotEmpty property="IS_AUTH_YN">
+					 	<isEqual property="IS_AUTH_YN" compareValue="Y">
+						   	AND CORP_CD IN ($GV_CORP_CD$)
+						   	AND PLANT_CD IN ($GV_PLANT_CD$)
+						</isEqual>
+					 </isNotEmpty>
+					 <isNotEmpty prepend="AND" property="EMP_NO">
+					 	EMP_NO LIKE #EMP_NO#||'%'
+					 </isNotEmpty>
+					 <isNotEmpty prepend="AND" property="EMP_NM">
+					 	EMP_NM LIKE #EMP_NM#||'%'
+					 </isNotEmpty>
+					 <isNotEmpty prepend="AND" property="empList">
+			 	 		<iterate prepend="EMP_NO IN" property="empList" open="(" close=")" conjunction=",">
+			                <![CDATA[    #empList[]#      ]]>
+			            </iterate>
+					 </isNotEmpty>
+				) A
+		 <include refid="listSearchWhr"/>
+	</select>
+
+	<select id="selectPartnerList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		<include refid="listSearchCol"/>
+			SELECT ROWNUM,
+			       COUNT(*) OVER() AS TOT_CNT, A.*
+			  FROM (
+					SELECT 	*
+					  FROM  (
+							SELECT  SID,
+							        EMP_NO,
+							        DECODE('$GV_LANG_CODE$', 'KR', EMP_NM_KR, 'EN', EMP_NM_EN, 'CN', EMP_NM_CN, 'JP', EMP_NM_JP, '') AS EMP_NM,
+							        EMP_NM_KR,
+							        EMP_NM_EN,
+							        EMP_NM_CN,
+							        EMP_NM_JP,
+							        CORP_CD,
+							        CORP_NM,
+							        PLANT_CD,
+							        DEPT_CD,
+							        DEPT_NM,
+							        POSITION_CD,
+							        POSITION_NM,
+							        RANK_CD,
+							        RANK_NM,
+							        EMAIL,
+							        STATUS,
+							        LAST_ACCESS_DATETIME,
+							        REG_USER_ID,
+							        REG_DATE,
+							        MOD_USER_ID,
+							        MOD_DATE,
+							        USE_LANG_CODE,
+							        CELLULAR,
+							        EXT_TEL,
+							        PASSWD_MOD_DT,
+							        PTNR
+							  FROM CM_USER
+					  		)
+					 WHERE  CORP_CD IN ($GV_CORP_CD$)
+					   AND  PLANT_CD IN ($GV_PLANT_CD$)
+					 <isNotEmpty prepend="AND" property="EMP_NO">
+					 	EMP_NO LIKE #EMP_NO#||'%'
+					 </isNotEmpty>
+					 <isNotEmpty prepend="AND" property="EMP_NM">
+					 	EMP_NM LIKE #EMP_NM#||'%'
+					 </isNotEmpty>
+					 AND PTNR = 'Y'
+				) A
+		 <include refid="listSearchWhr"/>
+	</select>
+
+	<resultMap id="bbsResultMap" class="java.util.HashMap">
+		<result property="GUID"            column="GUID"/>
+		<result property="BBS_TYPE"        column="BBS_TYPE"/>
+		<result property="VIEW_TARGET_GBN" column="VIEW_TARGET_GBN"/>
+		<result property="VIEW_TARGET"     column="VIEW_TARGET" jdbcType="CLOB" javaType="java.lang.String"/>
+		<result property="VIEW_TARGET_NM"  column="VIEW_TARGET_NM" jdbcType="CLOB" javaType="java.lang.String"/>
+		<result property="BBS_NO"          column="BBS_NO"/>
+		<result property="BBS_TITLE"       column="BBS_TITLE"/>
+		<result property="BBS_CONT"        column="BBS_CONT"  jdbcType="CLOB" javaType="java.lang.String"/>
+		<result property="UP_BBS_NO"       column="UP_BBS_NO"/>
+		<result property="NOTI_START_DT"   column="NOTI_START_DT"/>
+		<result property="NOTI_END_DT"     column="NOTI_END_DT"/>
+		<result property="NOTI_POPUP_GBN"  column="NOTI_POPUP_GBN"/>
+		<result property="NOTI_POPUP_CAT"  column="NOTI_POPUP_CAT"/>
+		<result property="IMG_PATH"        column="IMG_PATH"/>
+		<result property="DEL_YN"          column="DEL_YN"/>
+		<result property="REG_USER_ID"     column="REG_USER_ID"/>
+		<result property="REG_DT"          column="REG_DT"/>
+		<result property="MOD_USER_ID"     column="MOD_USER_ID"/>
+		<result property="MOD_DT"          column="MOD_DT"/>
+		<result property="REG_USER_NM"     column="REG_USER_NM"/>
+	</resultMap>
+
+	<!-- 내부공지사항 로그인전 팝업 -->
+	<select id="selectNoticeLoginPreList" parameterClass="java.util.Map" resultMap="bbsResultMap">
+		<![CDATA[
+		SELECT	GUID,
+				BBS_TYPE,
+				VIEW_TARGET_GBN,
+				VIEW_TARGET,
+				VIEW_TARGET_NM,
+				BBS_NO,
+				BBS_TITLE,
+				BBS_CONT,
+				UP_BBS_NO,
+				NOTI_START_DT,
+				NOTI_END_DT,
+				NOTI_POPUP_GBN,
+				NOTI_POPUP_CAT,
+				IMG_PATH,
+				DEL_YN,
+				REG_USER_ID,
+				TO_CHAR(REG_DT, 'YYYY-MM-DD') AS REG_DT,
+				MOD_USER_ID,
+				TO_CHAR(MOD_DT, 'YYYY-MM-DD') AS MOD_DT,
+				(SELECT DECODE('$GV_LANG_CODE$', 'KR', EMP_NM_KR, 'EN', EMP_NM_EN, 'CN', EMP_NM_CN, 'JP', EMP_NM_JP, '') AS EMP_NM
+						   FROM CM_USER WHERE SID = CM_BBS.REG_USER_ID) AS REG_USER_NM
+		  FROM 	CM_BBS
+		 WHERE 	BBS_TYPE = '1'
+		   AND 	NOTI_POPUP_GBN = '2'
+		   AND 	NOTI_END_DT >= TO_CHAR(SYSDATE, 'YYYYMMDD')
+		   AND 	DEL_YN = 'N'
+		]]>
+	</select>
+
+	<!-- 내부공지사항 로그인후 팝업 -->
+	<select id="selectNoticeLoginPostList" parameterClass="java.util.Map" resultMap="bbsResultMap">
+		<![CDATA[
+		SELECT 	GUID,
+				BBS_TYPE,
+				VIEW_TARGET_GBN,
+				VIEW_TARGET,
+				VIEW_TARGET_NM,
+				BBS_NO,
+				BBS_TITLE,
+				BBS_CONT,
+				UP_BBS_NO,
+				NOTI_START_DT,
+				NOTI_END_DT,
+				NOTI_POPUP_GBN,
+				NOTI_POPUP_CAT,
+				IMG_PATH,
+				DEL_YN,
+				REG_USER_ID,
+				TO_CHAR(REG_DT, 'YYYY-MM-DD') AS REG_DT,
+				MOD_USER_ID,
+				TO_CHAR(MOD_DT, 'YYYY-MM-DD') AS MOD_DT,
+				(SELECT DECODE('$GV_LANG_CODE$', 'KR', EMP_NM_KR, 'EN', EMP_NM_EN, 'CN', EMP_NM_CN, 'JP', EMP_NM_JP, '') AS EMP_NM
+ 					   FROM CM_USER WHERE SID = CM_BBS.REG_USER_ID) AS REG_USER_NM
+		  FROM 	CM_BBS
+		 WHERE 	BBS_TYPE = '1'
+		   AND 	NOTI_POPUP_GBN = '3'
+		   AND 	NOTI_END_DT >= TO_CHAR(SYSDATE, 'YYYYMMDD')
+		   AND 	DEL_YN = 'N'
+		]]>
+	</select>
+
+	<select id="selectFinanceList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+	   SELECT	TRSPCODE ,
+				TRSPNAME ,
+				TRSPABBR ,
+				EXTRCLSS ,
+				TRSPCLSS ,
+				BSNO     ,
+				RENM     ,
+				TELENO1  ,
+				TELENO2  ,
+				FAX_NO1  ,
+				FAX_NO2  ,
+				TLX_NO   ,
+				ZIP_CODE1,
+				ZIP_CODE2,
+				ADDR1    ,
+				ADDR2    ,
+				ADMR     ,
+				OFICPOS  ,
+				DEPTNAME ,
+				WORKCODE ,
+				WORKCLAS
+	      FROM	CXDATLIB.CX02PF
+	     WHERE 1=1
+	     <isNotEmpty property="CODE">
+	     	AND TRSPCODE LIKE '%$CODE$%'
+	     </isNotEmpty>
+	     <isNotEmpty property="NAME">
+	     	AND TRSPNAME LIKE '%$NAME$%'
+	     </isNotEmpty>
+	     <isNotEmpty property="BSNO">
+	     	AND BSNO LIKE '%$BSNO$%'
+	     </isNotEmpty>
+	     <isNotEmpty property="RENM">
+	     	AND RENM LIKE '%$RENM$%'
+	     </isNotEmpty>
+		ORDER BY TRSPCODE
+	</select>
+
+	<select id="selectPdworkerLineList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT '0' AS CHK,
+			   A.WORKER_EMP,
+			   A.WORKER_NM,
+			   A.LINE_CD,
+			   B.LINE_NM
+		  FROM PD_WORKER A, CM_LINE_MASTER B
+		 WHERE A.LINE_CD = B.LINE_CD
+		   AND A.CORP_CD IN ($GV_CORP_CD$)
+		 <isNotEmpty property="PLANT_CD">
+		   AND A.PLANT_CD = #PLANT_CD#
+		 </isNotEmpty>
+		 <isNotEmpty property="CODE">
+	     	AND WORKER_EMP LIKE '%'||#CODE#||'%'
+	     </isNotEmpty>
+	     <isNotEmpty property="VALUE">
+	     	AND WORKER_NM LIKE '%'||#VALUE#||'%'
+	     </isNotEmpty>
+	</select>
+
+	<!-- 구매 경비예산 - 재무 정보 조회  -->
+	<select id="selectFiStatement" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT
+		     A.CORPCD1 AS CORP_CD
+		    , A.CORPCD1 || A.CORPCD2 AS PLANT_CD
+		    , SUBSTR(A.TRSDATE, 1,6) BDGT_YYYYMM
+		    , A.PARTCODE AS BDGT_DEPT_CD        	/* 예산부서   */
+		    , A.DEPTCODE AS LINE_CD              		/* 라인코드   */
+		    , A.ACNTCODE AS ACCOUNT_CD          /* 계정코드   */
+		    , A.AMTM AS USE_AMT                 		/* 사용금액   */
+		    , A.HTRSDATE AS FI_DATE             		/* 회계일자   */
+		    , A.HSLIPNO AS FI_NO                			/* 회계번호   */
+		    , A.HSEQ AS FI_SN                   			/* 회계항번   */
+		    , A.SLIPTYPE AS STATEMENT_GBN       	/* 전표구분   */
+		    , A.CLSSDRCR AS CLASS_GBN           	/* 차대구분(1.차변  2.대변)  */
+		    , A.TRSPCODE AS SUPPLY_CD           	/* 거래처       */
+		    , A.EMPLNO  AS EMP_NO               		/* 사번          */
+		    , A.ITEMCODE AS ITEM_CD             		/* 품목코드    */
+		    , A.TRSDATE AS STATEMENT_DATE       	/* 전표일자    */
+		    , A.SLIPNO AS STATEMENT_NO         		/* 전표번호    */
+		    , A.SEQ AS STATEMENT_SN             		/* 전표항번    */
+		    , A.GUBUN CREATE_GBN                		/* 생성구분(1. 전표,  2. 오라클, 3. 입력)  */
+		    , A.DESC AS REMARK                  			/* 비고  */
+		    /*   char(substr(char(current timestamp - 1 day),1,4) || substr(char(current timestamp - 1 day),6, 2) || substr(char(current timestamp - 1 day),9, 2))  */
+		FROM IADATLIB.IA09LF02 A
+		 WHERE  A.TRSDATE BETWEEN #START_DT# AND #END_DT#
+		 AND A.CORPCD1 = #CORPCD1#
+		 AND A.CORPCD2 = #CORPCD2#
+		 AND A.GUBUN = '1'
+		 AND ((A.PARTCODE = '110' AND (A.ACNTCODE = '43130' OR A.ACNTCODE = '43200' OR A.ACNTCODE = '43270' OR A.ACNTCODE = '43830'))
+		  OR  (A.PARTCODE = '641' AND A.ACNTCODE = '43590')
+		  OR  (A.PARTCODE = '220' AND (A.ACNTCODE = '43690' OR A.ACNTCODE = '43960'))
+		  OR  (A.ACNTCODE BETWEEN '50000' AND '99999'))
+		 AND (A.PARTCODE NOT IN ('130','160') OR A.ACNTCODE = '53130')
+	</select>
+
+
+	<select id="selectCmCodeMapBeforeList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT '0' AS CHK,
+			   A.LANG_CODE,
+		       A.MASTER_CODE,
+		       A.MASTER_CODE_NM,
+		       A.CODE,
+		       A.P_MASTER_CODE,
+       		   A.P_CODE,
+		       NVL(B.ABBR_CODE_NM, NVL(A.ABBR_CODE_NM, A.CODE_NM)) AS  ABBR_CODE_NM,
+			   NVL(B.SORT_ORDER, A.SORT_ORDER) SORT_ORDER,
+			   B.I, B.D, B.G, B.V, B.A,
+			   B.E, B.F, B.H, B.J, B.O,
+			   B.T, B.U, B.W
+		  FROM (
+		        SELECT  C.LANG_CODE, MC.MASTER_CODE,
+		                DECODE('$GV_LANG_CODE$', 'KR', MC.MASTER_NM_KR, 'CN', MC.MASTER_NM_CN, 'EN', MC.MASTER_NM_EN, 'JP', MC.MASTER_NM_JP) MASTER_CODE_NM,
+		                C.CODE, C.ABBR_CODE_NM, C.CODE_NM, C.SORT_ORDER,C.P_MASTER_CODE,C.P_CODE
+		            FROM CM_MASTER_CODE MC, CM_CODE C
+		            WHERE MC.MASTER_CODE = C.MASTER_CODE
+		        ) A,
+		        (
+		        SELECT LANG_CODE,  MASTER_CODE, CODE, ABBR_CODE_NM, SORT_ORDER,
+		               MAX(V) V, MAX(D) D, MAX(G) G, MAX(I) I, MAX(A) A, MAX(E) E, MAX(F) F,
+		               MAX(H) H, MAX(J) J, MAX(O) O, MAX(T) T, MAX(U) U, MAX(W) W
+		          FROM (
+		                SELECT LANG_CODE,
+		                       MASTER_CODE,
+		                       CODE,
+		                       DECODE(CORP_CD, 'V', DECODE(STATUS, 'Y', '1', '0'), '0') AS V,
+							   DECODE(CORP_CD, 'D', DECODE(STATUS, 'Y', '1', '0'), '0') AS D,
+							   DECODE(CORP_CD, 'G', DECODE(STATUS, 'Y', '1', '0'), '0') AS G,
+							   DECODE(CORP_CD, 'I', DECODE(STATUS, 'Y', '1', '0'), '0') AS I,
+							   DECODE(CORP_CD, 'A', DECODE(STATUS, 'Y', '1', '0'), '0') AS A,
+							   DECODE(CORP_CD, 'E', DECODE(STATUS, 'Y', '1', '0'), '0') AS E,
+							   DECODE(CORP_CD, 'F', DECODE(STATUS, 'Y', '1', '0'), '0') AS F,
+							   DECODE(CORP_CD, 'H', DECODE(STATUS, 'Y', '1', '0'), '0') AS H,
+							   DECODE(CORP_CD, 'J', DECODE(STATUS, 'Y', '1', '0'), '0') AS J,
+							   DECODE(CORP_CD, 'O', DECODE(STATUS, 'Y', '1', '0'), '0') AS O,
+							   DECODE(CORP_CD, 'T', DECODE(STATUS, 'Y', '1', '0'), '0') AS T,
+							   DECODE(CORP_CD, 'U', DECODE(STATUS, 'Y', '1', '0'), '0') AS U,
+							   DECODE(CORP_CD, 'W', DECODE(STATUS, 'Y', '1', '0'), '0') AS W,
+		                       ABBR_CODE_NM,
+		                       SORT_ORDER
+		                  FROM CM_CODE_MAP
+		                 WHERE 1=1
+		                  <isNotEmpty prepend="AND" property="LANG_CODE">
+					   		LANG_CODE = #LANG_CODE#
+					      </isNotEmpty>
+					      <isNotEmpty prepend="AND" property="MASTER_CODE">
+					   		MASTER_CODE = #MASTER_CODE#
+					      </isNotEmpty>
+		                )
+		        GROUP BY LANG_CODE,  MASTER_CODE, CODE, ABBR_CODE_NM, SORT_ORDER
+		        ) B
+		 WHERE A.MASTER_CODE = B.MASTER_CODE(+)
+		   AND A.LANG_CODE = B.LANG_CODE(+)
+		   AND A.CODE = B.CODE(+)
+		<isNotEmpty prepend="AND" property="LANG_CODE">
+	   		A.LANG_CODE = #LANG_CODE#
+	    </isNotEmpty>
+	    <isNotEmpty prepend="AND" property="MASTER_CODE">
+	   		A.MASTER_CODE = #MASTER_CODE#
+	    </isNotEmpty>
+	    <isNotEmpty prepend="AND" property="P_MASTER_CODE">
+	   		A.P_MASTER_CODE = #P_MASTER_CODE#
+	    </isNotEmpty>
+	    <isNotEmpty prepend="AND" property="P_CODE">
+	   		A.P_CODE = #P_CODE#
+	    </isNotEmpty>
+		ORDER BY A.MASTER_CODE, A.CODE
+
+	</select>
+
+	<select id="selectCmCustomerSalesList" parameterClass="map"  resultClass="hashmap">
+		SELECT	DISTINCT '0' AS CHK,
+				A.CUST_CD,
+				A.CUST_CD,
+				A.CUST_NM,
+				A.CUST_NM_ABBR,
+				A.CUST_NM_EN,
+				A.OWNER_NM,
+				A.CUST_GROUP_CD,
+				A.BIZ_REG_NO,
+				A.MINOR_BIZ_REG_NO,
+				A.RES_REG_NO,
+				A.TEL_NO,
+				A.TEL_NO_EN,
+				A.HP_NO,
+				A.FAX_NO,
+				A.EMAIL,
+				A.POST_NO,
+				A.ADDR,
+				A.PLANT_ADDR,
+				A.ADDR_EN,
+				A.BANK_CD,
+				A.BANK_ACCOUNT_NO,
+				A.BIZ_KIND,
+				A.BIZ_TYPE,
+				A.SALE_YN,
+				A.OUTS_YN,
+				A.PUR_YN,
+				A.RELATE_YN,
+				A.START_DT,
+				A.END_DT,
+				A.SALE_EMP,
+				A.CREDIT_LMT,
+				A.NATION_CD,
+				A.ATTN_INFO,
+				A.ACCOUNT_ADD_INFO,
+				A.BOX_REMARK,
+				A.REMARK,
+				A.RELATE_GBN,
+				A.INSUR_YN,
+				A.CUSTOMS_YN,
+				A.CUSTOMS_FEE,
+				A.FI_CUST_CD,
+				A.EDI_ID,
+				A.LANG_CODE,
+				A.REG_USER_ID,
+				A.REG_DT,
+				A.MOD_USER_ID,
+				A.MOD_DT
+		 FROM	CM_CUSTOMER_MASTER A, SM_SALES_UNITCOST B
+		WHERE   1=1
+     	 AND A.CUST_CD = B.CUST_CD
+		 <isNotEmpty prepend="AND" property="CODE">
+		 	A.CUST_CD LIKE '%'||#CODE#||'%'
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="VALUE">
+		 	A.CUST_NM LIKE '%'||#VALUE#||'%'
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="NAME">
+		 	UPPER(A.CUST_NM) LIKE '%'||#NAME#||'%'
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="SALE_YN">
+		 	A.SALE_YN = #SALE_YN#
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="ITEM_CD">
+		 	B.ITEM_CD = #ITEM_CD#
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="PLANT_CD">
+		  	B.PLANT_CD = #PLANT_CD#
+		  </isNotEmpty>
+		  <isEmpty prepend="AND" property="PLANT_CD">
+		  	B.PLANT_CD IN ($GV_PLANT_CD$)
+		  </isEmpty>
+ 		  <isNotEmpty prepend="AND" property="OVER_CUST_YN">
+		 	A.NATION_CD != 'KR'
+		  </isNotEmpty>
+		  AND A.LANG_CODE = 'KR'
+		  ORDER BY A.CUST_CD
+	</select>
+
+	<select id="selectCmCustomerSalesPlanList" parameterClass="map"  resultClass="hashmap">
+		SELECT	DISTINCT '0' AS CHK,
+				A.CUST_CD,
+				CUST_NM,
+				CUST_NM_ABBR,
+				CUST_NM_EN,
+				OWNER_NM,
+				CUST_GROUP_CD,
+				BIZ_REG_NO,
+				MINOR_BIZ_REG_NO,
+				RES_REG_NO,
+				TEL_NO,
+				TEL_NO_EN,
+				HP_NO,
+				FAX_NO,
+				EMAIL,
+				POST_NO,
+				ADDR,
+				PLANT_ADDR,
+				ADDR_EN,
+				BANK_CD,
+				BANK_ACCOUNT_NO,
+				BIZ_KIND,
+				BIZ_TYPE,
+				SALE_YN,
+				OUTS_YN,
+				PUR_YN,
+				RELATE_YN,
+				START_DT,
+				A.END_DT,
+				SALE_EMP,
+				CREDIT_LMT,
+				NATION_CD,
+				ATTN_INFO,
+				ACCOUNT_ADD_INFO,
+				BOX_REMARK,
+				REMARK,
+				RELATE_GBN,
+				INSUR_YN,
+				CUSTOMS_YN,
+				CUSTOMS_FEE,
+				FI_CUST_CD,
+				EDI_ID,
+				A.LANG_CODE,
+				A.REG_USER_ID,
+				A.REG_DT,
+				A.MOD_USER_ID,
+				A.MOD_DT
+		 FROM	CM_CUSTOMER_MASTER A, SM_PLAN_UNITCOST B
+		WHERE   1=1
+     	 AND A.CUST_CD = B.CUST_CD
+		 <isNotEmpty prepend="AND" property="CODE">
+		 	A.CUST_CD LIKE '%'||#CODE#||'%'
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="VALUE">
+		 	A.CUST_NM LIKE '%'||#VALUE#||'%'
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="NAME">
+		 	UPPER(A.CUST_NM) LIKE '%'||#NAME#||'%'
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="SALE_YN">
+		 	A.SALE_YN = #SALE_YN#
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="ITEM_CD">
+		 	B.ITEM_CD = #ITEM_CD#
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="PLANT_CD">
+		  	B.PLANT_CD = #PLANT_CD#
+		  </isNotEmpty>
+		  <isEmpty prepend="AND" property="PLANT_CD">
+		  	B.PLANT_CD IN ($GV_PLANT_CD$)
+		  </isEmpty>
+		 AND A.LANG_CODE = 'KR'
+		 ORDER BY A.CUST_CD
+	</select>
+
+	<select id="selectCmItemcodeListForSale" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		<include refid="listSearchCol"/>
+			SELECT ROWNUM,
+			       COUNT(*) OVER() AS TOT_CNT, A.*
+			  FROM (
+			  		SELECT DISTINCT '0' AS CHK,
+						  B.ITEM_CD,
+						  B.PLANT_CD,
+						  B.PLANT_ITEM_NM AS ITEM_NM,
+						  B.PLANT_ITEM_NO AS ITEM_NO,
+						  A.TYPE_CD,
+						  A.TYPE_NM,
+						  A.PROC_CD,
+						  A.PROC_NM,
+						  A.QTY_UNIT,
+						  A.NET_WGT,
+						  A.GROSS_WGT,
+						  A.HS_CD,
+						  A.REMARK,
+						  A.UNIT_WGT,
+						  B.SAFT_STOCK,
+						  B.MAINTAIN_DAY,
+						  B.MAX_STOCK,
+						  B.MIN_STOCK,
+						  B.PROC_STND_UNITCOST,
+						  B.PROD_STND_UNITCOST,
+						  B.ITEM_GBN,
+						  B.LONGTIME_YN,
+						  B.MERCH_YN,		<!-- 상품여부 -->
+						  B.PROD_YN,		<!-- 제품여부 -->
+						  B.SUPPLY_MATRL_YN	<!-- 유상사급여부 -->
+					 FROM CM_ITEMCODE_MASTER A, CM_ITEMCODE_PLANT B, SM_SALES_UNITCOST C
+					WHERE A.PART_GBN = B.PART_GBN
+					  AND A.ITEM_CD = C.ITEM_CD
+		              AND B.ITEM_CD = C.ITEM_CD
+		              AND B.PLANT_CD = C.PLANT_CD
+					  AND A.ITEM_CD = B.M_ITEM_CD
+					  <isNotEmpty prepend="AND" property="PLANT_CD">
+					  	B.PLANT_CD = #PLANT_CD#
+					  </isNotEmpty>
+					  <isEmpty prepend="AND" property="PLANT_CD">
+					  	B.PLANT_CD IN ($GV_PLANT_CD$)
+					  </isEmpty>
+					  <isNotEmpty prepend="AND" property="ITEM_GBN">
+						B.ITEM_GBN IN ($ITEM_GBN$)
+					  </isNotEmpty>
+					  <!-- 상품/ 제품 / 유상사급 여부 -->
+					  <isNotEmpty property="ITEM_ADD_YN">
+					  AND ($ITEM_ADD_YN$)
+					  </isNotEmpty>
+					  AND A.BOUT_DT IS NULL
+					  AND B.BOUT_DT IS NULL
+					  AND C.END_DT IS NULL
+					  AND C.DEL_YN = 'N'
+					  <isNotEmpty prepend="AND" property="CUST_CD">
+					 	C.CUST_CD = #CUST_CD#
+					 </isNotEmpty>
+					  <isNotEmpty prepend="AND" property="CONDITION">
+					  		UPPER(B.ITEM_CD||B.PLANT_ITEM_NM||B.PLANT_ITEM_NO||A.PROC_CD|| A.PROC_NM) LIKE '%'||#CONDITION#||'%'
+					  </isNotEmpty>
+					ORDER BY B.ITEM_CD
+				) A
+		 <include refid="listSearchWhr"/>
+	</select>
+
+	<select id="selectCmItemcodeListForSalePlan" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		<include refid="listSearchCol"/>
+			SELECT ROWNUM,
+			       COUNT(*) OVER() AS TOT_CNT, A.*
+			  FROM (
+			  		SELECT DISTINCT '0' AS CHK,
+						  B.ITEM_CD,
+						  B.PLANT_CD,
+						  B.PLANT_ITEM_NM AS ITEM_NM,
+						  B.PLANT_ITEM_NO AS ITEM_NO,
+						  A.TYPE_CD,
+						  A.TYPE_NM,
+						  A.PROC_CD,
+						  A.PROC_NM,
+						  A.QTY_UNIT,
+						  A.NET_WGT,
+						  A.GROSS_WGT,
+						  A.HS_CD,
+						  A.REMARK,
+						  B.SAFT_STOCK,
+						  B.MAINTAIN_DAY,
+						  B.MAX_STOCK,
+						  B.MIN_STOCK,
+						  B.PROC_STND_UNITCOST,
+						  B.PROD_STND_UNITCOST,
+						  B.ITEM_GBN,
+						  B.LONGTIME_YN,
+						  B.MERCH_YN,		<!-- 상품여부 -->
+						  B.PROD_YN,		<!-- 제품여부 -->
+						  B.SUPPLY_MATRL_YN	<!-- 유상사급여부 -->
+					 FROM CM_ITEMCODE_MASTER A, CM_ITEMCODE_PLANT B, SM_PLAN_UNITCOST C
+					WHERE A.PART_GBN = B.PART_GBN
+					  AND A.ITEM_CD = C.ITEM_CD
+		              AND B.ITEM_CD = C.ITEM_CD
+		              AND B.PLANT_CD = C.PLANT_CD
+					  AND A.ITEM_CD = B.M_ITEM_CD
+					  <isNotEmpty prepend="AND" property="PLANT_CD">
+					  	B.PLANT_CD = #PLANT_CD#
+					  </isNotEmpty>
+					  <isEmpty prepend="AND" property="PLANT_CD">
+					  	B.PLANT_CD IN ($GV_PLANT_CD$)
+					  </isEmpty>
+					  <isNotEmpty prepend="AND" property="ITEM_GBN">
+						B.ITEM_GBN IN ($ITEM_GBN$)
+					  </isNotEmpty>
+					  <!-- 상품/ 제품 / 유상사급 여부 -->
+					  <isNotEmpty property="ITEM_ADD_YN">
+					  AND ($ITEM_ADD_YN$)
+					  </isNotEmpty>
+					  AND A.BOUT_DT IS NULL
+					  AND B.BOUT_DT IS NULL
+					  AND C.END_DT IS NULL
+					  <isNotEmpty prepend="AND" property="CUST_CD">
+					 	C.CUST_CD = #CUST_CD#
+					 </isNotEmpty>
+					  <isNotEmpty prepend="AND" property="CONDITION">
+					  		UPPER(B.ITEM_CD||B.PLANT_ITEM_NM||B.PLANT_ITEM_NO||A.PROC_CD|| A.PROC_NM) LIKE '%'||#CONDITION#||'%'
+					  </isNotEmpty>
+					ORDER BY B.ITEM_CD
+				) A
+		 <include refid="listSearchWhr"/>
+	</select>
+
+	<select id="selectSsEmpMaster" parameterClass="map" resultClass="hashmap">
+		SELECT EMP_NO, DECODE('$GV_LANG_CODE$','KR',EMP_NM_KR,'CN',EMP_NM_CN,EMP_NM_EN) EMP_NM
+		  FROM EMP_MASTER
+		 WHERE 1=1
+		  <isNotEmpty prepend="AND" property="CODE">
+		  	EMP_NO LIKE '%'||#CODE#||'%'
+		  </isNotEmpty>
+		  <isNotEmpty property="NAME">
+			  <isEqual prepend="AND" property="GV_LANG_CODE" compareValue="EN">
+			  	UPPER(EMP_NM_EN) LIKE '%'||#NAME#||'%'
+			  </isEqual>
+			  <isEqual prepend="AND" property="GV_LANG_CODE" compareValue="CN">
+			  	UPPER(EMP_NM_CN) LIKE '%'||#NAME#||'%'
+			  </isEqual>
+			  <isEqual prepend="AND" property="GV_LANG_CODE" compareValue="KR">
+			  	UPPER(EMP_NM_KR) LIKE '%'||#NAME#||'%'
+			  </isEqual>
+		  </isNotEmpty>
+	</select>
+
+
+	<select id="selectHrEmpMaster" parameterClass="map" resultClass="hashmap">
+		SELECT EMP_NO, DECODE('$GV_LANG_CODE$','KR',EMP_NM_KR,'CN',EMP_NM_CN,EMP_NM_EN) EMP_NM
+		  FROM EMP_MASTER
+		 WHERE EMP_STATUS != '9'
+		  <isNotEmpty prepend="AND" property="NAME">
+		  	EMP_NO LIKE '%'||#NAME#||'%'
+		  </isNotEmpty>
+		  <isNotEmpty property="CODE">
+			  <isEqual prepend="AND" property="GV_LANG_CODE" compareValue="EN">
+			  	EMP_NM_EN LIKE '%'||#CODE#||'%'
+			  </isEqual>
+			  <isEqual prepend="AND" property="GV_LANG_CODE" compareValue="CN">
+			  	EMP_NM_CN LIKE '%'||#CODE#||'%'
+			  </isEqual>
+			  <isEqual prepend="AND" property="GV_LANG_CODE" compareValue="KR">
+			  	EMP_NM_KR LIKE '%'||#CODE#||'%'
+			  </isEqual>
+		  </isNotEmpty>
+	</select>
+
+
+	<select id="selectPtnrList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT 	*
+		  FROM  (
+				SELECT  SID,
+				        EMP_NO,
+				        DECODE('$GV_LANG_CODE$', 'KR', EMP_NM_KR, 'EN', EMP_NM_EN, 'CN', EMP_NM_CN, 'JP', EMP_NM_JP, '') AS EMP_NM,
+				        EMP_NM_KR,
+				        EMP_NM_EN,
+				        EMP_NM_CN,
+				        EMP_NM_JP,
+				        CORP_CD,
+				        CORP_NM,
+				        PLANT_CD,
+				        DEPT_CD,
+				        DEPT_NM,
+				        POSITION_CD,
+				        POSITION_NM,
+				        RANK_CD,
+				        RANK_NM,
+				        EMAIL,
+				        STATUS,
+				        LAST_ACCESS_DATETIME,
+				        REG_USER_ID,
+				        REG_DATE,
+				        MOD_USER_ID,
+				        MOD_DATE,
+				        USE_LANG_CODE,
+				        CELLULAR,
+				        EXT_TEL,
+				        PASSWD_MOD_DT,
+				        PTNR
+				  FROM  CM_USER
+				 WHERE  CORP_CD IN ($GV_CORP_CD$)
+		           AND  PLANT_CD IN ($GV_PLANT_CD$)
+		           AND  PTNR = 'Y'
+		  		)
+		 WHERE  1=1
+		 <isNotEmpty prepend="AND" property="EMP_NO">
+		 	EMP_NO LIKE #EMP_NO#||'%'
+		 </isNotEmpty>
+		 <isNotEmpty prepend="AND" property="EMP_NM">
+		 	EMP_NM LIKE #EMP_NM#||'%'
+		 </isNotEmpty>
+	</select>
+
+	<select id="selectCmCloseHistoryList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT
+				CORP_CD
+				,PLANT_CD
+				,THSYEAR
+				,THSMONT
+				,CLOSE_CAT
+				,CLOSE_START_DT
+				,CLOSE_END_DT
+				,DEL_YN
+				,REG_USER_ID
+				,REG_DATE
+				,MOD_USER_ID
+				,MOD_DATE
+		FROM CM_CLOSE_HISTORY
+		WHERE 1=1
+			<isNotEmpty property="FROM_MONTH">
+				<isNotEmpty property="TO_MONTH">
+				AND	THSYEAR || THSMONT  BETWEEN #FROM_MONTH# AND #TO_MONTH#
+				</isNotEmpty>
+			</isNotEmpty>
+			<isNotEmpty property="CLOSE_CAT">
+				AND CLOSE_CAT = #CLOSE_CAT#
+			</isNotEmpty>
+			AND DEL_YN='N'
+		ORDER BY PLANT_CD,THSYEAR DESC,THSMONT DESC,CLOSE_CAT DESC,CLOSE_START_DT DESC
+	</select>
+
+
+	<!-- 부자재 단가있는 품목 -->
+	<select id="selectSubmaterialUnitCostList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		/* Common.selectSubmaterialUnitCostList  */
+		SELECT '0' AS CHK,
+		       B.ITEM_CD,
+		       B.PLANT_CD,
+		       B.PLANT_ITEM_NM AS ITEM_NM,
+		       B.SIZE_SPEC AS ITEM_NO,
+		       A.CONCRT_CD,
+		       A.CONCRT_NM,
+		       A.QTY_UNIT,
+		       A.ACCOUNT_CD,
+		       A.ITEM_GBN,
+		       B.REMARK,
+		       B.DRAW_NO,
+		       B.BOX_QTY,
+		       B.AUTO_ORDER_GBN,
+		       B.MONTH_UNITQTY,
+		       B.SAFT_STOCK,
+		       B.LEAD_TIME,
+		       B.WAREHOUSE_CD,
+		       B.LOCATION,
+		       B.MAX_STOCK,
+		       B.MIN_STOCK
+		       , B.BOX_CD  AS PROC_CD
+			   , B.BOX_PER_QTY AS PROC_NM
+			   , B.BOX_CD
+			   , B.BOX_PER_QTY
+			   , B.MIN_LOT
+		  FROM CM_SUBMATERIAL_MASTER A, CM_SUBMATERIAL_PLANT B,
+		  	   (
+		  	   	<include refid="listSearchCol"/>
+					SELECT ROWNUM,
+					       A.*
+					  FROM (
+					  		SELECT *
+				              FROM PC_SUBMATRL_UNITCOST_HIS
+				             WHERE CORP_CD IN ( SELECT CORP_CD FROM CM_PLANT_MASTER P
+				                                 WHERE  1 =1
+				                                   <isNotEmpty prepend="AND" property="PLANT_CD">
+												  		PLANT_CD = #PLANT_CD#
+												   </isNotEmpty>
+												   <isEmpty prepend="AND" property="PLANT_CD">
+												  		PLANT_CD IN ($GV_PLANT_CD$)
+												   </isEmpty>
+				                                  )
+				               <isNotEmpty prepend="AND" property="PLANT_CD">
+							  		PLANT_CD = #PLANT_CD#
+							   </isNotEmpty>
+							   <isEmpty prepend="AND" property="PLANT_CD">
+							  		PLANT_CD IN ($GV_PLANT_CD$)
+							   </isEmpty>
+				               <isNotEmpty prepend="AND" property="ITEM_GBN">
+									ITEM_GBN IN ($ITEM_GBN$)
+							   </isNotEmpty>
+				               AND (END_GBN IS NULL OR END_GBN = 'N')
+				               AND TO_CHAR(SYSDATE, 'YYYYMMDD') BETWEEN THSDATE AND NVL(END_DT, TO_CHAR(SYSDATE, 'YYYYMMDD'))
+							) A
+				 <include refid="listSearchWhr"/>
+		  	   ) C
+		 WHERE A.PART_GBN = B.PART_GBN
+		   AND A.ITEM_CD = B.ITEM_CD
+		   <isNotEmpty prepend="AND" property="PLANT_CD">
+		  	B.PLANT_CD = #PLANT_CD#
+		   </isNotEmpty>
+		   <isEmpty prepend="AND" property="PLANT_CD">
+		  	B.PLANT_CD IN ($GV_PLANT_CD$)
+		   </isEmpty>
+		   <isNotEmpty prepend="AND" property="ITEM_GBN">
+			A.ITEM_GBN IN ($ITEM_GBN$)
+		   </isNotEmpty>
+		   AND A.BOUT_DT IS NULL
+		   AND B.BOUT_DT IS NULL
+		   <isNotEmpty prepend="AND" property="CONDITION">
+		  		UPPER(B.ITEM_CD||B.PLANT_ITEM_NM||B.SIZE_SPEC||A.CONCRT_CD|| A.CONCRT_NM) LIKE '%'||#CONDITION#||'%'
+		  </isNotEmpty>
+		  <!-- 연마/재연마 구분 -->
+		  <isNotEmpty prepend="AND" property="POLISH">
+		  	$POLISH$
+		  </isNotEmpty>
+		  AND B.PLANT_CD = C.PLANT_CD
+		  AND A.ITEM_CD = C.ITEM_CD
+		  AND A.ITEM_GBN = C.ITEM_GBN
+	</select>
+
+	<!-- 단가있는 품목 -->
+	<select id="selectCmItemcodeUnitCostList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		/* Common.selectCmItemcodeUnitCostList  */
+		<include refid="listSearchCol"/>
+			SELECT ROWNUM,
+			       COUNT(*) OVER() AS TOT_CNT, A.*
+			  FROM (
+			  		SELECT '0' AS CHK,
+						  B.ITEM_CD,
+						  B.PLANT_CD,
+						  B.PLANT_ITEM_NM AS ITEM_NM,
+						  B.PLANT_ITEM_NO AS ITEM_NO,
+						  A.TYPE_CD,
+						  A.TYPE_NM,
+						  A.PROC_CD,
+						  A.PROC_NM,
+						  A.QTY_UNIT,
+						  A.NET_WGT,
+						  A.GROSS_WGT,
+						  A.HS_CD,
+						  A.REMARK,
+						  B.SAFT_STOCK,
+						  B.MAINTAIN_DAY,
+						  B.MAX_STOCK,
+						  B.MIN_STOCK,
+						  B.PROC_STND_UNITCOST,
+						  B.PROD_STND_UNITCOST,
+						  B.ITEM_GBN,
+						  B.LONGTIME_YN,
+						  B.MERCH_YN,		<!-- 상품여부 -->
+						  B.PROD_YN,		<!-- 제품여부 -->
+						  B.SUPPLY_MATRL_YN	<!-- 유상사급여부 -->
+						 , B.BOX_PER_QTY
+						 , B.BOX_CD
+						 , B.MIN_LOT
+						 , S.PUR_UNITCOST AS ITEM_UNITCOST
+					 FROM CM_ITEMCODE_MASTER A, CM_ITEMCODE_PLANT B, PC_ITEM_UNITCOST_HIS S, PC_ITEM_UNITCOST M
+					WHERE A.PART_GBN = B.PART_GBN
+					  AND A.ITEM_CD = B.M_ITEM_CD
+					  <isNotEmpty prepend="AND" property="PLANT_CD">
+					  	B.PLANT_CD = #PLANT_CD#
+					  </isNotEmpty>
+					  <isEmpty prepend="AND" property="PLANT_CD">
+					  	B.PLANT_CD IN ($GV_PLANT_CD$)
+					  </isEmpty>
+					  <isNotEmpty prepend="AND" property="ITEM_GBN">
+						B.ITEM_GBN IN ($ITEM_GBN$)
+					  </isNotEmpty>
+					  <!-- 상품/ 제품 / 유상사급 여부 -->
+					  <isNotEmpty property="ITEM_ADD_YN">
+					  AND ($ITEM_ADD_YN$)
+					  </isNotEmpty>
+					  AND A.BOUT_DT IS NULL
+					  AND B.BOUT_DT IS NULL
+					  <isNotEmpty prepend="AND" property="CONDITION">
+					  		UPPER(B.ITEM_CD||B.PLANT_ITEM_NM||B.PLANT_ITEM_NO||A.PROC_CD|| A.PROC_NM) LIKE '%'||#CONDITION#||'%'
+					  </isNotEmpty>
+					  AND S.CORP_CD IN ( SELECT CORP_CD FROM CM_PLANT_MASTER P
+													WHERE  1 =1
+													  <isNotEmpty prepend="AND" property="PLANT_CD">
+													  	P.PLANT_CD = #PLANT_CD#
+													  </isNotEmpty>
+													  <isEmpty prepend="AND" property="PLANT_CD">
+													  	P.PLANT_CD IN ($GV_PLANT_CD$)
+													  </isEmpty>
+												)
+					AND B.PLANT_CD = S.PLANT_CD
+					AND B.ITEM_CD = S.ITEM_CD
+					AND B.ITEM_GBN = S.ITEM_GBN
+					AND M.GUID = S.M_GUID
+					AND M.END_DT IS NULL
+					AND M.DEL_YN = 'N'
+					AND TO_CHAR(SYSDATE, 'YYYYMMDD') BETWEEN S.THSDATE AND NVL(S.END_DT, TO_CHAR(SYSDATE, 'YYYYMMDD'))
+					ORDER BY B.ITEM_CD
+				) A
+		 <include refid="listSearchWhr"/>
+	</select>
+
+	<select id="selectPcMakeProcList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT (SELECT CODE_NM FROM CM_CODE T WHERE T.MASTER_CODE = 'IJ000382' AND T.LANG_CODE = '$GV_LANG_CODE$' AND T.CODE = B.CORP_GROUP_CD) GROUP_GBN, CODE PROC_CD, CODE_NM PROC_NM
+		  FROM(
+		        SELECT 'B' AS GROUP_GBN, COMCD2.CODE, COMCD2.CODE_NM
+		          FROM CM_ITEM_COMM COMCD1
+		              ,CM_ITEM_COMM COMCD2
+		        WHERE COMCD1.ITEM_TYPE = '1'
+		           AND COMCD1.CODE_TYPE = 'T'
+		           AND COMCD2.ITEM_TYPE = '1'
+		           AND COMCD2.CODE_TYPE = 'P'
+		           AND COMCD1.GROUP_CD = COMCD2.P_GROUP_CD
+		        GROUP BY COMCD2.CODE, COMCD2.CODE_NM
+		        UNION ALL
+		        SELECT 'C' AS GROUP_GBN, CODE, CODE_NM
+		          FROM CM_ITEM_COMM
+		        WHERE ITEM_TYPE = '2'
+		           AND CODE_TYPE = 'P'
+		        GROUP BY CODE, CODE_NM
+		      ) A,
+		      CM_CORP_MASTER B
+		WHERE 1=1
+		<isNotEmpty property="PLANT_CD">
+		  AND B.CORP_CD = (SELECT CORP_CD FROM CM_PLANT_MASTER WHERE PLANT_CD = #PLANT_CD#)
+		</isNotEmpty>
+		<isNotEmpty property="CODE">
+		  AND A.CODE = #CODE#
+		</isNotEmpty>
+		<isNotEmpty property="NAME">
+		  AND UPPER(A.CODE_NM) = #NAME#
+		</isNotEmpty>
+		  AND A.GROUP_GBN = B.CORP_GROUP_CD
+		GROUP BY B.CORP_GROUP_CD, A.CODE, A.CODE_NM
+		ORDER BY A.CODE ASC
+	</select>
+
+
+	<select id="selectSubmaterialUnitCostCustomerList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		<include refid="listSearchCol"/>
+			SELECT ROWNUM,
+			       A.*
+			  FROM (
+				   SELECT   '0' AS CHK,
+							C.CUST_CD,
+							C.CUST_NM,
+							C.CUST_NM_ABBR,
+							C.CUST_NM_EN,
+							C.OWNER_NM,
+							C.CUST_GROUP_CD,
+							C.BIZ_REG_NO,
+							C.MINOR_BIZ_REG_NO,
+							C.RES_REG_NO,
+							C.TEL_NO,
+							C.TEL_NO_EN,
+							C.HP_NO,
+							C.FAX_NO,
+							C.EMAIL,
+							C.POST_NO,
+							C.ADDR,
+							C.PLANT_ADDR,
+							C.ADDR_EN,
+							C.BANK_CD,
+							C.BANK_ACCOUNT_NO,
+							C.BIZ_KIND,
+							C.BIZ_TYPE,
+							C.SALE_YN,
+							C.OUTS_YN,
+							C.PUR_YN,
+							C.RELATE_YN,
+							C.START_DT,
+							C.END_DT,
+							C.SALE_EMP,
+							C.CREDIT_LMT,
+							C.NATION_CD,
+							C.ATTN_INFO,
+							C.ACCOUNT_ADD_INFO,
+							C.BOX_REMARK,
+							C.REMARK,
+							C.RELATE_GBN,
+							C.INSUR_YN,
+							C.CUSTOMS_YN,
+							C.CUSTOMS_FEE,
+							C.FI_CUST_CD,
+							C.EDI_ID,
+							C.LANG_CODE,
+							C.REG_USER_ID,
+							C.REG_DT,
+							C.MOD_USER_ID,
+							C.MOD_DT
+					 FROM	CM_CUSTOMER_MASTER C
+					WHERE 1=1
+					 <isNotEmpty prepend="AND" property="CODE">
+					 	C.CUST_CD LIKE '%'||#CODE#||'%'
+					 </isNotEmpty>
+					 <isNotEmpty prepend="AND" property="VALUE">
+					 	UPPER(C.CUST_NM) LIKE '%'||#VALUE#||'%'
+					 </isNotEmpty>
+					 <isNotEmpty prepend="AND" property="NAME">
+					 	UPPER(C.CUST_NM) LIKE '%'||#NAME#||'%'
+					 </isNotEmpty>
+					 <isNotEmpty prepend="AND" property="CUST_CD">
+					 	C.CUST_CD LIKE '%'||#CUST_CD#||'%'
+					 </isNotEmpty>
+					 <isNotEmpty prepend="AND" property="CUST_NM_ABBR">
+					 	C.CUST_NM_ABBR LIKE '%'||#CUST_NM_ABBR#||'%'
+					 </isNotEmpty>
+					 <isNotEmpty prepend="AND" property="SALE_YN">
+					 	C.SALE_YN = #SALE_YN#
+					 </isNotEmpty>
+					 <isNotEmpty prepend="AND" property="OUTS_YN">
+					 	C.OUTS_YN = #OUTS_YN#
+					 </isNotEmpty>
+					 <isNotEmpty prepend="AND" property="PUR_YN">
+					 	C.PUR_YN = #PUR_YN#
+					 </isNotEmpty>
+					 <isNotEmpty prepend="AND" property="RELATE_YN">
+					 	C.RELATE_YN = #RELATE_YN#
+					 </isNotEmpty>
+					 <isNotEmpty prepend="AND" property="CUSTOMS_YN">
+					 	C.CUSTOMS_YN = #CUSTOMS_YN#
+					 </isNotEmpty>
+					 <isNotEmpty prepend="AND" property="INSUR_YN">
+					 	C.INSUR_YN = #INSUR_YN#
+					 </isNotEmpty>
+					 <isNotEmpty prepend="AND" property="FORWARD_YN">
+					 	C.FORWARDER_YN = #FORWARD_YN#
+					 </isNotEmpty>
+					 <isNotEmpty prepend="AND" property="CARRIER_YN">
+					 	C.CARRIER_YN = #CARRIER_YN#
+					 </isNotEmpty>
+					 <isNotEmpty prepend="AND" property="RELATE_PLANT_YN">
+					 	C.RELATE_PLANT_CD IN ($GV_PLANT_CD$)
+					 </isNotEmpty>
+					 <isNotEmpty prepend="AND" property="LANG_CODE">
+					 	C.LANG_CODE = #LANG_CODE#
+					 </isNotEmpty>
+					 <isEmpty prepend="AND" property="LANG_CODE">
+					 	C.LANG_CODE = #GV_LANG_CODE#
+					 </isEmpty>
+						AND EXISTS (SELECT *
+					                FROM PC_SUBMATRL_UNITCOST_HIS
+					                WHERE CORP_CD IN ( SELECT CORP_CD FROM CM_PLANT_MASTER P
+					                                    WHERE  1 =1
+					                                   <isNotEmpty prepend="AND" property="PLANT_CD">
+													  		PLANT_CD = #PLANT_CD#
+													   </isNotEmpty>
+													   <isEmpty prepend="AND" property="PLANT_CD">
+													  		PLANT_CD IN ($GV_PLANT_CD$)
+													   </isEmpty>
+					                                  )
+					               <isNotEmpty prepend="AND" property="PLANT_CD">
+								  		PLANT_CD = #PLANT_CD#
+								   </isNotEmpty>
+								   <isEmpty prepend="AND" property="PLANT_CD">
+								  		PLANT_CD IN ($GV_PLANT_CD$)
+								   </isEmpty>
+					               <isNotEmpty prepend="AND" property="ITEM_GBN">
+										ITEM_GBN = #ITEM_GBN#
+								   </isNotEmpty>
+					                 AND (END_GBN IS NULL OR END_GBN = 'N')
+					                 AND TO_CHAR(SYSDATE, 'YYYYMMDD') BETWEEN THSDATE AND NVL(END_DT, TO_CHAR(SYSDATE, 'YYYYMMDD'))
+							       )
+			) A
+		<include refid="listSearchWhr"/>
+	</select>
+
+	<select id="selectUnitcostOrderRate" parameterClass="map" resultClass="hashmap">
+		SELECT CORP_CD
+			   ,PLANT_CD
+			   ,ITEM_GBN
+			   ,ITEM_CD
+			   <isEqual property="TABLE_NAME" compareValue="PC_SUBMATRL_UNITCOST">
+			   ,(SELECT PLANT_ITEM_NM FROM CM_SUBMATERIAL_PLANT WHERE PLANT_CD = M.PLANT_CD AND ITEM_CD=M.ITEM_CD)    AS ITEM_NM
+               ,(SELECT SIZE_SPEC FROM CM_SUBMATERIAL_PLANT WHERE PLANT_CD = M.PLANT_CD AND ITEM_CD=M.ITEM_CD)    AS ITEM_NO
+               </isEqual>
+               <isNotEqual property="TABLE_NAME" compareValue="PC_SUBMATRL_UNITCOST">
+			   ,(SELECT PLANT_ITEM_NM FROM CM_ITEMCODE_PLANT WHERE PLANT_CD = M.PLANT_CD AND ITEM_CD=M.ITEM_CD)    AS ITEM_NM
+               ,(SELECT PLANT_ITEM_NO FROM CM_ITEMCODE_PLANT WHERE PLANT_CD = M.PLANT_CD AND ITEM_CD=M.ITEM_CD)    AS ITEM_NO
+               </isNotEqual>
+               ,M.ORDER_RATE
+               ,M.GUID
+               ,'$TABLE_NAME$' TABLE_NAME
+               ,M.SUPPLY_CD
+               ,(SELECT CUST_NM FROM CM_CUSTOMER_MASTER WHERE CUST_CD=M.SUPPLY_CD AND LANG_CODE = #GV_LANG_CODE# ) AS SUPPLY_NM
+		  FROM $TABLE_NAME$ M
+		 WHERE 1=1
+		   AND CORP_CD = #CORP_CD#
+		   AND PLANT_CD = #PLANT_CD#
+		   <isNotEmpty property="ITEM_GBN">
+		   	AND ITEM_GBN = #ITEM_GBN#
+		   </isNotEmpty>
+		   AND ITEM_CD = #ITEM_CD#
+		   AND END_DT IS NULL
+		   AND (DEL_YN = 'N' OR DEL_YN IS NULL)
+	</select>
+
+	<update id="updateUnitcostOrderRate" parameterClass="java.util.Map">
+		  UPDATE $TABLE_NAME$
+			 SET ORDER_RATE = #ORDER_RATE#
+		   WHERE GUID = #GUID#
+	</update>
+
+	<select id="selectMakeCustCd" parameterClass="map" resultClass="hashmap">
+		SELECT DISTINCT MAKE_CUST_CD CODE,MAKE_CUST_CD VALUE
+		  FROM CM_CAR_MASTER
+		 WHERE MAKE_CUST_CD IS NOT NULL
+		 ORDER BY MAKE_CUST_CD
+	</select>
+
+	<select id="selectCmItemcodeSellUnitCostList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		/* Common.selectCmItemcodeSellUnitCostList  */
+		<include refid="listSearchCol"/>
+			SELECT ROWNUM,
+			       COUNT(*) OVER() AS TOT_CNT, A.*
+			  FROM (
+			  		SELECT '0' AS CHK,
+						  B.ITEM_CD,
+						  B.PLANT_CD,
+						  B.PLANT_ITEM_NM AS ITEM_NM,
+						  B.PLANT_ITEM_NO AS ITEM_NO,
+						  A.TYPE_CD,
+						  A.TYPE_NM,
+						  A.PROC_CD,
+						  A.PROC_NM,
+						  A.QTY_UNIT,
+						  A.NET_WGT,
+						  A.GROSS_WGT,
+						  A.HS_CD,
+						  A.REMARK,
+						  B.SAFT_STOCK,
+						  B.MAINTAIN_DAY,
+						  B.MAX_STOCK,
+						  B.MIN_STOCK,
+						  B.PROC_STND_UNITCOST,
+						  B.PROD_STND_UNITCOST,
+						  B.ITEM_GBN,
+						  B.LONGTIME_YN,
+						  B.MERCH_YN,		<!-- 상품여부 -->
+						  B.PROD_YN,		<!-- 제품여부 -->
+						  B.SUPPLY_MATRL_YN	<!-- 유상사급여부 -->
+						 , B.BOX_PER_QTY
+						 , B.BOX_CD
+						 , B.MIN_LOT
+						 , S.SALE_UNITCOST AS ITEM_UNITCOST
+						 , S.SUPPLY_CD
+                         , (SELECT CUST_NM FROM CM_CUSTOMER_MASTER WHERE CUST_CD= S.SUPPLY_CD AND LANG_CODE = #GV_LANG_CODE# ) AS SUPPLY_NM
+                         , S.CUR_CD
+					 FROM CM_ITEMCODE_MASTER A, CM_ITEMCODE_PLANT B, PC_SELL_UNITCOST_HIS S, PC_SELL_UNITCOST M
+					WHERE A.PART_GBN = B.PART_GBN
+					  AND A.ITEM_CD = B.M_ITEM_CD
+					  AND B.PLANT_CD = #PLANT_CD#
+					  <isNotEmpty prepend="AND" property="SUPPLY_CD">
+					  	S.SUPPLY_CD = #SUPPLY_CD#
+					  </isNotEmpty>
+					  <isNotEmpty prepend="AND" property="ITEM_GBN">
+						B.ITEM_GBN IN ($ITEM_GBN$)
+					  </isNotEmpty>
+					  <!-- 상품/ 제품 / 유상사급 여부 -->
+					  <isNotEmpty property="ITEM_ADD_YN">
+					  AND ($ITEM_ADD_YN$)
+					  </isNotEmpty>
+					  AND A.BOUT_DT IS NULL
+					  AND B.BOUT_DT IS NULL
+					  <isNotEmpty prepend="AND" property="CONDITION">
+					  		B.ITEM_CD||B.PLANT_ITEM_NM||B.PLANT_ITEM_NO||A.PROC_CD|| A.PROC_NM LIKE '%'||#CONDITION#||'%'
+					  </isNotEmpty>
+					  AND S.CORP_CD = ( SELECT CORP_CD FROM CM_PLANT_MASTER P
+													WHERE  P.PLANT_CD = #PLANT_CD# AND ROWNUM = 1
+												)
+					AND B.PLANT_CD = S.PLANT_CD
+					AND B.ITEM_CD = S.ITEM_CD
+					AND B.ITEM_GBN = S.ITEM_GBN
+					AND M.GUID = S.M_GUID
+					AND M.END_DT IS NULL
+					AND M.DEL_YN = 'N'
+					AND TO_CHAR(SYSDATE, 'YYYYMMDD') BETWEEN S.THSDATE AND NVL(S.END_DT, TO_CHAR(SYSDATE, 'YYYYMMDD'))
+					ORDER BY B.ITEM_CD
+				) A
+		 <include refid="listSearchWhr"/>
+	</select>
+
+
+
+	<!-- 회계전산 연동부분  -->
+	<insert id="insertDeptList" parameterClass="java.util.Map">
+		INSERT INTO IEDATLIB.IE01PF
+			(
+			DEPT_CODE,
+			DEPT_NAME,
+			DEPT_PLAC,
+			UPPR_DEPT,
+			HEAD_OFIC)
+			VALUES
+			(
+			#DEPT_CODE#,
+			#DEPT_NAME#,
+			#DEPT_PLAC#,
+			#UPPR_DEPT#,
+			#HEAD_OFIC#
+			)
+	</insert>
+
+		<insert id="insertDeptList2" parameterClass="java.util.Map">
+		INSERT INTO IEDATLIB.IE14PF
+			(
+			DEPT_CODE,
+			PRT_DEPT,
+			DEPT_NAME,
+			DEPT_PLAC,
+			UPPR_DEPT,
+			UPGP_PART,
+			HEAD_OFIC,
+			FULL_NAME
+			)
+			VALUES
+			(
+			#DEPT_CODE#,
+			#PRT_DEPT#,
+			#DEPT_NAME#,
+			#DEPT_PLAC#,
+			#UPPR_DEPT#,
+			#UPGP_PART#,
+			#HEAD_OFIC#,
+			#FULL_NAME#
+			)
+	</insert>
+
+	<insert id="insertBankInfo" parameterClass="java.util.Map">
+		INSERT INTO IEDATLIB.IE44PF
+	(
+		  EMNO,
+		  MTCH,
+		  SPRT_FMLY,
+		  CHLD,
+		  AB_CHLD,
+		  WMNFOLKS,
+		  WMNWORK,
+		  BASE_PAY,
+		  PLNG_ALWN,
+		  SELF_CD,
+		  POSALWN_CD,
+		  CNTSALWN,
+		  DNGRCODE,
+		  ETCALWN1CD,
+		  ETCALWN2CD,
+		  ETCALWN3CD,
+		  ETCALWN4CD,
+		  CARALWNCD,
+		  DONA_DUCT,
+		  BANK,
+		  ACNT_NO
+		)
+		VALUES
+		(
+		  #EMNO#,
+		  #MTCH#,
+		  #SPRT_FMLY#,
+		  #CHLD#,
+		  #AB_CHLD#,
+		  #WMNFOLKS#,
+		  #WMNWORK#,
+		  #BASE_PAY#,
+		  #PLNG_ALWN#,
+		  #SELF_CD#,
+		  #POSALWN_CD#,
+		  #CNTSALWN#,
+		  #DNGRCODE#,
+		  #ETCALWN1CD#,
+		  #ETCALWN2CD#,
+		  #ETCALWN3CD#,
+		  #ETCALWN4CD#,
+		  #CARALWNCD#,
+		  #DONA_DUCT#,
+		  #BANK#,
+		  #ACNT_NO#
+		)
+	</insert>
+
+
+
+		<insert id="insertEmpMaster" parameterClass="java.util.Map">
+		INSERT INTO IEDATLIB.IE04PF
+				(
+				EMNO,
+				NAME_KOR,
+				NAME_CHA,
+				INHB_NO,
+				STS,
+				OFIC_POS,
+				OFIC_LVL,
+				SLRY_TYPE,
+				SLRY_ACNT,
+				WAGE_CD,
+				CORP_CLSS,
+				FACT_CD,
+				ATAH_DEPT,
+				ENTR_YY,
+				ENTR_DATE,
+				APRT_YY,
+				APRT_DATE,
+				FINL_YY,
+				FINL_PMTN,
+				ROP_ZIP,
+				ROP_ADDR,
+				ROP_TEL,
+				CURR_ZIP,
+				CURR_ADDR,
+				CURR_TEL,
+				RSDP_ZIP,
+				RSDP_ADDR,
+				RSDP_TEL,
+				RSDP_CLSS,
+				MLTY_TP,
+				SRV_PRID,
+				FNSV_CLSS,
+				CLSS,
+				SIGHT,
+				HIGHT,
+				WEIGHT,
+				CLR_BLDNS,
+				BLOD_TYPE,
+				LBR_VALD,
+				BOHUN,
+				JANGAE,
+				HOBBY,
+				SPCL_ABTY,
+				RELIGION,
+				QLIF_CD1,
+				QLIF_CD2,
+				QLIF_CD3)
+				VALUES
+				(
+				#EMNO#,
+				#NAME_KOR#,
+				#NAME_CHA#,
+				#INHB_NO#,
+				#STS#,
+				#OFIC_POS#,
+				#OFIC_LVL#,
+				#SLRY_TYPE#,
+				#SLRY_ACNT#,
+				#WAGE_CD#,
+				#CORP_CLSS#,
+				#FACT_CD#,
+				#ATAH_DEPT#,
+				#ENTR_YY#,
+				#ENTR_DATE#,
+				#APRT_YY#,
+				#APRT_DATE#,
+				#FINL_YY#,
+				#FINL_PMTN#,
+				#ROP_ZIP#,
+				#ROP_ADDR#,
+				#ROP_TEL#,
+				#CURR_ZIP#,
+				#CURR_ADDR#,
+				#CURR_TEL#,
+				#RSDP_ZIP#,
+				#RSDP_ADDR#,
+				#RSDP_TEL#,
+				#RSDP_CLSS#,
+				#MLTY_TP#,
+				#SRV_PRID#,
+				#FNSV_CLSS#,
+				#CLSS#,
+				#SIGHT#,
+				#HIGHT#,
+				#WEIGHT#,
+				#CLR_BLDNS#,
+				#BLOD_TYPE#,
+				#LBR_VALD#,
+				#BOHUN#,
+				#JANGAE#,
+				#HOBBY#,
+				#SPCL_ABTY#,
+				#RELIGION#,
+				#QLIF_CD1#,
+				#QLIF_CD2#,
+				#QLIF_CD3#
+				)
+	</insert>
+
+	<insert id="insertAttndncList" parameterClass="java.util.Map">
+		INSERT INTO IEDATLIB.IE23PF
+			(
+			 ATTD_YR_MH,
+			 EMNO,
+			 REC_CLSS,
+			 IE23_CORP,
+			 IE23_DEPT,
+			 IE23_OFLVL,
+			 WK_VA_CAFW,
+			 WK_VA_DATE,
+			 OCCR_MH_VA,
+			 CNSM_MH_VA,
+			 CNSM_YR_VA,
+             CNSM_PHLY,
+             IDLE_DATE,
+             IDLW_DATE,
+             CLSE_DATE,
+             INJ_DATE,
+             EDUC_DATE,
+             INJ_REAL,
+             EDUC_REAL,
+             DILG_REAL,
+             DILG_EXCH,
+             OVR_REAL,
+             OVR_EXCH,
+             PLNG_REAL,
+             PLNG_EXCH,
+             NIGH_REAL,
+             NIGH_EXCH,
+             HOLI_RE_D,
+             HOLI_RE_P,
+             HOLI_EXCH,
+             EXCH_SUM
+			)
+			VALUES
+			(
+			 #ATTD_YR_MH#,
+			 #EMNO#,
+			 #REC_CLSS#,
+			 #IE23_CORP#,
+			 #IE23_DEPT#,
+			 #IE23_OFLVL#,
+			 #WK_VA_CAFW#,
+			 #WK_VA_DATE#,
+			 #OCCR_MH_VA#,
+			 #CNSM_MH_VA#,
+			 #CNSM_YR_VA#,
+             #CNSM_PHLY#,
+             #IDLE_DATE#,
+             #IDLW_DATE#,
+             #CLSE_DATE#,
+             #INJ_DATE#,
+             #EDUC_DATE#,
+             #INJ_REAL#,
+             #EDUC_REAL#,
+             #DILG_REAL#,
+             #DILG_EXCH#,
+             #OVR_REAL#,
+             #OVR_EXCH#,
+             #PLNG_REAL#,
+             #PLNG_EXCH#,
+             #NIGH_REAL#,
+             #NIGH_EXCH#,
+             #HOLI_RE_D#,
+             #HOLI_RE_P#,
+             #HOLI_EXCH#,
+             #EXCH_SUM#
+			)
+	</insert>
+
+	<insert id="inserttPayList" parameterClass="java.util.Map">
+		INSERT INTO IEDATLIB.IE48PF
+			(
+			 SLRY_YR_MH,
+			 EMNO,
+			 IE48_CORP,
+			 IE48_DEPT,
+			 OFIC_LVL,
+			 BASE_PAY,
+			 PLNG_ALWN,
+			 OUT_ALWN,
+             NIGH_ALWN,
+             HOLI_ALWN,
+             PRDT_ALWN,
+             SELF_ALWN,
+             FMLY_ALWN,
+             OF_DY_CD,
+             OF_DY_ALWN,
+             CNTS_CD,
+             CNTS_ALWN,
+             DNGR_CODE,
+             DNGR_ALWN1,
+             DNGR_ALWN2,
+             DNGR_ALWN3,
+             DNGR_ALWN4,
+             WK_VA_ALWN,
+             MH_VA_ALWN,
+             YR_VA_ALWN,
+             IDLE_ALWN,
+             IDLW_ALWN,
+             PHY_ALWN,
+             PVMN_OMMT,
+             ETC_ALWN,
+             ETC_ALWN1,
+             ETC_ALWN2,
+             ETC_ALWN3,
+             ETC_ALWN4,
+             ETC_ALWN5,
+             PRE_ALWN,
+             CAR_ALWN,
+             PAY_SUM,
+             TXA_OBJ_AM,
+             MDINS_CLSS,
+             MDINS_AMTM,
+			 PENS_CLSS,
+			 PENS_AMTM,
+             PENS_GIBU,
+             PENS_TE,
+             RE_AC_PR1,
+             RE_AC_PR2,
+             RE_AC_PR3,
+             RE_AC_DUCT,
+             PVMN_OVR,
+             MDINSU_ADD,
+             LAUN_COST,
+             ETC_DUCT,
+             UNION_FEE,
+             EMPY_INSU,
+             YRVA_DUCT,
+             MHVA_DUCT,
+             LAB_TAX,
+             INHB_TAX,
+             DUCT_SUM,
+             TIME_PAY)
+			VALUES
+			(
+			 #SLRY_YR_MH#,
+			 #EMNO#,
+			 #IE48_CORP#,
+			 #IE48_DEPT#,
+			 #OFIC_LVL#,
+			 #BASE_PAY#,
+			 #PLNG_ALWN#,
+			 #OUT_ALWN#,
+             #NIGH_ALWN#,
+             #HOLI_ALWN#,
+             #PRDT_ALWN#,
+             #SELF_ALWN#,
+             #FMLY_ALWN#,
+             #OF_DY_CD#,
+             #OF_DY_ALWN#,
+             #CNTS_CD#,
+             #CNTS_ALWN#,
+             #DNGR_CODE#,
+             #DNGR_ALWN1#,
+             #DNGR_ALWN2#,
+             #DNGR_ALWN3#,
+             #DNGR_ALWN4#,
+             #WK_VA_ALWN#,
+             #MH_VA_ALWN#,
+             #YR_VA_ALWN#,
+             #IDLE_ALWN#,
+             #IDLW_ALWN#,
+             #PHY_ALWN#,
+             #PVMN_OMMT#,
+             #ETC_ALWN#,
+             #ETC_ALWN1#,
+             #ETC_ALWN2#,
+             #ETC_ALWN3#,
+             #ETC_ALWN4#,
+             #ETC_ALWN5#,
+             #PRE_ALWN#,
+             #CAR_ALWN#,
+             #PAY_SUM#,
+             #TXA_OBJ_AM#,
+             #MDINS_CLSS#,
+             #MDINS_AMTM#,
+			 #PENS_CLSS#,
+			 #PENS_AMTM#,
+             #PENS_GIBU#,
+             #PENS_TE#,
+             #RE_AC_PR1#,
+             #RE_AC_PR2#,
+             #RE_AC_PR3#,
+             #RE_AC_DUCT#,
+             #PVMN_OVR#,
+             #MDINSU_ADD#,
+             #LAUN_COST#,
+             #ETC_DUCT#,
+             #UNION_FEE#,
+             #EMPY_INSU#,
+             #YRVA_DUCT#,
+             #MHVA_DUCT#,
+             #LAB_TAX#,
+             #INHB_TAX#,
+             #DUCT_SUM#,
+             #TIME_PAY#
+			 )
+	</insert>
+
+	<insert id="insertBonusList" parameterClass="java.util.Map">
+		     INSERT INTO IEDATLIB.IE49PF
+			(
+			 CORP_CLSS,
+			 BUNS_YR_MH,
+             BUNS_CLSS,
+             EMNO,
+             NAME,
+             IE49_DEPT,
+             OFIC_LVL,
+             PYMT_RATE,
+             BUNS_RATE,
+             BUNS_AMTM,
+             TAX_LAB,
+             TAX_INHB,
+             TAX_DEPST
+			)
+			VALUES(
+			 #CORP_CLSS#,
+			 #BUNS_YR_MH#,
+             #BUNS_CLSS#,
+             #EMNO#,
+             #NAME#,
+             #IE49_DEPT#,
+             #OFIC_LVL#,
+             #PYMT_RATE#,
+             #BUNS_RATE#,
+             #BUNS_AMTM#,
+             #TAX_LAB#,
+             #TAX_INHB#,
+             #TAX_DEPST#
+			)
+	</insert>
+
+	<delete id="deleteDeptList" parameterClass="java.util.Map">
+		DELETE FROM IEDATLIB.IE01PF
+	</delete>
+
+	<delete id="deleteDeptList2" parameterClass="java.util.Map">
+		DELETE FROM IEDATLIB.IE14PF
+	</delete>
+
+	<delete id="deleteBankInfo" parameterClass="java.util.Map">
+		DELETE FROM IEDATLIB.IE44PF
+	</delete>
+
+	<delete id="deleteEmpMaster" parameterClass="java.util.Map">
+		DELETE FROM IEDATLIB.IE04PF
+	</delete>
+
+	<delete id="deleteAttndnc" parameterClass="java.util.Map">
+		DELETE FROM IEDATLIB.IE23PF
+		WHERE ATTD_YR_MH = #DB2_MONTH#
+	</delete>
+
+	<delete id="deletePay" parameterClass="java.util.Map">
+		DELETE FROM IEDATLIB.IE48PF
+		WHERE SLRY_YR_MH = #DB2_MONTH#
+		AND IE48_CORP = 'V'
+	</delete>
+
+	<delete id="deleteBonus" parameterClass="java.util.Map">
+		DELETE FROM IEDATLIB.IE49PF
+		WHERE BUNS_YR_MH = #DB2_MONTH#
+		AND BUNS_CLSS = '7'
+	</delete>
+
+
+	<!-- 회계전산 연동부분  -->
+
+
+	<!-- 현황 from~to 조건절 -->
+	<sql id="Statistics01">
+		<isNotEmpty property="S_CODE1">
+			<isNotEmpty property="F_CODE1">
+			AND $CODE_COL1$ BETWEEN #S_CODE1# AND #F_CODE1#
+			</isNotEmpty>
+			<isEmpty property="F_CODE1">
+			AND $CODE_COL1$ LIKE '%' || #S_CODE1# || '%'
+			</isEmpty>
+		</isNotEmpty>
+		<isEmpty property="S_CODE1">
+			<isNotEmpty property="F_CODE1">
+			AND $CODE_COL1$ LIKE '%' || #F_CODE1# || '%'
+			</isNotEmpty>
+		</isEmpty>
+
+		<isNotEmpty property="S_NAME1">
+			<isNotEmpty property="F_NAME1">
+			AND $NAME_COL1$ BETWEEN #S_NAME1# AND #F_NAME1#
+			</isNotEmpty>
+			<isEmpty property="F_NAME1">
+			AND $NAME_COL1$ LIKE '%' || #S_NAME1# || '%'
+			</isEmpty>
+		</isNotEmpty>
+		<isEmpty property="S_NAME1">
+			<isNotEmpty property="F_NAME1">
+			AND $NAME_COL1$ LIKE '%' || #F_NAME1# || '%'
+			</isNotEmpty>
+		</isEmpty>
+	</sql>
+
+	<sql id="Statistics02">
+		<isNotEmpty property="S_CODE2">
+			<isNotEmpty property="F_CODE2">
+			AND $CODE_COL2$ BETWEEN #S_CODE2# AND #F_CODE2#
+			</isNotEmpty>
+			<isEmpty property="F_CODE2">
+			AND $CODE_COL2$ LIKE '%' || #S_CODE2# || '%'
+			</isEmpty>
+		</isNotEmpty>
+		<isEmpty property="S_CODE2">
+			<isNotEmpty property="F_CODE2">
+			AND $CODE_COL2$ LIKE '%' || #F_CODE2# || '%'
+			</isNotEmpty>
+		</isEmpty>
+
+		<isNotEmpty property="S_NAME2">
+			<isNotEmpty property="F_NAME2">
+			AND $NAME_COL2$ BETWEEN #S_NAME2# AND #F_NAME2#
+			</isNotEmpty>
+			<isEmpty property="F_NAME2">
+			AND $NAME_COL2$ LIKE '%' || #S_NAME2# || '%'
+			</isEmpty>
+		</isNotEmpty>
+		<isEmpty property="S_NAME2">
+			<isNotEmpty property="F_NAME2">
+			AND $NAME_COL2$ LIKE '%' || #F_NAME2# || '%'
+			</isNotEmpty>
+		</isEmpty>
+	</sql>
+
+	<sql id="Statistics03">
+		<isNotEmpty property="S_CODE3">
+			<isNotEmpty property="F_CODE3">
+			AND $CODE_COL3$ BETWEEN #S_CODE3# AND #F_CODE3#
+			</isNotEmpty>
+			<isEmpty property="F_CODE3">
+			AND $CODE_COL3$ LIKE '%' || #S_CODE3# || '%'
+			</isEmpty>
+		</isNotEmpty>
+		<isEmpty property="S_CODE3">
+			<isNotEmpty property="F_CODE3">
+			AND $CODE_COL3$ LIKE '%' || #F_CODE3# || '%'
+			</isNotEmpty>
+		</isEmpty>
+
+		<isNotEmpty property="S_NAME3">
+			<isNotEmpty property="F_NAME3">
+			AND $NAME_COL3$ BETWEEN #S_NAME3# AND #F_NAME3#
+			</isNotEmpty>
+			<isEmpty property="F_NAME3">
+			AND $NAME_COL3$ LIKE '%' || #S_NAME3# || '%'
+			</isEmpty>
+		</isNotEmpty>
+		<isEmpty property="S_NAME3">
+			<isNotEmpty property="F_NAME3">
+			AND $NAME_COL3$ LIKE '%' || #F_NAME3# || '%'
+			</isNotEmpty>
+		</isEmpty>
+	</sql>
+	
+	<select id="selectOriginTextList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT C.CODE,
+			   C.CODE_NM,
+			   C.ABBR_CODE_NM,
+			   C.SORT_ORDER,
+			   O.ORIGIN_TEXT,
+			   O.REG_USER_ID,
+			   TO_CHAR(O.REG_DT, 'YYYY-MM-DD') AS REG_DT,
+			   O.MOD_USER_ID,
+			   TO_CHAR(O.MOD_DT, 'YYYY-MM-DD') AS MOD_DT,
+			   P.CORP_CD
+		  FROM CM_CODE C, CM_ORIGIN_TEXT O, CM_CORP_MASTER P
+		 WHERE C.CODE = O.ORIGIN_CD(+)
+		   AND C.MASTER_CODE = 'IJ000354'
+		   AND C.LANG_CODE = #GV_LANG_CODE#
+		   AND P.CORP_CD IN ($GV_CORP_CD$)
+		   AND P.STATUS = 'Y'
+		<isNotEmpty prepend="AND" property="CODE">
+		   		C.CODE LIKE '%'||UPPER(#CODE#)||'%'
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="CODE_NM">
+		 		C.ABBR_CODE_NM LIKE '%'||UPPER(#CODE_NM#)||'%'
+		</isNotEmpty>
+		ORDER BY SORT_ORDER
+	</select>
+	
+	<update id="updateOriginText" parameterClass="java.util.Map">
+		MERGE INTO CM_ORIGIN_TEXT R
+		USING DUAL
+		ON (R.ORIGIN_CD = #CODE#
+		    AND R.CORP_CD = #CORP_CD#)
+		WHEN MATCHED THEN
+			UPDATE SET
+				ORIGIN_TEXT = #ORIGIN_TEXT#,
+			  	MOD_USER_ID = #SS_USER_ID#,
+			  	MOD_DT = SYSDATE
+		WHEN NOT MATCHED THEN
+			INSERT( 
+				ORIGIN_CD, ORIGIN_TEXT, REG_USER_ID, CORP_CD
+			)VALUES(
+				#CODE#, #ORIGIN_TEXT#, #SS_USER_ID#, #CORP_CD#
+			)
+	</update>
+
+	<select id="selectUserSetHtokeyList" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT 	SID,
+				BTN_ID,
+				SCREEN_ID,
+				KEY1,
+				KEY2
+		  FROM  CM_USER_HOTKEY
+		 WHERE  SID = #SS_USER_ID#
+		   AND  SCREEN_ID = #SCREEN_ID#
+		ORDER BY KEY1, KEY2, BTN_ID
+	</select>
+	
+	<update id="updateUserSetHtokey" parameterClass="java.util.Map">
+		MERGE INTO CM_USER_HOTKEY R
+		USING DUAL
+		ON (R.SID = #SS_USER_ID# AND R.SCREEN_ID = #SCREEN_ID# AND R.BTN_ID = #BTN_ID#)
+		WHEN MATCHED THEN
+			UPDATE SET
+				KEY1 = #KEY1#,
+			  	KEY2 = #KEY2#
+		WHEN NOT MATCHED THEN
+			INSERT( 
+				SID,
+				BTN_ID,
+				SCREEN_ID,
+				KEY1,
+				KEY2
+			)VALUES(
+				#SS_USER_ID#, 
+				#BTN_ID#, 
+				#SCREEN_ID#, 
+				#KEY1#,
+				#KEY2#
+			)
+	</update>
+	
+	<delete id="deleteUserSetHtokey" parameterClass="java.util.Map">
+		DELETE FROM CM_USER_HOTKEY
+		 WHERE SID = #SS_USER_ID# 
+		   AND SCREEN_ID = #SCREEN_ID# 
+		   AND BTN_ID = #BTN_ID#
+	</delete>
+	
+</sqlMap>
+

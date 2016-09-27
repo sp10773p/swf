@@ -42,7 +42,6 @@ public class ViewController {
                          @RequestParam(required = false, value = "param") String param, HttpServletResponse response) throws IOException {
 
         JSONObject returnData = new JSONObject();
-        response.setCharacterEncoding("UTF-8");
 
         try {
             JSONParser jsonParser;

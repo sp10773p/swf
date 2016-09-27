@@ -19,6 +19,9 @@
 <link rel="stylesheet" href="css/jquery-ui.css">
 <link rel="stylesheet" href="css/jquery-ui.structure.css">
 <link rel="stylesheet" href="css/jquery-ui.theme.css">
+<link rel="stylesheet" type="text/css" media="screen" href="css/ui.jqgrid-bootstrap.css" />
+<link rel="stylesheet" type="text/css" media="screen" href="css/ui.jqgrid-bootstrap-ui.css" />
+<link rel="stylesheet" type="text/css" media="screen" href="css/ui.jqgrid.css" />
 
 
 <script src="js/jquery.js"></script>
@@ -27,6 +30,8 @@
 <script src="js/util.js"></script>
 <script src="js/string.js"></script>
 <script src="js/serverUtils.js"></script>
+<script src="js/i18n/grid.locale-en.js" type="text/javascript"></script>
+<script src="js/jquery.jqGrid.min.js" type="text/javascript"></script>
 
 <style>
     html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif}
@@ -64,4 +69,5 @@
 
     .select_btn {padding-top: 30px; padding-right: 15px; width: 10%; float: right; text-align: right}
 
+    .ui-jqgrid .ui-jqgrid-view {z-index: 0}
 </style>

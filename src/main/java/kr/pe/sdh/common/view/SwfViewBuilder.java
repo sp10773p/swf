@@ -6,6 +6,8 @@ import kr.pe.sdh.common.util.StringUtils;
 import kr.pe.sdh.common.view.factory.SearchFactory;
 import org.apache.velocity.Template;
 import org.apache.velocity.app.VelocityEngine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -26,6 +28,8 @@ public class SwfViewBuilder {
 
     private Map<String, String> viewVm = new HashMap<String, String>();
 
+    static final Logger LOGGER = LoggerFactory.getLogger(SwfViewBuilder.class);
+
     public SwfViewBuilder(String viewPath, String layout) throws Exception {
         this.viewPath = viewPath;
         this.layout   = layout;
@@ -34,7 +38,7 @@ public class SwfViewBuilder {
     }
 
     private void build() throws Exception {
-        System.out.println("### SWeb Framework View Build Start...");
+        LOGGER.info("### SWeb Framework View Build Start...");
         File f = new File(viewPath);
 
         if(!f.exists()){
@@ -48,7 +52,7 @@ public class SwfViewBuilder {
 
             }catch (Exception e){
                 e.printStackTrace();
-                System.err.println("::: View 파일 파싱중 에러가 발생 하였습니다." + e.getMessage());
+                LOGGER.error("::: View 파일 파싱중 에러가 발생 하였습니다. {}", e.getMessage());
             }
         }
     }
@@ -62,7 +66,7 @@ public class SwfViewBuilder {
         String viewTitle = DOMUtil.getAttribute(root, "title");
 
         // 화면 정보
-        System.out.println("### View Building - " + viewId);
+        LOGGER.info("### View Building - {}", viewId);
         ViewEntry viewEntry = new ViewEntry(viewId, viewType, viewTitle);
 
         //조회 정보
@@ -131,7 +135,7 @@ public class SwfViewBuilder {
 
             }
 
-            System.out.println("### Append Search Infomation - " + searchId);
+            LOGGER.info("### Append Search Infomation - {}", searchId);
 
             searchsInfo.addSearch(searchId, searchEntryList);
         }
@@ -184,7 +188,7 @@ public class SwfViewBuilder {
             String selectQKey = DOMUtil.getElementTextByPath(searchEle, "selectQKey");
 
             if(itemList == null && StringUtils.isEmpty(selectQKey)){
-                System.err.println("::: type 이 select/checkbox/radio/autocomplete 일때 '<list>' 나 '<selectQKey>' Tag정의가 있어야 합니다.");
+                LOGGER.error("::: type 이 select/checkbox/radio/autocomplete 일때 '<list>' 나 '<selectQKey>' Tag정의가 있어야 합니다.");
                 return null;
             }
 
@@ -229,7 +233,7 @@ public class SwfViewBuilder {
         }
 
         if(!bool){
-            System.err.print("::: <seach> Tag의 필수 속성이 존재 하지 않습니다. [" + attStr.substring(0, attStr.length() - 1) + "]");
+            LOGGER.error("::: <seach> Tag의 필수 속성이 존재 하지 않습니다. [{}]", attStr.substring(0, attStr.length() - 1));
         }
 
         return bool;
@@ -286,7 +290,7 @@ public class SwfViewBuilder {
 
         // 첫 로드이거나 layout이 변경되었을때  Auto Reload
         if(viewVm.get(viewId) == null || template.requiresChecking()){
-            System.out.println("### View Layout Reload : " + viewId);
+            LOGGER.info("### View Layout Reload : {}", viewId);
 
             StringWriter writer = new StringWriter();
             VelocityEngineUtils.mergeTemplate(velocityEngine, layout, "UTF-8", map, writer);
@@ -330,11 +334,11 @@ public class SwfViewBuilder {
                     viewVm.remove(viewId);
                     viewInfoManager.removeViewInfo(viewId);
 
-                    System.out.println("### ViewInfo Reload Start. - " + viewId);
+                    LOGGER.info("### ViewInfo Reload Start. - {}", viewId);
                     buildViewInfo(filename);
 
                 } catch (Exception e) {
-                    System.err.println("::: ViewInfo Reload Fail !!!");
+                    LOGGER.error("::: ViewInfo Reload Fail !!!");
                     e.printStackTrace();
                 }
             }
