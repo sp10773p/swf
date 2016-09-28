@@ -1,0 +1,1 @@
+insert into users values('rednics', 'Shin Kwan Young', '1234');

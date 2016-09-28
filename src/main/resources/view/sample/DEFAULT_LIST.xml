@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<view id="sampleDefaultList" type="DEFAULT_LIST" title="List1 type">
+
+    <searchs colSize="3" function="" qKey="selectList">
+        <search id="search1" type="duedate" title="Due Date" isMand="Y" from="-1y" to="0" />
+        <search id="search2" type="select"  title="Select Box" isMand="Y">
+            <style>width: 150px</style>
+            <list>
+                <item code="">All</item>
+                <item code="A" selected="true">A</item>
+                <item code="B">B</item>
+            </list>
+            <!-- CODE, VALUE, DEFAULT
+                <selectQKey>module1.select</selectQKey>
+            -->
+        </search>
+        <search id="search3" type="checkbox" title="Check Box">
+            <list>
+                <item code="M">Milk</item>
+                <item code="S" checked="true">Sugar</item>
+            </list>
+            <!-- CODE, VALUE, DEFAULT
+                <selectQKey>module1.select</selectQKey>
+            -->
+        </search>
+        <search id="search4" type="text" title="Text Box" length="10">
+            <!-- <style>font-size:12px</style> -->
+            <!-- <event name="keypress">fn_search</event> -->
+        </search>
+        <search id="search5" type="radio" title="Radio Button">
+            <list>
+                <item code="M">Milk</item>
+                <item code="S" checked="true">Sugar</item>
+            </list>
+            <!-- CODE, LABEL, DEFAULT
+                <selectQKey>module1.select</selectQKey>
+            -->
+        </search>
+        <search id="search6" type="autocomplete" title="Autocomplete" isMulti="Y">
+            <selectQKey>
+                <!-- VALUE, LABEL -->
+            </selectQKey>
+        </search>
+        <search id="search7" type="date" title="Date" default="-7" />
+        <search id="search8" type="text" title="검색조건8" length="10" />
+        <search id="search9" type="text" title="검색조건9" length="10" />
+    </searchs>
+    <script>
+        <![CDATA[
+            function fn_test(formId, targetId, selectQkey){
+                alert("test");
+            }
+        ]]>
+    </script>
+</view>
