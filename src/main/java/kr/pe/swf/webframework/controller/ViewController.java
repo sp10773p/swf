@@ -26,7 +26,8 @@ public class ViewController {
     @Resource(name="velocityEngine")
     private VelocityEngine velocityEngine;
 
-    private ViewInfoFactory viewInfoFactory = ViewInfoFactory.getInstance();
+    @Autowired
+    private ViewInfoFactory viewInfoFactory;
 
     @RequestMapping("/index.do")
     public String view(HttpServletRequest request, HttpServletResponse response){

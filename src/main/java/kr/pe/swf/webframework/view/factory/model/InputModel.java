@@ -8,9 +8,27 @@ import kr.pe.swf.webframework.util.StringUtils;
 public class InputModel extends AbstractModel {
 
     public void createModel() {
-        appendAttribute("id", getId());
+        appendAttribute("id"  , getId());
+        appendAttribute("type", getType());
+
         if(StringUtils.isNotEmpty(getName())){
             appendAttribute("name", getName());
+        }
+
+        if(StringUtils.isNotEmpty(getType())){
+            appendAttribute("type", getType());
+        }
+
+        if(StringUtils.isNotEmpty(getStyle())){
+            appendAttribute("style", getStyle());
+        }
+
+        if(StringUtils.isNotEmpty(getClassName())){
+            appendAttribute("class", getClassName());
+        }
+
+        if(StringUtils.isNotEmpty(getChecked())){
+            appendAttribute("checked", getChecked());
         }
 
         if(getLength() > 0){
@@ -20,5 +38,7 @@ public class InputModel extends AbstractModel {
         if(StringUtils.isNotEmpty(getValue())){
             appendAttribute("value", getValue());
         }
+
+        buffer.append("<input ").append(getAttribute()).append("/>").append(LF);
     }
 }

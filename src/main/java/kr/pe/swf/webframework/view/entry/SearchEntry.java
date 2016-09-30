@@ -47,21 +47,21 @@ public class SearchEntry {
         map.put("default", defaultDate);
 
         // 쿼리 id를 우선으로 처리
-        if(selectQKey != null){
+        //if(selectQKey != null){
             map.put("selectQKey", selectQKey);
-        }else{
+        //}else{
             map.put("list", list);
-        }
+        //}
 
         // 쿼리 id를 우선으로 처리
-        List list = new ArrayList();
+        List eventList = new ArrayList();
         if(eventEntries != null){
             for(EventEntry eventEntry : eventEntries){
-                list.add(eventEntry.toMap());
+                eventList.add(eventEntry.toMap());
             }
         }
 
-        map.put("event", list);
+        map.put("event", eventList);
 
         return map;
     }

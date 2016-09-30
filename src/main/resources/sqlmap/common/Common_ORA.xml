@@ -6,6 +6,13 @@
 		select * from swf.users
 
 	</select>
-	
+
+	<select id="selectAutocompleteList" parameterClass="map" resultClass="hashmap">
+		select code      as "value",
+		       code_name as "label"
+		  from swf.CM_CODE
+
+	</select>
+
 </sqlMap>
 

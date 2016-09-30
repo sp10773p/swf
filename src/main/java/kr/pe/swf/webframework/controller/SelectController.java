@@ -1,7 +1,9 @@
 package kr.pe.swf.webframework.controller;
 
+import com.ibatis.sqlmap.client.SqlMapClient;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,6 +20,9 @@ import java.util.Map;
  */
 @Controller
 public class SelectController {
+
+    @Autowired
+    SqlMapClient sqlMapClient;
 
     @RequestMapping("/commonGridSelectList.do")
     public void commonGridSelectList(@RequestParam(value = "params") String params, HttpServletResponse response) throws IOException {
@@ -68,7 +73,7 @@ public class SelectController {
             System.out.println("select : " + selectQKey);
             //TODO 조회 / 조회후 배열 처리
             // sample
-            List<Map<String, String>> list = new ArrayList<Map<String, String>>();
+            List<Map<String, String>> list = sqlMapClient.queryForList(selectQKey);
             Map<String, String> data = new HashMap<String, String>();
             data.put("label", "Oh");
             data.put("value", "K");

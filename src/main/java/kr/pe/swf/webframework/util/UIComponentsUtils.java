@@ -3,6 +3,7 @@ package kr.pe.swf.webframework.util;
 import kr.pe.swf.webframework.view.entry.SearchEntry;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by seongdonghun on 2016. 9. 23..
@@ -35,6 +36,20 @@ public class UIComponentsUtils {
     }
 
     private static StringBuffer getAutocompleteTypeScript(SearchEntry searchEntry) {
+        StringBuffer itemBuffer = new StringBuffer();
+        itemBuffer.append("[");
+        for(Map<String, String> item : searchEntry.getList()){
+            String label = item.get("label");
+            String value = item.get("value");
+            itemBuffer.append("{value: \"").append(value).append("\", label: \"").append(label).append("\"},");
+        }
+
+        if(itemBuffer.length() > 1){
+            itemBuffer.deleteCharAt(itemBuffer.length()-1);
+        }
+        itemBuffer.append("]");
+
+
         StringBuffer scriptBuffer = new StringBuffer();
         scriptBuffer
                 .append("$('#"+searchEntry.getId()+"_VIEW')").append(LF)
@@ -46,9 +61,15 @@ public class UIComponentsUtils {
                 .append("})").append(LF)
 
                 .append(".autocomplete({").append(LF)
+                /* 실시간 쿼리버전
                 .append("\tsource: function( request, response ) {").append(LF)
                 .append("\t\tresponse( eval(gnf_autocomplete(request.term, 'selectQKey')));").append(LF)
-                .append("\t},").append(LF)
+                .append("\t}")
+                */
+
+                // 초기화된 데이터 로드
+                .append("\tsource: ").append(itemBuffer.toString()).append(LF)
+                .append("\t,").append(LF)
 
                 .append("\tsearch: function() {").append(LF)
                 .append("\t\tvar term = this.value.split( /,\\s*/ ).pop();").append(LF)

@@ -6,13 +6,11 @@ import kr.pe.swf.webframework.util.StringUtils;
  * Created by seongdonghun on 2016. 9. 28..
  */
 public class LabelModel extends AbstractModel {
-
-
     public void createModel() {
         String styleStr = "";
 
         if(isMand()){
-            styleStr = "color: red;";
+            styleStr = mandStyle;
         }
 
         if(StringUtils.isNotEmpty(getStyle())){

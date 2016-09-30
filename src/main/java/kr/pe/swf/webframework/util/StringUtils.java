@@ -261,6 +261,10 @@ public class StringUtils {
 		return (str == null ? "" : String.valueOf(str).trim());
 	}
 
+	public static String blankStr(Object str){
+		return (str == null ? "" : String.valueOf(str));
+	}
+
 	public static boolean isNum(String val)
 	{
 		String nreg ="[.0-9]+";

@@ -28,8 +28,7 @@
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>
-            classpath:spring/context-common.xml
-            classpath:spring/context-datasource.xml
+            classpath:spring/context-*.xml
         </param-value>
     </context-param>
 
@@ -46,13 +45,6 @@
     <listener>
         <listener-class>
             kr.pe.swf.webframework.view.ViewLoaderListener
-        </listener-class>
-    </listener>
-
-
-    <listener>
-        <listener-class>
-            org.springframework.web.context.ContextLoaderListener
         </listener-class>
     </listener>
 

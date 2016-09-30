@@ -12,6 +12,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.io.File;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,12 +27,16 @@ public class ViewLoader {
     private final String SEARCHS_ID = "SEARCHS";
     private String viewPath;
 
-    private ViewInfoFactory viewInfoFactory = ViewInfoFactory.getInstance();
+    private ViewInfoFactory viewInfoFactory;
 
-    public void initViewLoader(String viewPath, String layout) {
+    public void initViewLoader(String viewPath, String layout){
+        initViewLoader(null, viewPath, layout);
+    }
+
+    public void initViewLoader(ViewInfoFactory viewInfoFactory, String viewPath, String layout) {
         this.viewPath = viewPath;
-
-        viewInfoFactory.setLayout(layout);
+        this.viewInfoFactory = viewInfoFactory;
+        this.viewInfoFactory.setLayout(layout);
     }
 
     public void load() throws RuntimeException {
@@ -194,7 +199,15 @@ public class ViewLoader {
             }
 
             if(StringUtils.isNotEmpty(selectQKey)){
-                searchEntry.setSelectQKey(selectQKey); // TODO selectQKey 쿼리 실행후 select의 배열처리해서 set 할것
+                selectQKey = selectQKey.trim();
+                searchEntry.setSelectQKey(selectQKey);
+
+                try {
+                    List<Map<String, String>> list = this.viewInfoFactory.getSqlMapClient().queryForList(selectQKey, null);
+                    searchEntry.setList(list);
+                }catch (SQLException e){
+                    e.printStackTrace();
+                }
 
             }else{
                 List<Map<String, String>> list = new ArrayList<Map<String, String>>();

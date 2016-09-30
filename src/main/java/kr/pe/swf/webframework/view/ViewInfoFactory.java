@@ -1,5 +1,7 @@
 package kr.pe.swf.webframework.view;
 
+import com.ibatis.sqlmap.client.SqlMapClient;
+import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import kr.pe.swf.webframework.util.StringUtils;
 import kr.pe.swf.webframework.view.entry.ViewEntry;
 import kr.pe.swf.webframework.view.factory.SearchBuilder;
@@ -18,8 +20,6 @@ import java.util.Map;
  * Created by seongdonghun on 2016. 9. 12..
  */
 public class ViewInfoFactory {
-    private static  ViewInfoFactory viewInfoFactory = new ViewInfoFactory();
-
     static final Logger LOGGER = LoggerFactory.getLogger(ViewInfoFactory.class);
 
     // view id, view info
@@ -31,10 +31,16 @@ public class ViewInfoFactory {
 
     private String layout;
 
+    private SqlMapClient sqlMapClient;
+
     private ViewInfoFactory() {}
 
-    public static ViewInfoFactory getInstance(){
-        return viewInfoFactory;
+    private ViewInfoFactory(SqlMapClient sqlMapClient){
+        this.sqlMapClient = sqlMapClient;
+    }
+
+    public SqlMapClient getSqlMapClient() {
+        return sqlMapClient;
     }
 
     public ViewEntry getViewEntry(String viewId) {
@@ -89,7 +95,7 @@ public class ViewInfoFactory {
     }
 
     public String getViewType(String viewId) {
-        return viewInfoFactory.getViewEntry(viewId).getType();
+        return getViewEntry(viewId).getType();
     }
 
 
@@ -105,6 +111,8 @@ public class ViewInfoFactory {
             StringWriter writer = new StringWriter();
             VelocityEngineUtils.mergeTemplate(velocityEngine, layout, "UTF-8", map, writer);
 
+            System.out.println(writer.toString());
+
             viewVmLoadManage.put(viewId, writer.toString());
         }
     }
@@ -118,18 +126,18 @@ public class ViewInfoFactory {
     }
 
     public boolean isExists(String viewId) {
-        if(viewInfoFactory.getViewEntry(viewId) == null){
+        if(getViewEntry(viewId) == null){
             return false;
 
         }else{
 
             // 수정여부 확인
-            if(!viewInfoFactory.checkViewInfo(viewId)){
+            if(!checkViewInfo(viewId)){
 
-                String filename = viewInfoFactory.getViewInfoFile(viewId);
+                String filename = getViewInfoFile(viewId);
                 try {
                     viewVmLoadManage.remove(viewId);
-                    viewInfoFactory.removeViewInfo(viewId);
+                    removeViewInfo(viewId);
 
                     LOGGER.info("### ViewInfo Reload Start. - {}", viewId);
                     (new ViewLoader()).buildViewInfo(filename);

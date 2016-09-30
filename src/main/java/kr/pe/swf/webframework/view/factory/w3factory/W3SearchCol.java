@@ -3,6 +3,7 @@ package kr.pe.swf.webframework.view.factory.w3factory;
 import kr.pe.swf.webframework.util.HtmlUtil;
 import kr.pe.swf.webframework.view.entry.SearchEntry;
 import kr.pe.swf.webframework.view.factory.SearchCol;
+import kr.pe.swf.webframework.view.factory.model.*;
 
 import static kr.pe.swf.webframework.util.HtmlUtil.createLabel;
 
@@ -41,36 +42,44 @@ public class W3SearchCol extends SearchCol {
                 break;
         }
 
+        AbstractModel titleModel = new LabelModel();
+        titleModel.initAttribute(searchEntry.toMap());
+
         colBuffer.append(HtmlUtil.openDiv(colDivClass));
         colBuffer.append("\t").append(HtmlUtil.openDiv(thClass));
-        colBuffer.append("\t\t").append(createLabel(searchEntry.toMap()));
+        colBuffer.append("\t\t").append(titleModel.draw());
         colBuffer.append("\t").append(HtmlUtil.closeDiv());
         colBuffer.append("\t").append(HtmlUtil.openDiv(tdClass));
 
         // 조회조건 입력란
-        String orgId = searchEntry.getId();
         String type  = searchEntry.getType();
-        if("duedate".equals(type) || "dueyearmonth".equals(type)){
-            searchEntry.setId("from_" + orgId);
+        AbstractModel model;
 
-            colBuffer.append("\t\t").append(HtmlUtil.createInput(searchEntry.toMap(), dateClass));
-            colBuffer.append(" ~ ");
+        if("autocomplete".equals(type)){
+            model = new AutocompleteModel();
+            model.initAttribute(searchEntry.toMap());
+            model.setClassName(inputClass);
 
-            searchEntry.setId("to_" + orgId);
-            colBuffer.append("\t\t").append(HtmlUtil.createInput(searchEntry.toMap(), dateClass));
+        }else if("radio".equals(type)){
+            model = new RadioModel(searchEntry.getList());
+            model.setClassName(radioClass);
 
-            searchEntry.setId(orgId);
+        }else if("checkbox".equals(type)){
+            model = new CheckboxModel(searchEntry.getList());
+            model.setClassName(checkboxClass);
 
-        }else if("checkbox".equals(searchEntry.getType())){
-            colBuffer.append("\t\t").append(HtmlUtil.createCheckNRadio(searchEntry.toMap(), checkboxClass));
-
-        }else if("radio".equals(searchEntry.getType())){
-            colBuffer.append("\t\t").append(HtmlUtil.createCheckNRadio(searchEntry.toMap(), radioClass));
+        }else if(type.indexOf("date") > -1){
+            model = new DatepickerModel();
+            model.setClassName(dateClass);
 
         }else{
-            colBuffer.append("\t\t").append(HtmlUtil.createInput(searchEntry.toMap(), inputClass));
+            model = new InputModel();
+            model.setClassName(inputClass);
 
         }
+
+        model.initAttribute(searchEntry.toMap());
+        colBuffer.append("\t\t").append(model.draw());
 
         colBuffer.append("\t").append(HtmlUtil.closeDiv()); // close Td Div
         colBuffer.append(HtmlUtil.closeDiv()); // close Col Div

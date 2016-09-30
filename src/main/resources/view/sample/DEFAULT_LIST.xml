@@ -38,7 +38,7 @@
         </search>
         <search id="search6" type="autocomplete" title="Autocomplete" isMulti="Y">
             <selectQKey>
-                <!-- VALUE, LABEL -->
+                Common.selectAutocompleteList
             </selectQKey>
         </search>
         <search id="search7" type="date" title="Date" default="-7" />
