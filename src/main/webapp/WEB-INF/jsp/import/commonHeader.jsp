@@ -56,9 +56,10 @@
     .search-input {width: 98%; height: 24px; font-size: 14px; font-weight: normal}
     .search-date  {width: 100px; height: 24px; font-size: 14px; font-weight: normal; text-align: center}
     .searchForm {margin-bottom: 0px;}
+    .select_btn {padding-top: 30px; padding-right: 15px; width: 10%; float: right; text-align: right}
 
+    /*** Override ***/
     input[type=checkbox].w3-check, input[type=radio].w3-radio {top: 3px; width: 18px; height: 18px}
-
     .w3-border {border:  2px solid #009688 !important;}
 
     .ui-datepicker {font-size: 12px;  width: 220px;}
@@ -67,7 +68,6 @@
     .ui-datepicker-trigger {width: 17px; margin-left: 2px; cursor: pointer}
     .ui-datepicker th {color: white}
 
-    .select_btn {padding-top: 30px; padding-right: 15px; width: 10%; float: right; text-align: right}
-
+    .ui-common-table {font-size: 14px}
     .ui-jqgrid .ui-jqgrid-view {z-index: 0}
 </style>

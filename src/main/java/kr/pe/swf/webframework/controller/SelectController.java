@@ -3,17 +3,18 @@ package kr.pe.swf.webframework.controller;
 import com.ibatis.sqlmap.client.SqlMapClient;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Required;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by seongdonghun on 2016. 9. 27..
@@ -24,29 +25,35 @@ public class SelectController {
     @Autowired
     SqlMapClient sqlMapClient;
 
+    Logger logger = LoggerFactory.getLogger(SelectController.class);
+
     @RequestMapping("/commonGridSelectList.do")
-    public void commonGridSelectList(@RequestParam(value = "params") String params, HttpServletResponse response) throws IOException {
+    public void commonGridSelectList(@RequestParam(value = "_search") String _search,
+                                     @RequestParam(value = "nd") String nd,
+                                     @RequestParam(value = "rows") String rows,
+                                     @RequestParam(value = "page") String page,
+                                     @RequestParam(value = "sidx") String sidx,
+                                     @RequestParam(value = "sord") String sord,
+                                     @RequestParam(required=false, value = "params") String params,
+                                     HttpServletRequest request,
+                                     HttpServletResponse response) throws IOException {
 
         JSONObject jsonObject = new JSONObject();
         String result = new String();
 
         try {
-            JSONObject jsonParam = (JSONObject)(new JSONParser().parse(params));
-
-            System.out.println("params : " + jsonParam.toString());
-
-            //TODO 조회 / 조회후 배열 처리
-            List<Map<String, String>> list = new ArrayList<Map<String, String>>();
-            for(int i=0; i<10; i++){
-                Map<String, String> data = new HashMap<String, String>();
-                for(int k=0; k<10; k++){
-                    data.put("COL"+i, String.valueOf(i));
-                }
-
-                list.add(data);
+            Enumeration p = request.getParameterNames();
+            while(p.hasMoreElements()){
+                String s=  (String)p.nextElement();
+                System.out.println(s+ " : " + request.getParameter(s));
             }
 
-            //jsonObject.put("data", StringUtils.listMapToString(list));
+            //TODO 조회 / 조회후 배열 처리
+            List<Map<String, String>> list = sqlMapClient.queryForList("Common.selectTestList");
+
+            jsonObject.put("page", String.valueOf(1));
+            jsonObject.put("total", String.valueOf(2));
+            jsonObject.put("records", String.valueOf(13));
             jsonObject.put("data", list);
 
             result = jsonObject.toJSONString();
@@ -74,7 +81,7 @@ public class SelectController {
             //TODO 조회 / 조회후 배열 처리
             // sample
             List<Map<String, String>> list = sqlMapClient.queryForList(selectQKey);
-            Map<String, String> data = new HashMap<String, String>();
+            /*Map<String, String> data = new HashMap<String, String>();
             data.put("label", "Oh");
             data.put("value", "K");
 
@@ -83,7 +90,7 @@ public class SelectController {
             data = new HashMap<String, String>();
             data.put("label", "Seong");
             data.put("value", "S");
-            list.add(data);
+            list.add(data);*/
 
             //jsonObject.put("data", StringUtils.listMapToString(list));
             jsonObject.put("data", list);

@@ -111,6 +111,7 @@ public class ViewLoader {
                 String viewId = DOMUtil.getAttribute(root, "id");
                 throw new Exception("::: <searchs> Tag의 qKey는 필수 속성입니다. [" + viewId +"]");
             }
+            searchsFactory.setqKey(qKeyAtt);
 
             // search column size
             String colSizeAtt = DOMUtil.getAttribute(searchsEle, "colSize");

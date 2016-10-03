@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <view id="sampleDefaultList" type="DEFAULT_LIST" title="List1 type">
 
-    <searchs colSize="3" function="" qKey="selectList">
+    <searchs colSize="3" function="" qKey="selectTestList">
         <search id="search1" type="duedate" title="Due Date" isMand="Y" from="-1y" to="0" />
         <search id="search2" type="select"  title="Select Box" isMand="Y">
             <style>width: 150px</style>
@@ -45,6 +45,20 @@
         <search id="search8" type="text" title="검색조건8" length="10" />
         <search id="search9" type="text" title="검색조건9" length="10" />
     </searchs>
+    <lists url="" rowNum="" rowList="" sortname="" sortorder="" viewrecords="" >
+		<colNames>['Inv No','Date', 'Client', 'Amount','Tax','Total','Notes']</colNames>
+		<colModel>
+			[
+				{name:'ID',index:'ID', width:55},
+				{name:'INVDATE',index:'INVDATE', width:90, jsonmap:"INVDATE"},
+				{name:'NAME',index:'NAME asc, invdate', width:100},
+				{name:'AMOUNT',index:'AMOUNT', width:80, align:"right"},
+				{name:'TAX',index:'TAX', width:80, align:"right"},
+				{name:'TOTAL',index:'TOTAL', width:80,align:"right"},
+				{name:'NOTE',index:'NOTE', width:150, sortable:false}
+			]
+		</colModel>
+    </lists>
     <script>
         <![CDATA[
             function fn_test(formId, targetId, selectQkey){

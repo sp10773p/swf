@@ -4,7 +4,7 @@
 var ajaxUtil = {};
 var serverUtil = {};
 
-serverUtil = function (formId, selectQKey, targetId) {
+serverUtil = function (formId, targetId, selectQKey) {
     this.params = {};
     this.formId = formId;
     this.selectQKey = selectQKey;
@@ -43,6 +43,13 @@ serverUtil.prototype = {
     },
     send: function () {
         return new ajaxUtil.Request("/commonGridSelectList.do", this.encodeURI(), null, "POST", true);
+    },
+    loadGrid: function () {
+        $("#"+this.targetId).clearGridData();  // 이전 데이터 삭제
+        $("#"+this.targetId).setGridParam({url:"commonGridSelectList.do",
+                                     datatype:"json",
+                                     postData: this.encodeURI }).trigger("reloadGrid");
+
     }
 }
 
@@ -129,16 +136,10 @@ function gfn_drawMain(data) {
  * 조회조건의 조회시 기본으로 호출되는 함수
  */
 function gfn_gridSelectList(formId, targetId, selectQKey) {
-    var s = new serverUtil(formId, targetId, selectQKey);
-    var data = s.send();
+    $("#"+targetId).clearGridData();  // 이전 데이터 삭제
 
-    var row_size = data["data"].length;
-    for(var i=0; i < row_size; i++){
-        var column = data["data"][i];
-        for(var colId in column){
-            console.log(column[colId]);
-        }
-    }
+    //var server = new serverUtil(formId, targetId, selectQKey);
+    //server.loadGrid();
 
 
     /*$("#" + targetId).jqGrid({

@@ -4,14 +4,16 @@
 <sqlMap namespace="Common">
 	<select id="selectList" parameterClass="map" resultClass="hashmap">
 		select * from swf.users
-
 	</select>
 
 	<select id="selectAutocompleteList" parameterClass="map" resultClass="hashmap">
 		select code      as "value",
 		       code_name as "label"
 		  from swf.CM_CODE
+	</select>
 
+	<select id="selectTestList" parameterClass="map" resultClass="hashmap">
+		select * from swf.TB_TEST
 	</select>
 
 </sqlMap>
