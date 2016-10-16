@@ -13,6 +13,7 @@ public class AutocompleteModel extends AbstractModel {
         setId(orgId + PREFIX_VIEW_ID);
         inputModel.initAttribute(getInitAttributeMap());
         inputModel.setType("text");
+        inputModel.setMand(false);
 
         buffer.append(inputModel.draw());
 

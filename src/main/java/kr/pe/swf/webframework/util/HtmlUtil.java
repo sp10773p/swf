@@ -20,162 +20,6 @@ public class HtmlUtil {
         return " " + key + "=\"" + value + "\" ";
     }
 
-    public static String createLabel(Map data) {
-        String title     = StringUtils.trimStr(data.get("title"));
-        String className = StringUtils.trimStr(data.get("className"));
-        String style     = StringUtils.trimStr(data.get("style"));
-
-        boolean isMand = data.get("isMand") == null ? false : (Boolean)data.get("isMand");
-
-        return createLabel(title, className, style, isMand);
-    }
-
-    public static String createLabel(String title, String className, String style, boolean isMand) {
-        String styleStr = "";
-
-        if(isMand){
-            styleStr = "color: red;";
-        }
-
-        if(StringUtils.isNotEmpty(style)){
-            styleStr = styleStr + style;
-        }
-
-        String label = getLabelTag(title, className, styleStr);
-
-        return label;
-    }
-
-    public static String getLabelTag(String title, String className, String style){
-        String att = "";
-
-        if(StringUtils.isNotEmpty(className)){
-            att += getAttribute("class", className);
-        }
-
-        if(StringUtils.isNotEmpty(style)){
-            att += getAttribute("style", style);
-        }
-
-        return "<label" + att + ">" + title + "</label>" + LF;
-
-    }
-
-    public static String createInput(Map data, String className){
-        String id    = StringUtils.trimStr(data.get("id"));
-        String name  = StringUtils.trimStr(data.get("name"));
-        String type  = StringUtils.trimStr(data.get("type"));
-        String style = StringUtils.trimStr(data.get("style"));
-
-        int length   = data.get("length") == null ? 0 : (Integer)data.get("length");
-
-        String input;
-
-        if(type.equals("select")){
-            List<Map<String, String>> list = null;
-            if(StringUtils.isNotEmpty(data.get("selectQKey"))){
-                list = null; // TODO 조회하여 list 생성
-
-            }else{
-                list = (List<Map<String, String>>)data.get("list");
-
-            }
-
-
-            input = getSelectTag(id, name, style, list, className);
-        }else{
-            if(type.equals("autocomplete")){
-                input  = getInputTag(type    , id + "_VIEW", name, length, style, className);
-                input += getInputTag("hidden", id          , name, 0     , ""   , "");
-
-            }else{
-                input  = getInputTag(type, id, name, length, style, className);
-            }
-        }
-
-        return input;
-    }
-
-    public static String createCheckNRadio(Map data, String className){
-        String id    = StringUtils.trimStr(data.get("id"));
-        String type  = StringUtils.trimStr(data.get("type"));
-        String style = StringUtils.trimStr(data.get("style"));
-
-        List<Map<String, String>> list = null;
-        if(StringUtils.isNotEmpty(data.get("selectQKey"))){
-            list = null; // TODO 조회하여 list 생성
-
-        }else{
-            list = (List<Map<String, String>>)data.get("list");
-
-        }
-
-        int idx = 0;
-        StringBuffer sb = new StringBuffer();
-        for(Map<String, String> map : list){
-
-            String code  = map.get("code");
-            String label = map.get("label");
-
-            String checked = null;
-            if(map.containsKey("checked") && map.get("checked").equals("true")){
-                checked = "checked";
-
-            }
-
-            String inp = HtmlUtil.getInputTag(type, id+(++idx), id, 0, style, className, code, checked);
-
-            sb.append(inp);
-
-            Map<String, String> labelData = new HashMap<String, String>();
-            labelData.put("title"    , label);
-            labelData.put("className", "w3-validate");
-            labelData.put("style"    , "margin-left: 3px; margin-right: 3px;");
-
-            sb.append(createLabel(labelData));
-
-        }
-
-        return sb.toString();
-    }
-
-    private static String getSelectTag(String id, String name, String style, List<Map<String, String>> list, String className){
-        String att = getAttribute("id", id);
-
-        if(StringUtils.isNotEmpty(style)){
-            att += getAttribute("style", style);
-        }
-
-        return "<select class=\"" + className + "\"" + att + ">"
-                + LF
-                + getOptions(list)
-                + "</select>"
-                + LF;
-    }
-
-    private static String getOptions(List<Map<String, String>> list) {
-        StringBuffer sb = new StringBuffer();
-
-        for(Map<String, String> map : list){
-            String code  = map.get("code");
-            String label = map.get("label");
-
-            String att = getAttribute("value", code);
-            if(map.containsKey("selected") && map.get("selected").equals("true")){
-                att += " selected";
-            }
-
-            sb.append("\t<option ").
-                    append(att).
-                    append(">").
-                    append(label).
-                    append("</option>").
-                    append(LF);
-
-        }
-
-        return sb.toString();
-    }
 
     public static List<String[]> getStringArray(String select){
         select = select.trim().replaceAll("\\[", "").replaceAll("]", "");
@@ -190,50 +34,6 @@ public class HtmlUtil {
 
         return resultList;
     }
-
-    public static String getInputTag(String type, String id, String name, int length, String style, String className){
-        return getInputTag(type, id, name, length, style, className, null, null);
-
-    }
-
-    public static String getInputTag(String type, String id, String name, int length, String style, String className, String value, String checked){
-        String att  = getAttribute("id", id);
-
-        if(StringUtils.isNotEmpty(name)){
-            att += getAttribute("name", name);
-        }
-
-        if(length > 0){
-            att += getAttribute("length", String.valueOf(length));
-        }
-
-        if(StringUtils.isNotEmpty(value)){
-            att += getAttribute("value", value);
-        }
-
-        if(StringUtils.isNotEmpty(checked)){
-            att += getAttribute("checked", checked);
-        }
-
-        if(type.equals("date") || type.equals("duedate")){
-            type = "input";
-            style = "width: 100px; text-align: center;" + String.valueOf(style); // 날짜 타입
-
-        }
-
-        if(StringUtils.isNotEmpty(style)){
-            att += getAttribute("style", style);
-        }
-
-        if(StringUtils.isNotEmpty(className)){
-            att += getAttribute("class", className);
-        }
-
-        att += getAttribute("type", type);
-
-        return "<input" + att + "/>" + LF;
-    }
-
 
     public static String closeDiv() {
         return "</div>"+LF;
@@ -268,4 +68,52 @@ public class HtmlUtil {
         return "\t" + key + ":" + valStr + (isComman ? "," : "") +LF;
     }
 
+    public static String closeTr(){
+        return "</tr>" + LF;
+    }
+
+    public static String openTr(String className){
+        className = (StringUtils.isNotEmpty(className) ? getAttribute("class", className) : "");
+        return "<tr" + className + ">" + LF;
+    }
+
+    public static String openTh(boolean isMand, String thWidth, int rowSpan, int colSpan){
+        thWidth = (StringUtils.isNotEmpty(thWidth) ? getAttribute("width", thWidth) : "");
+        String att = thWidth + (rowSpan > 1 ? getAttribute("rowspan", String.valueOf(rowSpan)) : "")
+                             + (colSpan > 1 ? getAttribute("colSpan", String.valueOf(colSpan)) : "");
+        if(isMand){
+            att = getAttribute("style", "color: red;") + att;
+        }
+
+        return "<th" + att + ">" + LF;
+    }
+
+    public static String closeTh(){
+        return "</th>" + LF;
+    }
+
+    public static String openTd(String tdWidth, int rowSpan, int colSpan){
+        tdWidth = (StringUtils.isNotEmpty(tdWidth) ? getAttribute("width", tdWidth) : "");
+        String att = tdWidth + (rowSpan > 1 ? getAttribute("rowspan", String.valueOf(rowSpan)) : "")
+                + (colSpan > 1 ? getAttribute("colSpan", String.valueOf(colSpan)) : "");
+
+        return "<td" + att + ">" + LF;
+    }
+
+    public static String closeTd(){
+        return "</td>" + LF;
+    }
+
+    public static String openHtml(String className){
+        className = (StringUtils.isNotEmpty(className) ? getAttribute("class", className) : "");
+        return "<table" + className + ">" + LF;
+    }
+
+    public static String closeHtml(){
+        return "</table>" + LF;
+    }
+
+    public static String createHidden(String  id, String value){
+        return "<input id\"" + id +"\" type=\"hidden\" value=\"" + value +"\" />" + LF;
+    }
 }

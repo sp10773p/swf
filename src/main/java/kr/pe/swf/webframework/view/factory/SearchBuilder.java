@@ -1,5 +1,6 @@
 package kr.pe.swf.webframework.view.factory;
 
+import kr.pe.swf.webframework.view.SearchsFactory;
 import kr.pe.swf.webframework.view.entry.SearchEntry;
 
 import java.lang.reflect.Constructor;
@@ -9,8 +10,12 @@ import java.util.*;
  * Created by seongdonghun on 2016. 9. 20..
  */
 public abstract class SearchBuilder {
+    protected SearchsFactory searchsFactory;
+
     protected List<SearchEntry> searchEntries = null;
     protected int searchColSize = 3; //default column count
+
+    private Map params = new HashMap();
 
     public static SearchBuilder getSearchFactory(String classname, List<SearchEntry> searchEntries){
         SearchBuilder factory = null;
@@ -26,6 +31,14 @@ public abstract class SearchBuilder {
         }
 
         return factory;
+    }
+
+    public Map getParams() {
+        return params;
+    }
+
+    public void setParams(Map params) {
+        this.params = params;
     }
 
     public SearchBuilder(List<SearchEntry> searchEntries){
@@ -79,4 +92,11 @@ public abstract class SearchBuilder {
     public abstract SearchRow createRow();
     public abstract SearchCol createCol(SearchEntry data);
 
+    public void setSearchsFactory(SearchsFactory searchsFactory) {
+        this.searchsFactory = searchsFactory;
+    }
+
+    public SearchsFactory getSearchsFactory() {
+        return searchsFactory;
+    }
 }

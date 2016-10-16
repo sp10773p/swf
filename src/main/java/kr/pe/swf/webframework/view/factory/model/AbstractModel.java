@@ -33,6 +33,7 @@ public abstract class AbstractModel implements Model {
     private boolean isMand;
 
     private int length;
+    private String qKey;
 
     StringBuffer buffer = new StringBuffer();
     StringBuffer attBuffer = new StringBuffer();

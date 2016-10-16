@@ -1,6 +1,7 @@
 package kr.pe.swf.webframework.util;
 
 import kr.pe.swf.webframework.view.entry.SearchEntry;
+import sun.java2d.pipe.hw.AccelDeviceEventNotifier;
 
 import java.util.List;
 import java.util.Map;
@@ -225,4 +226,40 @@ public class UIComponentsUtils {
 
         return "\t" + key + ":" + result + (isComma ? "," : "") + LF;
     }
+
+    public static String getSearchEventScript(String type, String id, String function){
+        String jquerySelectorStr = "$(#" + id +"')";
+        String event = "keypress";
+
+        if(type.equals("radio") || type.equals("checkbox")){
+            jquerySelectorStr = "$(\"input[name='" + id + "']\")";
+            event = "click";
+
+        }else if(type.equals("select")){
+            event = "change";
+        }
+
+        return getSearchScript(jquerySelectorStr, event, function);
+    }
+
+    public static String getSearchScript(String selector, String event, String function){
+        StringBuffer scriptBuffer = new StringBuffer();
+
+        scriptBuffer.append(selector).append(".on(\"").append(event).append("\", function(event){\r\n");
+        if(event.equals("keypress")){
+            scriptBuffer.append("\tif(event.whitch == 13){\r\n");
+        }
+
+        scriptBuffer.append("\t").append(function).append(";\r\n");
+
+        if(event.equals("keypress")){
+            scriptBuffer.append("\t\tevent.preventDefault();\r\n");
+            scriptBuffer.append("\t}\r\n");
+        }
+
+        scriptBuffer.append("}0;\r\n");
+
+        return scriptBuffer.toString();
+    }
+
 }

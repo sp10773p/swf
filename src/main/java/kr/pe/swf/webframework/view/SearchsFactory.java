@@ -10,50 +10,52 @@ import java.util.*;
 public class SearchsFactory {
 
     // searchs id, search items
-    private Map<String, List<SearchEntry>> searchs = new HashMap<String, List<SearchEntry>>();
+    private List<SearchEntry> searchs = new ArrayList<SearchEntry>();
 
-    // searchs html code - searchs id, searchs html code
-    private Map<String, String> searchsHtml = new HashMap<String, String>();
-
-    // searchs script code - searchs id, searchs script code
+    // For Cache
+    private StringBuffer searchsHtml;
     private StringBuffer searchsScript = new StringBuffer();
 
     private int colSize = 3;
 
     private String function;
     private String qKey;
+    private String id; // searchs id
 
-    public void addSearch(String searchId, List<SearchEntry> searchEntries){
-        this.searchs.put(searchId, searchEntries);
+    public void addSearch(SearchEntry searchEntry){
+        this.searchs.add(searchEntry);
     }
 
-    List<SearchEntry> getSearch(String searchId){
-        return this.searchs.get(searchId);
-    }
-
-    Map<String, List<SearchEntry>> getSearchs(){
+    public List<SearchEntry> getSearchs(){
         return this.searchs;
     }
 
-    List<String> getSearchsIds(){
+    public void setSearchs(List<SearchEntry> searchEntries){
+        this.searchs = searchEntries;
+    }
+
+    public List<String> getSearchsIds(){
         List<String> searchIds = new ArrayList<String>();
-        Iterator it = this.searchs.keySet().iterator();
-        while(it.hasNext()){
-            searchIds.add((String)it.next());
+
+        for(SearchEntry searchEntry : this.searchs){
+            searchIds.add(searchEntry.getId());
         }
 
         return searchIds;
     }
 
-    public void setSearchHtml(String searchsId, String html){
-        this.searchsHtml.put(searchsId, html);
+    public void appendSearchHtml(String html){
+        if(this.searchsHtml == null){
+            this.searchsHtml = new StringBuffer();
+        }
+        this.searchsHtml.append(html);
     }
 
-    public String getSearchHtml(String searchsId){
-        return this.searchsHtml.get(searchsId);
+    public String getSearchHtml(){
+        return (this.searchsHtml != null ? this.searchsHtml.toString() : null);
     }
 
-    public void appendScript(String script){
+    public void appendSearchScript(String script){
         this.searchsScript.append(script);
     }
 
@@ -83,5 +85,13 @@ public class SearchsFactory {
 
     public void setqKey(String qKey) {
         this.qKey = qKey;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

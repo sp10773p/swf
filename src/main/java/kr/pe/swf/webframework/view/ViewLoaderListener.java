@@ -30,8 +30,10 @@ public class ViewLoaderListener extends ViewLoader implements ServletContextList
             System.out.println(">>>>> " + s);
         }
 
-        String viewPath = servletContext.getInitParameter("viewPath");
-        String layout   = servletContext.getInitParameter("layout");
+        String viewPath   = servletContext.getInitParameter("viewPath");
+        String gridType   = servletContext.getInitParameter("gridType");
+        String searchType = servletContext.getInitParameter("searchType");
+        String detailType = servletContext.getInitParameter("detailType");
 
         servletContext.log("Initializing Seong`s Webframework View Loader");
         if (LOGGER.isInfoEnabled()) {
@@ -43,14 +45,21 @@ public class ViewLoaderListener extends ViewLoader implements ServletContextList
             throw new RuntimeException("::: viewPath context-param이 존재하지 않습니다.");
         }
 
+        if(gridType == null && StringUtils.isEmpty(gridType)){
+            gridType = "jqgrid";
+        }
 
-        if(layout == null && StringUtils.isEmpty(layout)){
-            layout = "kr.pe.swf.webframework.view.factory.w3factory.W3SearchBuilder";
+        if(detailType == null && StringUtils.isEmpty(detailType)){
+            detailType = "kr.pe.swf.webframework.view.factory.w3factory.W3DetailBuilder";
+        }
+
+        if(searchType == null && StringUtils.isEmpty(searchType)){
+            searchType = "kr.pe.swf.webframework.view.factory.w3factory.W3SearchBuilder";
         }
         LOGGER.info("View config path : {}", viewPath);
-        LOGGER.info("Layout package : {}", layout);
+        LOGGER.info("Layout package : {}", searchType);
 
-        initViewLoader((ViewInfoFactory)applicationContext.getBean("viewInfoFactory"),viewPath, layout);
+        initViewLoader((ViewInfoFactory)applicationContext.getBean("viewInfoFactory"),viewPath, searchType, detailType, gridType);
 
         LOGGER.info("Start View Loading");
 

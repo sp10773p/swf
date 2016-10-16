@@ -39,6 +39,10 @@ public class InputModel extends AbstractModel {
             appendAttribute("value", getValue());
         }
 
+        if(isMand()){
+            appendAttribute("mandatory", getTitle());
+        }
+
         buffer.append("<input ").append(getAttribute()).append("/>").append(LF);
     }
 }

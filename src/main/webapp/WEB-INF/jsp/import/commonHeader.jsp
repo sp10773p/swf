@@ -26,12 +26,15 @@
 
 <script src="js/jquery.js"></script>
 <script src="js/jquery-ui.js"></script>
+<script src="js/i18n/grid.locale-en.js" type="text/javascript"></script>
+<script src="js/jquery.jqGrid.min.js" type="text/javascript"></script>
+
 <script src="js/date.js"></script>
 <script src="js/util.js"></script>
 <script src="js/string.js"></script>
 <script src="js/serverUtils.js"></script>
-<script src="js/i18n/grid.locale-en.js" type="text/javascript"></script>
-<script src="js/jquery.jqGrid.min.js" type="text/javascript"></script>
+<script src="js/jqGridUtil.js"></script>
+<script src="js/menu.js"></script>
 
 <style>
     html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif}
@@ -70,4 +73,14 @@
 
     .ui-common-table {font-size: 14px}
     .ui-jqgrid .ui-jqgrid-view {z-index: 0}
+
+	/* detail 관련 */
+	.detail-table {border-collapse: collapse; border-spacing: 0; width: 100%; display: table; border: : 1px solid #ccc}
+	.detail-table tr {border-bottom: 1px solid #ddd}
+	.detail-table td, .detail-table th {border: 1px solid #ccc; padding: 6px 8px; display: table-cell; text-align: left; vertical-align: middle; font-size: 14px; height: 100%;}
+	.detail-table th {background-color: #ddffff!important;}
+
+	.detail-input {width: 98%; font-size: 14px; font-weight: normal}
+
+
 </style>

@@ -18,7 +18,7 @@ public class EventEntry {
         this.name = name;
     }
 
-    String getFnName() {
+    public String getFnName() {
         return fnName;
     }
 

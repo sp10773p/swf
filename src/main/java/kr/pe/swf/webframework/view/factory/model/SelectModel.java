@@ -24,6 +24,10 @@ public class SelectModel extends AbstractModel {
             appendAttribute("style", getStyle());
         }
 
+        if(isMand()){
+            appendAttribute("mandatory", getTitle());
+        }
+
         buffer.append("<select class=\"").append(getClassName()).append("\"")
                 .append(getAttribute()).append(">").append(LF);
 
