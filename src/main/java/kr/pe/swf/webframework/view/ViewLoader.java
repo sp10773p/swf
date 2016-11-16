@@ -4,7 +4,6 @@ import kr.pe.swf.webframework.util.DOMUtil;
 import kr.pe.swf.webframework.util.FileUtil;
 import kr.pe.swf.webframework.util.StringUtils;
 import kr.pe.swf.webframework.view.entry.*;
-import kr.pe.swf.webframework.view.factory.ButtonsFactory;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,20 +28,18 @@ public class ViewLoader {
     private final String DETAILS_ID = "DETAILS";
     private final String LISTS_ID   = "LISTS";
 
-    private final String DEFAULT_LIST_ROWNUM  = "10";
-    private final String DEFAULT_LIST_ROWLIST = "10,30,50";
-
-
+    private final String DEFAULT_LIST_ROWNUM   = "10";
+    private final String DEFAULT_LIST_ROWLIST  = "10,30,50";
     private String viewPath;
 
     private ViewInfoFactory viewInfoFactory;
 
-    public ViewLoader(){}
-
-    public ViewLoader(ViewInfoFactory viewInfoFactory){
-        this.viewInfoFactory = viewInfoFactory;
+    public ViewLoader() {
     }
 
+    public ViewLoader(ViewInfoFactory viewInfoFactory) {
+        this.viewInfoFactory = viewInfoFactory;
+    }
 
     public void initViewLoader(ViewInfoFactory viewInfoFactory, String viewPath, String searchType, String detailType, String gridType) {
         this.viewPath = viewPath;
@@ -95,20 +92,20 @@ public class ViewLoader {
         String script = DOMUtil.getElementTextByPath(root, "script");
         viewEntry.setScript(script);
 
-        // 그리드 정보
+        //그리드 정보
         viewEntry.setListsFactory(buildListInfo(root, viewEntry.getSearchsFactory()));
 
-        // 상세정보
+        //상세 정보
         viewEntry.setDetailsFactory(buildDetailInfo(root));
 
-        // 버튼 정보
+        //버튼정보
         viewEntry.setButtonsFactory(buildButtonInfo(root));
 
         viewInfoFactory.setViewEntryMap(viewId, viewEntry);
         viewInfoFactory.setViewLoadManage(viewId, filename);
     }
 
-    private List<ButtonsFactory> buildButtonInfo(Element root){
+    private List<ButtonsFactory> buildButtonInfo(Element root) {
         List<ButtonsFactory> buttonsFactories = new ArrayList<ButtonsFactory>();
 
         List<Element> buttonList = DOMUtil.getChildrenByPath(root, "button");
@@ -119,8 +116,8 @@ public class ViewLoader {
             // id
             String idAtt = DOMUtil.getAttribute(buttonEle, "id");
             buttonsFactory.setId(idAtt);
-
             // function
+
             String functionAtt = DOMUtil.getAttribute(buttonEle, "function");
             buttonsFactory.setFunction(functionAtt);
 
@@ -134,43 +131,43 @@ public class ViewLoader {
         return buttonsFactories;
     }
 
-    private List<DetailsFactroy> buildDetailInfo(Element root) throws InvocationTargetException, IllegalAccessException, SQLException {
-        List<DetailsFactroy> detailsFactories = new ArrayList<DetailsFactroy>();
+    private List<DetailsFactory> buildDetailInfo(Element root) throws IllegalAccessException, SQLException, InvocationTargetException {
+        List<DetailsFactory> detailsFactories = new ArrayList<DetailsFactory>();
 
         List<Element> detailsList = DOMUtil.getChildrenByPath(root, "details");
 
         int idx = 0;
-        for(Element detailEle : detailsList) {
-            DetailsFactroy detailsFactroy = new DetailsFactroy();
+        for(Element detailsEle : detailsList){
+            DetailsFactory detailsFactory = new DetailsFactory();
 
             // details id
-            detailsFactroy.setId(DETAILS_ID + (++idx));
+            detailsFactory.setId(DETAILS_ID + (++idx));
 
             // title
-            String titleAtt = DOMUtil.getAttribute(detailEle, "title");
-            if(StringUtils.isNotEmpty(titleAtt)){
-                detailsFactroy.setTitle(titleAtt);
+            String titleAtt = DOMUtil.getAttribute(detailsEle, "title");
+            if(StringUtils.isNotEmpty(titleAtt)) {
+                detailsFactory.setTitle(titleAtt);
             }
 
             // 로드시 조회 쿼리키
-            String qKeyAtt = DOMUtil.getAttribute(detailEle, "qKey");
-            if(StringUtils.isNotEmpty(qKeyAtt)){
-                detailsFactroy.setqKey(qKeyAtt);
+            String qKeyAtt = DOMUtil.getAttribute(detailsEle, "qKey");
+            if(StringUtils.isNotEmpty(qKeyAtt)) {
+                detailsFactory.setqKey(qKeyAtt);
             }
 
             // detail column size
-            String colSizeAtt = DOMUtil.getAttribute(detailEle, "colSize");
+            String colSizeAtt = DOMUtil.getAttribute(detailsEle, "colSize");
             if(StringUtils.isNotEmpty(colSizeAtt)){
-                detailsFactroy.setColSize(Integer.parseInt(colSizeAtt));
+                detailsFactory.setColSize(Integer.parseInt(colSizeAtt));
             }
 
-            List<Element> detailChildList = DOMUtil.getChildren(detailEle);
+            List<Element> detailChildList = DOMUtil.getChildren(detailsEle);
             DetailEntry detailEntry = null;
-            for(Element ele : detailChildList){
+            for (Element ele : detailChildList) {
                 detailEntry = new DetailEntry();
 
                 if(ele.getTagName().equals("title")){
-                    String title = ele.getTextContent();
+                    String title   = ele.getTextContent();
                     String colspan = DOMUtil.getAttribute(ele, "colspan");
                     String rowspan = DOMUtil.getAttribute(ele, "rowspan");
 
@@ -178,7 +175,7 @@ public class ViewLoader {
                     detailEntry.setColspan(colspan);
                     detailEntry.setRowspan(rowspan);
 
-                    detailsFactroy.addDetail(detailEntry);
+                    detailsFactory.addDetail(detailEntry);
 
                 }else if(ele.getTagName().equals("hidden")){
                     String id    = DOMUtil.getAttribute(ele, "id");
@@ -186,15 +183,16 @@ public class ViewLoader {
 
                     detailEntry.setId(id);
                     detailEntry.setValue(value);
+                    detailEntry.setType("hidden");
 
-                    detailsFactroy.addDetail(detailEntry);
+                    detailsFactory.addDetail(detailEntry);
 
                 }else if(ele.getTagName().equals("detail")){
-                    String colspan = DOMUtil.getAttribute(ele, "colspan");
                     String rowspan = DOMUtil.getAttribute(ele, "rowspan");
+                    String colspan = DOMUtil.getAttribute(ele, "colspan");
 
-                    detailEntry.setColspan(colspan);
                     detailEntry.setRowspan(rowspan);
+                    detailEntry.setColspan(colspan);
 
                     // 필수여부
                     boolean isMand = false;
@@ -203,9 +201,10 @@ public class ViewLoader {
                     for(Element compEle : compList){
                         CompEntry compEntry = new CompEntry();
                         Map map = getAttributeElementToMap(compEle);
+
                         BeanUtils.populate(compEntry, map);
 
-                        if(!isMand){
+                        if(!isMand) {
                             isMand = compEntry.isMand();
                         }
 
@@ -213,7 +212,7 @@ public class ViewLoader {
                         List<EventEntry> eventEntryList = getEventElement(compEle);
                         compEntry.setEventEntries(eventEntryList);
 
-                        //style 저장
+                        // style 저장
                         compEntry.setStyle(DOMUtil.getElementTextByPath(compEle, "style"));
 
                         String type = StringUtils.trimStr(compEntry.getType());
@@ -231,14 +230,13 @@ public class ViewLoader {
 
                             compEntry.setList(list);
                         }
-
-                        detailEntry.addCompEntries(compEntry);
+                        detailEntry.addCompEntry(compEntry);
                     }
 
-                    //comp 중에 필수인 comp가 있으면 이전 태그인 th에 mandatory 표시
+                    // comp 중에 필수인 comp가 있으면 이전 태그인 th에 mandatory 표시
                     if(isMand){
-                        List<DetailEntry> tmpList = detailsFactroy.getDetails();
-                        for(int i = (tmpList.size() - 1); i >= 0; i--){
+                        List<DetailEntry> tmpList = detailsFactory.getDetails();
+                        for(int i = (tmpList.size()-1); i >= 0; i--){
                             DetailEntry tmpDetailEntry = tmpList.get(i);
                             if(StringUtils.isNotEmpty(tmpDetailEntry.getTitle())){
                                 tmpDetailEntry.setMand(isMand);
@@ -247,17 +245,17 @@ public class ViewLoader {
                         }
                     }
 
-                    detailsFactroy.addDetail(detailEntry);
-
+                    detailsFactory.addDetail(detailEntry);
                 }
             }
 
-            detailsFactories.add(detailsFactroy);
-            LOGGER.info("### Append Detail Infomation - {}", detailsFactroy.getId());
+            detailsFactories.add(detailsFactory);
+            LOGGER.info("### Append Detail Infomation - {}", detailsFactory.getId());
         }
 
         return detailsFactories;
     }
+
     private List<SearchsFactory> buildSearchInfo(Element root) throws Exception {
         List<SearchsFactory> searchsFactories = new ArrayList<SearchsFactory>();
 
@@ -266,6 +264,7 @@ public class ViewLoader {
         int idx = 0;
         for(Element searchsEle : searchsList){
             SearchsFactory searchsFactory = new SearchsFactory();
+
             // searchs id
             searchsFactory.setId(SEARCHS_ID + (++idx));
 
@@ -290,7 +289,6 @@ public class ViewLoader {
             }
 
             List<Element> searchList = DOMUtil.getChildrenByPath(searchsEle, "search");
-
             // 조회조건 영역 파싱
             for(int i=0; i<searchList.size(); i++){
                 Element searchEle = searchList.get(i);
@@ -302,25 +300,23 @@ public class ViewLoader {
                 if (searchEntry == null) continue;
 
                 searchsFactory.addSearch(searchEntry);
-
             }
 
             searchsFactories.add(searchsFactory);
             LOGGER.info("### Append Search Infomation - {}", searchsFactory.getId());
-
         }
 
         return searchsFactories;
     }
+
 
     private List<ListsFactory> buildListInfo(Element root, List<SearchsFactory> searchsFactories) throws InvocationTargetException, IllegalAccessException {
         List<ListsFactory> retListsFactory = new ArrayList<ListsFactory>();
 
         List<Element> listsList = DOMUtil.getChildrenByPath(root, "lists");
         int idx = 0;
-        for(Element listEle : listsList){
+        for(Element listEle : listsList) {
             ListsFactory listsFactory = new ListsFactory();
-
             // lists id
             listsFactory.setId(LISTS_ID + (++idx));
 
@@ -332,13 +328,13 @@ public class ViewLoader {
 
             String rowListAtt = DOMUtil.getAttribute(listEle, "rowList");
             if(StringUtils.isEmpty(rowListAtt)){
-                rowNumAtt = DEFAULT_LIST_ROWLIST;
+                rowListAtt = DEFAULT_LIST_ROWLIST;
             }
-            listsFactory.setRowList(rowListAtt);
+            listsFactory.setRowList("["+rowListAtt+"]");
 
             // 디폴트 소팅 컬럼
             String sortname = DOMUtil.getAttribute(listEle, "sortname");
-            if(StringUtils.isEmpty(sortname)){
+            if(StringUtils.isEmpty(sortname)) {
                 sortname = "";
             }
             listsFactory.setSortname(sortname);
@@ -353,7 +349,7 @@ public class ViewLoader {
             // 조회 쿼리
             String qKey = DOMUtil.getAttribute(listEle, "qKey");
             if(StringUtils.isEmpty(qKey)){
-                // 쿼리키가 없을때 같은 차수의 조회영역  쿼리키를 셋팅한다. (조회버튼으로 조회시 대상인 리스트임)
+                // 쿼리키가 없을때 같은 차수의 조회영역 쿼리키를 셋팅한다.(조회버튼으로 조회시 대상인 리스트임)
                 if(searchsFactories.size() >= idx){
                     SearchsFactory searchsFactory = searchsFactories.get(idx-1);
                     qKey = searchsFactory.getqKey();
@@ -361,12 +357,13 @@ public class ViewLoader {
             }
             listsFactory.setqKey(qKey);
 
-            //화면로드시 조회할지 여부
+            // 화면로드시 조회할지 여부
             String isFirstLoad = DOMUtil.getAttribute(listEle, "isFirstLoad");
             if(StringUtils.isNotEmpty(isFirstLoad)){
-                listsFactory.setFirstLoad("Y".equals(isFirstLoad.toUpperCase()) ? true :false);
+                listsFactory.setFirstLoad(("Y".equals(isFirstLoad.toUpperCase()) ? true : false));
             }
 
+            // 화면로드시 조회할지 여부
             String layout = DOMUtil.getAttribute(listEle, "layout");
             if(StringUtils.isNotEmpty(layout)){
                 listsFactory.setLayout(layout);
@@ -374,7 +371,7 @@ public class ViewLoader {
 
             // 컬럼정보 셋팅
             String colModel = DOMUtil.getElementTextByPath(listEle, "colModel");
-            listsFactory.setLists(makeColumEntryList(colModel));
+            listsFactory.setList(makeColumnEntryList(colModel));
 
             // 컬럼정보 문자열로 저장
             listsFactory.setColModel(colModel.replaceAll("&#44;", ",").replaceAll("&#59;", ";").replaceAll("&#39;", "'"));
@@ -386,14 +383,14 @@ public class ViewLoader {
                 String fnName = DOMUtil.getElementText(eventEle);
 
                 EventEntry eventEntry = new EventEntry();
+                eventEntry.setName(name);
                 eventEntry.setFnName(fnName);
-                eventEntry.setFnName(name);
 
                 listsFactory.addEventEntry(eventEntry);
             }
 
             retListsFactory.add(listsFactory);
-
+            LOGGER.info("### Append List Infomation - {}", listsFactory.getId());
         }
 
         return retListsFactory;
@@ -403,7 +400,7 @@ public class ViewLoader {
         SearchEntry searchEntry = new SearchEntry();
 
         //속성 저장
-        BeanUtils.populate(searchEle, getAttributeElementToMap(searchEle));
+        BeanUtils.populate(searchEntry, getAttributeElementToMap(searchEle));
 
         // event 저장
         searchEntry.setEventEntries(getEventElement(searchEle));
@@ -419,11 +416,9 @@ public class ViewLoader {
             if(list == null){
                 return null;
             }
-
             String selectQKey = DOMUtil.getElementTextByPath(searchEle, "selectQKey");
             if(StringUtils.isNotEmpty(selectQKey)){
                 searchEntry.setSelectQKey(selectQKey.trim());
-
             }
 
             searchEntry.setList(list);
@@ -433,19 +428,19 @@ public class ViewLoader {
     }
 
     private Map getAttributeElementToMap(Element element){
-        String[] attArr = {"id", "type", "title", "isMand", "isMult", "length", "from", "to", "default", "value"};
+        String[] attArr = {"id","type","title","isMand","isMult","length","from","to","default","value"};
 
         Map<String, Object> retMap = new HashMap();
         for(String arrId : attArr){
-            String key = arrId;
+            String Key = arrId;
             if("from".equals(arrId) || "to".equals(arrId) || "default".equals(arrId)){
-                key += "Date";
+                Key += "Date";
 
             }else if("isMand".equals(arrId) || "isMult".equals(arrId)){
-                key = arrId.replace("is", "").toLowerCase();
+                Key = arrId.replace("is", "").toLowerCase();
             }
 
-            retMap.put(key, DOMUtil.getAttribute(element, arrId));
+            retMap.put(Key, DOMUtil.getAttribute(element, arrId));
         }
 
         retMap.put("style", DOMUtil.getElementTextByPath(element, "style"));
@@ -470,8 +465,7 @@ public class ViewLoader {
         return eventEntries;
     }
 
-
-    private List<Map<String, String>> getItemList(Element element) throws SQLException{
+    private List<Map<String, String>> getItemList(Element element) throws SQLException {
         String selectQKey = DOMUtil.getElementTextByPath(element, "selectQKey");
         List<Element> itemList = DOMUtil.getChildrenByPath(element, "list/item");
 
@@ -480,23 +474,25 @@ public class ViewLoader {
             return null;
         }
 
-        List<Map<String ,String>> list = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> list = new ArrayList<Map<String, String>>();
+
         if(StringUtils.isNotEmpty(selectQKey)){
             selectQKey = selectQKey.trim();
 
             list = this.viewInfoFactory.getSqlMapClient().queryForList(selectQKey, null);
-        }else {
-            for (Element ele : itemList) {
-                String code = DOMUtil.getAttribute(ele, "code");
+
+        }else{
+            for(Element ele : itemList){
+                String code     = DOMUtil.getAttribute(ele, "code");
                 String selected = DOMUtil.getAttribute(ele, "selected");
-                String checked = DOMUtil.getAttribute(ele, "checked");
-                String label = DOMUtil.getElementText(ele);
+                String checked  = DOMUtil.getAttribute(ele, "checked");
+                String label    = DOMUtil.getElementText(ele);
 
                 Map<String, String> map = new HashMap<String, String>();
-                map.put("code", code);
-                map.put("label", label);
+                map.put("code"    , code);
+                map.put("label"   , label);
                 map.put("selected", selected);
-                map.put("checked", checked);
+                map.put("checked" , checked);
 
                 list.add(map);
             }
@@ -505,34 +501,34 @@ public class ViewLoader {
         return list;
     }
 
-    private boolean validMandantary(Element searchEle) {
+    private boolean validMandantary(Element ele) {
         //필수값 체크
         boolean bool = true;
         StringBuffer attStr = new StringBuffer();
-        for(SEARCH search : SEARCH.values()){
-            String att = DOMUtil.getAttribute(searchEle, search.toString());
+        for(MANDATORY mand : MANDATORY.values()){
+            String att = DOMUtil.getAttribute(ele, mand.toString());
             if(att == null || att.length() == 0){
                 bool = false;
             }
 
-            attStr.append(search.toString()+",");
+            attStr.append(mand.toString()+",");
         }
 
         if(!bool){
-            LOGGER.error("::: <seach> Tag의 필수 속성이 존재 하지 않습니다. [{}]", attStr.substring(0, attStr.length() - 1));
+            LOGGER.error(":::필수 속성이 존재 하지 않습니다. [{}]", attStr.substring(0, attStr.length() - 1));
         }
 
         return bool;
     }
 
-    private List<ColumnEntry> makeColumEntryList(String s) throws InvocationTargetException, IllegalAccessException {
+    private List<ColumnEntry> makeColumnEntryList(String s) throws InvocationTargetException, IllegalAccessException {
         List<ColumnEntry> columnEntries = new ArrayList<ColumnEntry>();
         StringBuffer colModel = new StringBuffer(s.trim().replaceAll("\\[", "").replaceAll("]", ""));
 
         while(colModel.indexOf("{") > -1){
             ColumnEntry columnEntry = new ColumnEntry();
             int colStartIdx = colModel.indexOf("{");
-            int colEndIdx   = colModel.indexOf("}") + 1;
+            int colEndIdx   = colModel.indexOf("}")+1;
 
             String column = colModel.substring(colStartIdx, colEndIdx).toString();
             column = column.replaceAll("\\{", "").replaceAll("}", "");
@@ -544,15 +540,13 @@ public class ViewLoader {
                 String key = op.split(":")[0].trim();
                 String val = op.split(":")[1].trim().replaceAll("'", "");
                 val = val.replaceAll("&#44;", ",").replaceAll("&#59;", ";").replaceAll("&#39;", "'");
-
                 option.put(key, val);
-
             }
 
             BeanUtils.populate(columnEntry, option);
             colModel.delete(0, colEndIdx);
 
-            LOGGER.debug("Lists Column Entry Load : {}", columnEntry.toString());
+            LOGGER.debug("LIsts Column Entry Load : {}", columnEntry.toString());
 
             columnEntries.add(columnEntry);
         }
@@ -561,17 +555,16 @@ public class ViewLoader {
     }
 
     // 필수 속성
-    enum SEARCH{
+    enum MANDATORY{
         id,type
     }
 
     enum TARGET {
-
-        SEARCHS1("LIST1"),
-        SEARCHS2("LIST2"),
-        SEARCHS3("LIST3"),
-        SEARCHS4("LIST4"),
-        SEARCHS5("LIST5");
+        SEARCHS1("LISTS1"),
+        SEARCHS2("LISTS2"),
+        SEARCHS3("LISTS3"),
+        SEARCHS4("LISTS4"),
+        SEARCHS5("LISTS5");
 
         private String key;
         private TARGET(String key){
@@ -583,5 +576,4 @@ public class ViewLoader {
         }
 
     }
-
 }

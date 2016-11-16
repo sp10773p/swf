@@ -55,7 +55,7 @@ public class StringUtils {
 	}
 	public static String getDateFormat(String sformat) 
 	{
-		java.util.Date currentTime = new java.util.Date();
+		Date currentTime = new Date();
 		SimpleDateFormat formatter = new SimpleDateFormat (sformat);
 		String sTime = formatter.format(currentTime) ;
 		return sTime;

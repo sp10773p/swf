@@ -1,11 +1,13 @@
 package kr.pe.swf.webframework.view.factory.w3factory;
 
 import kr.pe.swf.webframework.util.HtmlUtil;
+import kr.pe.swf.webframework.util.StringUtils;
+import kr.pe.swf.webframework.view.entry.EventEntry;
 import kr.pe.swf.webframework.view.entry.SearchEntry;
 import kr.pe.swf.webframework.view.factory.SearchCol;
 import kr.pe.swf.webframework.view.factory.model.*;
 
-import static kr.pe.swf.webframework.util.HtmlUtil.createLabel;
+import java.util.List;
 
 /**
  * Created by seongdonghun on 2016. 9. 20..
@@ -52,12 +54,11 @@ public class W3SearchCol extends SearchCol {
         colBuffer.append("\t").append(HtmlUtil.openDiv(tdClass));
 
         // 조회조건 입력란
-        String type  = searchEntry.getType();
+        String type  = StringUtils.trimStr(searchEntry.getType());
         AbstractModel model;
 
         if("autocomplete".equals(type)){
             model = new AutocompleteModel();
-            model.initAttribute(searchEntry.toMap());
             model.setClassName(inputClass);
 
         }else if("radio".equals(type)){
@@ -67,6 +68,10 @@ public class W3SearchCol extends SearchCol {
         }else if("checkbox".equals(type)){
             model = new CheckboxModel(searchEntry.getList());
             model.setClassName(checkboxClass);
+
+        }else if("select".equals(type)){
+            model = new SelectModel(searchEntry.getList());
+            model.setClassName(inputClass);
 
         }else if(type.indexOf("date") > -1){
             model = new DatepickerModel();
@@ -79,6 +84,14 @@ public class W3SearchCol extends SearchCol {
         }
 
         model.initAttribute(searchEntry.toMap());
+
+        List<EventEntry> eventEntryList = searchEntry.getEventEntries();
+        for(EventEntry eventEntry : eventEntryList){
+            String ev = eventEntry.getName();
+            String fn = eventEntry.getFnName();
+            model.appendAttribute(ev, fn);
+        }
+
         colBuffer.append("\t\t").append(model.draw());
 
         colBuffer.append("\t").append(HtmlUtil.closeDiv()); // close Td Div

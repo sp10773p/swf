@@ -13,140 +13,135 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by sdh on 2016-10-15.
+ * Created by seongdonghun on 2016. 9. 20..
  */
 public abstract class DetailBuilder {
-	protected List<DetailEntry> detailEntries = null;
-	protected int detailColSize = 3; // default column count
+    protected List<DetailEntry> detailEntries = null;
+    protected int detailColSize = 3; //default column count
 
-	private static Logger LOGGER = LoggerFactory.getLogger(DetailBuilder.class);
-	private Map params = new HashMap();
+    private static Logger LOGGER = LoggerFactory.getLogger(DetailBuilder.class);
+    private Map params = new HashMap();
 
-	public static DetailBuilder getDetailFactory(String classname, List<DetailEntry> detailEntries){
-		DetailBuilder factory = null;
-		try{
-			Class cls = Class.forName(classname);
-			Constructor constructor = cls.getConstructor(new Class[]{Class.forName("java.util.List")});
-			factory = (DetailBuilder)constructor.newInstance(new Object[]{detailEntries});
+    public static DetailBuilder getDetailFactory(String classname, List<DetailEntry> detailEntries){
+        DetailBuilder factory = null;
+        try{
+            Class cls = Class.forName(classname);
+            Constructor constructor = cls.getConstructor(new Class[]{Class.forName("java.util.List")});
+            factory = (DetailBuilder)constructor.newInstance(new Object[]{detailEntries});
 
-		}catch (ClassNotFoundException e){
-			System.err.println("클래스 " + classname + " 이 발견되지 않습니다");
-		}catch (Exception e){
-			e.printStackTrace();
-		}
+        }catch (ClassNotFoundException e){
+            LOGGER.error("클래스 {} 이 발견되지 않습니다", classname);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
-		return factory;
-	}
+        return factory;
+    }
 
-	public List<DetailEntry> getDetailEntries() {
-		return detailEntries;
-	}
+    public Map getParams() {
+        return params;
+    }
 
-	public void setDetailEntries(List<DetailEntry> detailEntries) {
-		this.detailEntries = detailEntries;
-	}
+    public void setParams(Map params) {
+        this.params = params;
+    }
 
-	public int getDetailColSize() {
-		return detailColSize;
-	}
+    public DetailBuilder(List<DetailEntry> detailEntries){
+        this.detailEntries = detailEntries;
+    }
 
-	public void setDetailColSize(int detailColSize) {
-		this.detailColSize = detailColSize;
-	}
+    public void setDetailColSize(int detailColSize){
+        this.detailColSize = detailColSize;
+    }
 
-	public Map getParams() {
-		return params;
-	}
+    public Map<String , String> drawDetail(Map data) throws Exception {
+        Map<String , String> codeMap = new HashMap<String, String>();
 
-	public void setParams(Map params) {
-		this.params = params;
-	}
+        if(this.detailEntries == null){
+            throw new NullPointerException("DetailEntry is null");
+        }
 
-	public Map<String, String> drawDetail(Map data) throws Exception{
-		Map<String, String> codeMap = new HashMap<String, String>();
+        StringBuffer buffer       = new StringBuffer();
+        StringBuffer hiddenBuffer = new StringBuffer();
 
-		if(this.detailEntries == null){
-			throw  new NullPointerException("DetailEntry is Null");
-		}
+        int colIdx = 0;
+        int preRowspan = 0;
 
-		StringBuffer buffer       = new StringBuffer();
-		StringBuffer hiddenBuffer = new StringBuffer();
+        DetailRow detailRow = this.createRow();
+        for(int i=0; i < this.detailEntries.size() || colIdx > 0; i++) {
+            DetailEntry detailEntry = null;
+            if(i < this.detailEntries.size()){
+                detailEntry = this.detailEntries.get(i);
 
-		int colIdx = 0;
-		int preRowspan = 0;
+            }else{
+                detailEntry = new DetailEntry();
+                detailEntry.setColspan(String.valueOf((this.detailColSize*2) - colIdx));
+            }
 
-		DetailRow detailRow = this.createRow();
-		for(int i=0; i < this.detailEntries.size() || colIdx > 0; i++){
-			DetailEntry detailEntry = null;
-			if(i < this.detailEntries.size()){
-				detailEntry = this.detailEntries.get(i);
+            if("hidden".equals(detailEntry.getType())){
+                String hiddenId = StringUtils.trimStr(detailEntry.getId());
 
-			}else{
-				detailEntry = new DetailEntry();
-				detailEntry.setColspan(String.valueOf((this.detailColSize*2) - colIdx));
-			}
+                if(this.params.containsKey(hiddenId)){
+                    detailEntry.setValue((String)this.params.get(hiddenId));
+                }
 
-			if("hidden".equals(detailEntry.getType())){
-				String hiddenId = StringUtils.trimStr(detailEntry.getId());
+                hiddenBuffer.append(HtmlUtil.createHidden(detailEntry.getId(), detailEntry.getValue())).append("\r\n");
+                continue;
+            }
 
-				if(this.params.containsKey(hiddenId)){
-					detailEntry.setValue((String)this.params.get(hiddenId));
-				}
+            if (colIdx == 0) {
+                detailRow.makeRow();
+                if(preRowspan > 0){
+                    colIdx++;
+                    preRowspan--;
+                }
+            }
 
-				hiddenBuffer.append(HtmlUtil.createHidden(detailEntry.getId(), detailEntry.getValue())).append("\r\n");
-				continue;
-			}
+            DetailCol detailCol = this.createCol(detailEntry);
+            detailCol.setColSize(this.detailColSize);
+            detailCol.bindValue(data);
 
-			if(colIdx == 0){
-				detailRow.makeRow();
-				if(preRowspan > 0){
-					colIdx++;
-					preRowspan--;
-				}
-			}
+            detailRow.appendCol(detailCol);
 
-			DetailCol detailCol = this.createCol(detailEntry);
-			detailCol.setColSize(this.detailColSize);
-			detailCol.bindValue(data);
+            preRowspan += (StringUtils.isEmpty(detailEntry.getRowspan()) ? 0 : Integer.parseInt(detailEntry.getRowspan()) - 1);
 
-			detailRow.appendCol(detailCol);
+            colIdx += (StringUtils.isEmpty(detailEntry.getColspan()) ? 1 : Integer.parseInt(detailEntry.getColspan()));
 
-			preRowspan += (StringUtils.isEmpty(detailEntry.getRowspan()) ? 0 : Integer.parseInt(detailEntry.getRowspan()) - 1);
+            if(colIdx == (this.detailColSize*2)){
+                detailRow.closeRow();
+                colIdx = 0;
+            }
 
-			colIdx += (StringUtils.isEmpty(detailEntry.getColspan()) ? 1 : Integer.parseInt(detailEntry.getColspan()));
+            // bindComponent Script 생성
+            for(CompEntry compEntry : detailEntry.getCompEntries()){
+                CompEntry copyEntry = (CompEntry) compEntry.clone();
+                String id = copyEntry.getId();
+                if(data!= null && data.containsKey(id)){
+                    copyEntry.setValue(String.valueOf(data.get(id)));
+                }
 
-			if(colIdx == (this.detailColSize*2)){
-				detailRow.closeRow();
-				colIdx = 0;
-			}
+                buffer.append(bindComponent(copyEntry));
+            }
+        }
 
-			// bindCompoenet Script 생성
-			for(CompEntry compEntry : detailEntry.getCompEntries()){
-				CompEntry copyEntry = (CompEntry)compEntry.clone();
-				String id = copyEntry.getId();
-				if(data != null && data.containsKey(id)){
-					copyEntry.setValue(String.valueOf(data.get(id)));
-				}
+        StringBuffer tableBuffer = new StringBuffer();
+        tableBuffer.append(HtmlUtil.openHtml("detail-table"));
+        tableBuffer.append("<tbody>").append("\r\n");
+        tableBuffer.append(detailRow.output());
+        tableBuffer.append("</tbody>").append("\r\n");
+        tableBuffer.append(HtmlUtil.closeHrml());
 
-				buffer.append(bindCompoen(copyEntry));
-			}
-		}
+        codeMap.put("bindScript" , buffer.toString());
+        codeMap.put("detail"     , tableBuffer.toString());
+        codeMap.put("hidden"     , hiddenBuffer.toString());
 
-		StringBuffer tableBuffer = new StringBuffer();
-		tableBuffer.append(HtmlUtil.openHtml("detail-table"));
-		tableBuffer.append("<tbody>").append("\r\n");
-		tableBuffer.append(detailRow.ouput());
-		tableBuffer.append(HtmlUtil.closeHtml());
+        return codeMap;
 
-		codeMap.put("bindScript", buffer.toString());
-		codeMap.put("detail"    , tableBuffer.toString());
-		codeMap.put("hidden"    , hiddenBuffer.toString());
+    }
 
-		return codeMap;
-	}
+    public abstract String bindComponent(CompEntry compEntry) throws Exception;
 
-	public abstract String bindCompoen(CompEntry compEntry) throws Exception;
+    public abstract DetailRow createRow();
+    public abstract DetailCol createCol(DetailEntry data);
 
-	public abstract DetailRow createRow();
-	public abstract DetailCol createCol(DetailEntry detailEntry);
 }

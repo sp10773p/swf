@@ -1,10 +1,8 @@
 package kr.pe.swf.webframework.view;
 
 import com.ibatis.sqlmap.client.SqlMapClient;
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import kr.pe.swf.webframework.util.StringUtils;
 import kr.pe.swf.webframework.view.entry.ViewEntry;
-import kr.pe.swf.webframework.view.factory.ButtonsFactory;
 import kr.pe.swf.webframework.view.factory.DetailBuilder;
 import kr.pe.swf.webframework.view.factory.ListBuilder;
 import kr.pe.swf.webframework.view.factory.SearchBuilder;
@@ -16,10 +14,7 @@ import org.springframework.ui.velocity.VelocityEngineUtils;
 
 import java.io.File;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by seongdonghun on 2016. 9. 12..
@@ -129,8 +124,6 @@ public class ViewInfoFactory {
             StringWriter writer = new StringWriter();
             VelocityEngineUtils.mergeTemplate(velocityEngine, layout, "UTF-8", map, writer);
 
-            System.out.println(writer.toString());
-
             viewVmLoadManage.put(viewId, writer.toString());
         //}
     }
@@ -173,17 +166,17 @@ public class ViewInfoFactory {
     public Map<String, Object> getBindSourceCode(String viewId) throws Exception{
         Map<String, Object> bindSourceMap = new HashMap<String, Object>();
 
-        //view Parameter
+        // view Parameter
         Map viewParam = this.getViewEntry(viewId).getViewParam();
 
         String saveMode = null;
-        if(!viewParam.isEmpty() && viewParam.containsKey("saveMod")){
+        if(!viewParam.isEmpty() && viewParam.containsKey("saveMode")){
             saveMode = (String)viewParam.get("saveMode");
         }
 
         StringBuffer bindScriptBuffer = new StringBuffer();
 
-        //조회영역
+        // 조회영역
         List<SearchsFactory> searchsFactories = getViewEntry(viewId).getSearchsFactory();
         for(SearchsFactory searchsFactory : searchsFactories){
             if(searchsFactory.getSearchHtml() == null){
@@ -199,11 +192,12 @@ public class ViewInfoFactory {
                 // 조회 함수 지정
                 String targetObjId = ViewLoader.TARGET.valueOf(searchsFactory.getId()).getTarget();
                 if(StringUtils.isNotEmpty(searchsFactory.getFunction())){
-                    String function = searchsFactory.getFunction() + "('" + searchsFactory.getId() + "' , '" + targetObjId + "', '" + searchsFactory.getqKey() + "')";
+                    String function = searchsFactory.getFunction() + "('" + searchsFactory.getId() + "' , '" + targetObjId
+                            + "', '" + searchsFactory.getqKey() + "')";
                     searchsFactory.setFunction(function);
 
                 }else{
-                    searchsFactory.setFunction("gfn_gridSelectList('" + searchsFactory.getId() + "' , '" + targetObjId + "', '" + searchsFactory.getqKey() + "')");
+                    searchsFactory.setFunction("gfn_pagingGridSelectList('" + searchsFactory.getId() + "' , '" + targetObjId + "', '" + searchsFactory.getqKey() + "')");
                 }
 
                 // set column size
@@ -212,7 +206,7 @@ public class ViewInfoFactory {
                 // html code 생성
                 Map<String, String> codeMap = searchBuilder.drawSearch();
 
-                searchsFactory.appendSearchHtml(codeMap.get("search"));
+                searchsFactory.appednSearchHtml(codeMap.get("search")); // Search Area HTML Code
 
                 // Search Area Component 초기화 Script
                 searchsFactory.appendSearchScript(codeMap.get("bindScript"));
@@ -221,19 +215,20 @@ public class ViewInfoFactory {
 
             bindScriptBuffer.append(searchsFactory.getSearchScript());
 
-            bindSourceMap.put(searchsFactory.getId() + "_SELECT_FN", searchsFactory.getFunction());
-            bindSourceMap.put(searchsFactory.getId() + "_FORM"     , searchsFactory.getId());
-            bindSourceMap.put(searchsFactory.getId()               , searchsFactory.getSearchHtml());
+            bindSourceMap.put(searchsFactory.getId() + "_SELECT_FN" , searchsFactory.getFunction());     // Search Area 검색버튼 클릭시 javascript Function명
+            bindSourceMap.put(searchsFactory.getId() + "_FORM"      , searchsFactory.getId());           // Search Form ID
+            bindSourceMap.put(searchsFactory.getId() + "_HTML"      , searchsFactory.getSearchHtml());   // Search Area HTML Code
+
         }
 
-        //상세 영역
-        StringBuffer detailHtmlBuffer = new StringBuffer(); //상세영역 html 코드
-        StringBuffer hiddenHtmlBuffer = new StringBuffer(); //상세영역 hidden html 코드
-        List<DetailsFactroy> detailsFactries = getViewEntry(viewId).getDetailsFactory();
+        // 상세 영역
+        StringBuffer detailHtmlBuffer = new StringBuffer(); // 상세영역 html 코드
+        StringBuffer hiddenHtmlBuffer = new StringBuffer(); // 상세영역 hidden html 코드
+        List<DetailsFactory> detailsFactories = getViewEntry(viewId).getDetailsFactory();
 
         Map data = null;
-        for(DetailsFactroy detailsFactroy : detailsFactries){
-            DetailBuilder detailBuilder = DetailBuilder.getDetailFactory(detailType, detailsFactroy.getDetails());
+        for(DetailsFactory detailsFactory : detailsFactories){
+            DetailBuilder detailBuilder = DetailBuilder.getDetailFactory(detailType, detailsFactory.getDetails());
 
             // view Parameter
             if(viewParam != null && !viewParam.isEmpty()){
@@ -241,11 +236,11 @@ public class ViewInfoFactory {
             }
 
             // set column size
-            detailBuilder.setDetailColSize(detailsFactroy.getColSize());
+            detailBuilder.setDetailColSize(detailsFactory.getColSize());
 
             // 수정모드일때 조회쿼리 실행
             if(saveMode != null && "U".equals(saveMode)){
-                String selectQKey = detailsFactroy.getqKey();
+                String selectQKey = detailsFactory.getqKey();
                 if(StringUtils.isNotEmpty(selectQKey)){
                     data = (Map)this.sqlMapClient.queryForObject(selectQKey, viewParam);
 
@@ -253,64 +248,63 @@ public class ViewInfoFactory {
             }else{
                 data = null;
             }
-
             // html code 생성
             Map<String, String> codeMap = detailBuilder.drawDetail(data);
 
-            detailsFactroy.clearDetailHtml();
-            detailsFactroy.appendDetailHtml(codeMap.get("detail")); // Detail Area HTML Code
+            detailsFactory.clearDetailHtml();
+            detailsFactory.appednDetailHtml(codeMap.get("detail")); // Detail Area HTML Code
 
             // Detail Area Component 초기화 Script
-            detailsFactroy.clearDetailScript();
+            detailsFactory.clearDetailScript();
+            detailsFactory.appendDetailScript(codeMap.get("bindScript"));
 
             // hidden 필드
             hiddenHtmlBuffer.append(codeMap.get("hidden"));
 
-            bindScriptBuffer.append(detailsFactroy.getDetailsScript());
+            bindScriptBuffer.append(detailsFactory.getDetailScript());
 
             // title이 있을때만 title을 표시
-            if(StringUtils.isNotEmpty(detailsFactroy.getTitle())){
-                detailHtmlBuffer.append("<h4>").append(detailsFactroy.getTitle()).append("</h4>\r\n");
+            if(StringUtils.isNotEmpty(detailsFactory.getTitle())){
+                detailHtmlBuffer.append("<h4>").append(detailsFactory.getTitle()).append("</h4>");
             }
 
-            detailHtmlBuffer.append(detailsFactroy.getDetailsHtml());
+            detailHtmlBuffer.append(detailsFactory.getDetailHtml());
+
         }
 
         detailHtmlBuffer.append(hiddenHtmlBuffer.toString());
-        bindSourceMap.put("DETAIL_HTML", detailHtmlBuffer.toString()); // Detail Area HTML Code
+        bindSourceMap.put("DETAIL_HTML"     , detailHtmlBuffer.toString());   // Detail Area HTML Code
 
         //bindComponent Script
-        bindSourceMap.put("bindScript"    , bindScriptBuffer.toString());
-        bindSourceMap.put("customerScript", getViewEntry(viewId).getScript());
+        bindSourceMap.put("bindScript"     , bindScriptBuffer.toString());
+        bindSourceMap.put("customerScript" , getViewEntry(viewId).getScript());
 
         // 리스트 영역
         StringBuffer bindGridScriptBuffer = new StringBuffer();
         List<ListsFactory> listsFactories = getViewEntry(viewId).getListsFactory();
         for(int i=0; i < listsFactories.size(); i++){
             ListsFactory listsFactory = listsFactories.get(i);
-            if(listsFactory.getListsScript() == null){
+            if(listsFactory.getListScript() == null){
                 ListBuilder listBuilder = new ListBuilder(gridType, listsFactory, this.velocityEngine);
 
-                String targetSelectQkey = null;
+                String targetSelectQKey = null;
                 String targetUrl        = null;
-
                 if(listsFactories.size() > (i+1)){
-                    targetSelectQkey = listsFactories.get(i+1).getqKey();
+                    targetSelectQKey = listsFactories.get(i+1).getqKey();
                     targetUrl        = listsFactories.get(i+1).getUrl();
                 }
 
                 Map param = this.getViewEntry(viewId).getViewParam();
-                bindGridScriptBuffer.append(listBuilder.createBindGrid(listsFactories.size(), i, targetSelectQkey, targetUrl, listsFactory.getLayout(), param));
-
+                bindGridScriptBuffer.append(listBuilder.createBindGrid(listsFactories.size(), i, targetSelectQKey, targetUrl, listsFactory.getLayout(), param));
             }
         }
 
         bindSourceMap.put("bindGridScript", bindGridScriptBuffer.toString());
 
         // 버튼 영역
-        List<Map<String ,String>> btnObjectList = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> btnObjectList = new ArrayList<Map<String, String>>();
         List<ButtonsFactory> buttonsFactories = getViewEntry(viewId).getButtonsFactory();
-        for(int i=0; i < buttonsFactories.size(); i++) {
+        for(int i=0; i < buttonsFactories.size(); i++){
             ButtonsFactory buttonsFactory = buttonsFactories.get(i);
             Map<String, String> btnObject = new HashMap<String, String>();
 
@@ -323,8 +317,8 @@ public class ViewInfoFactory {
 
         bindSourceMap.put("BUTTONS_LIST", btnObjectList);
 
-
         return bindSourceMap;
+
     }
 
     public String getDetailType() {
@@ -335,11 +329,11 @@ public class ViewInfoFactory {
         this.detailType = detailType;
     }
 
-    public String getGridType() {
-        return gridType;
-    }
-
     public void setGridType(String gridType) {
         this.gridType = gridType;
+    }
+
+    public String getGridType() {
+        return gridType;
     }
 }

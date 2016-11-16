@@ -32,7 +32,7 @@ public class InputModel extends AbstractModel {
         }
 
         if(getLength() > 0){
-            appendAttribute("length", String.valueOf(getLength()));
+            appendAttribute("maxlength", String.valueOf(getLength()));
         }
 
         if(StringUtils.isNotEmpty(getValue())){

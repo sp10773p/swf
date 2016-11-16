@@ -20,31 +20,39 @@ public class SearchsFactory {
 
     private String function;
     private String qKey;
-    private String id; // searchs id
+    private String id;          // searchs id
 
     public void addSearch(SearchEntry searchEntry){
         this.searchs.add(searchEntry);
-    }
-
-    public List<SearchEntry> getSearchs(){
-        return this.searchs;
     }
 
     public void setSearchs(List<SearchEntry> searchEntries){
         this.searchs = searchEntries;
     }
 
+    public List<SearchEntry> getSearchs(){
+        return this.searchs;
+    }
+
     public List<String> getSearchsIds(){
         List<String> searchIds = new ArrayList<String>();
 
         for(SearchEntry searchEntry : this.searchs){
-            searchIds.add(searchEntry.getId());
+            searchIds.add((String)searchEntry.getId());
         }
 
         return searchIds;
     }
 
-    public void appendSearchHtml(String html){
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void appednSearchHtml(String html){
         if(this.searchsHtml == null){
             this.searchsHtml = new StringBuffer();
         }
@@ -85,13 +93,5 @@ public class SearchsFactory {
 
     public void setqKey(String qKey) {
         this.qKey = qKey;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 }

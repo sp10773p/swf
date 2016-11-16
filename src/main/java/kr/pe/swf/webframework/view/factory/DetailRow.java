@@ -1,26 +1,26 @@
 package kr.pe.swf.webframework.view.factory;
 
 /**
- * Created by sdh on 2016-10-15.
+ * Created by seongdonghun on 2016. 9. 20..
  */
 public abstract class DetailRow {
-	protected int rowSize = 0;
-	protected int rowPos  = 1;
+    protected int rowSize= 0;
+    protected int rowPos = 1;
 
-	protected StringBuffer rowBuffer = new StringBuffer();
+    protected StringBuffer rowBuffer = new StringBuffer();
 
-	public DetailRow(int rowSize) {
-		this.rowSize = rowSize;
-		this.rowPos = 1; //position 초기화
-	}
+    public DetailRow(int rowSize){
+        this.rowSize = rowSize;
+        this.rowPos = 1; // position 초기화
+    }
 
-	public abstract void makeRow();
+    public abstract void makeRow();
 
-	public abstract void appendCol(DetailCol detailCol);
+    public abstract void appendCol(DetailCol col);
 
-	public abstract void closeRow();
+    public abstract void closeRow();
 
-	public String ouput(){
-		return this.rowBuffer.toString();
-	}
+    public String output(){
+        return this.rowBuffer.toString();
+    }
 }

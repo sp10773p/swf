@@ -1,0 +1,37 @@
+<!-- Title -->
+<div class="w3-row w3-padding-64" style="padding-bottom: 10px!important">
+    <div class="w3-container" style="width: 50%; float: left">
+        <h2 class="w3-text-teal">${title}</h2>
+    </div>
+    <div class="select_btn">
+        <!-- Button -->
+        #foreach(${btn} in ${BUTTONS_LIST})
+            <button id="${btn.BUTTONS_ID}" class="w3-btn w3-white w3-border w3-round-large" style="padding-top: 3px;
+            padding-bottom: 3px;" onclick="${btn.BUTTONS_FN}"><b>${btn.BUTTONS_NAME}</b></button>
+        #end
+    </div>
+</div>
+
+<!-- List Area -->
+<div class="w3-center w3-padding-16 w3-margin-left w3-margin-right">
+    <div style="margin-right: 5px; width: 49%; float: left;">
+        <table id="LISTS1"><tr><td></td></tr></table>
+    </div>
+    <div style="margin-left: 5px; width: 49%; float: right;">
+        <div id="detailArea">
+            <form id="DETAIL_FORM" class="searchForm">
+                ${DETAIL_HTML}
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        ${bindScript}
+        ${bindGridScript}
+    });
+
+    ${customerScript}
+
+
+</script>

@@ -2,19 +2,49 @@
 <!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
 
 <sqlMap namespace="Common">
-	<select id="selectList" parameterClass="map" resultClass="hashmap">
-		select * from swf.users
+
+	<select id="selectMenuList" parameterClass="map" resultClass="hashmap">
+		SELECT 	MENU_ID,
+				MENU_NM,
+				MENU_LVL,
+				MENU_TYPE,
+				P_MENU_ID,
+				SEQ,
+				URL,
+				USEYN,
+				LEAFYN
+		  FROM  CM_MENU
+		 WHERE  USEYN = 'Y'
+		ORDER BY SEQ
 	</select>
 
-	<select id="selectAutocompleteList" parameterClass="map" resultClass="hashmap">
-		select code      as "value",
-		       code_name as "label"
-		  from swf.CM_CODE
+	<select id="selectSubMenuList" parameterClass="string" resultClass="hashmap">
+		SELECT 	MENU_ID,
+				MENU_NM,
+				MENU_LVL,
+				MENU_TYPE,
+				P_MENU_ID,
+				SEQ,
+				URL,
+				USEYN,
+				LEAFYN
+		  FROM  CM_MENU
+		 WHERE  USEYN = 'Y'
+		  AND   MENU_LVL > 1
+		ORDER BY SEQ
 	</select>
 
-	<select id="selectTestList" parameterClass="map" resultClass="hashmap">
-		select * from swf.TB_TEST
+	<select id="selectMenuMngList" parameterClass="map" resultClass="hashmap">
+        SELECT 	MENU_ID AS "id",
+                MENU_NM,
+                CAST((MENU_LVL-1) AS CHAR) AS "level",
+                P_MENU_ID AS "parent",
+                IF(LEAFYN = 'Y','true','false') AS "isLeaf",
+                'true' AS "expanded",
+                'true' AS "loaded"
+          FROM  CM_MENU
+         WHERE  USEYN = 'Y'
+		ORDER BY SEQ
 	</select>
-
 </sqlMap>
 

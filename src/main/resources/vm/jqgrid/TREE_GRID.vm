@@ -1,0 +1,15 @@
+$('#${GRID_ID}').jqGrid({
+    ${initOption}
+    autowidth: true,
+    height: "auto",
+    colModel: ${colModel},
+    treeGrid: true,
+    treeGridModel: "adjacency",
+    rowNum: 10000,
+    treeIcons: {leaf: 'ui-icon-document_b'},
+    ${defaultEvent}
+    jsonReader: {
+        repeatitems: false,
+        root: "data"
+    }
+});

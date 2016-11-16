@@ -3,7 +3,6 @@ package kr.pe.swf.webframework.view.factory.model;
 import kr.pe.swf.webframework.util.StringUtils;
 import org.apache.commons.collections.map.HashedMap;
 
-import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -63,14 +62,14 @@ public abstract class AbstractModel implements Model {
     }
 
     public void initAttribute(Map<String, Object> map) {
-        this.type      = StringUtils.trimStr(map.get("type"));
-        this.id        = StringUtils.trimStr(map.get("id"));
-        this.name      = StringUtils.trimStr(map.get("name"));
-        this.title     = StringUtils.trimStr(map.get("title"));
-        this.style     = StringUtils.trimStr(map.get("style"));
-        this.className = StringUtils.trimStr(map.get("className"));
-        this.value     = StringUtils.trimStr(map.get("value"));
-        this.checked   = StringUtils.trimStr(map.get("checked"));
+        this.type      = (StringUtils.isEmpty(this.type)      ? StringUtils.trimStr(map.get("type"))      : this.type);
+        this.id        = (StringUtils.isEmpty(this.id)        ? StringUtils.trimStr(map.get("id"))        : this.id);
+        this.name      = (StringUtils.isEmpty(this.name)      ? StringUtils.trimStr(map.get("name"))      : this.name);
+        this.title     = (StringUtils.isEmpty(this.title)     ? StringUtils.trimStr(map.get("title"))     : this.title);
+        this.style     = (StringUtils.isEmpty(this.style)     ? StringUtils.trimStr(map.get("style"))     : this.style);
+        this.className = (StringUtils.isEmpty(this.className) ? StringUtils.trimStr(map.get("className")) : this.className);
+        this.value     = (StringUtils.isEmpty(this.value)     ? StringUtils.trimStr(map.get("value"))     : this.value);
+        this.checked   = (StringUtils.isEmpty(this.checked)   ? StringUtils.trimStr(map.get("checked"))   : this.checked);
         this.length    = (map.get("length") == null ? 0     : (Integer)map.get("length"));
         this.isMand    = (map.get("isMand") == null ? false : (Boolean)map.get("isMand"));
     }

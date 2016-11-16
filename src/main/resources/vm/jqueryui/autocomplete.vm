@@ -1,0 +1,32 @@
+$('#${id}_VIEW')
+    .on( "keydown", function( event ) {
+        if ( event.keyCode === $.ui.keyCode.TAB && $( this ).autocomplete( "instance" ).menu.active ) {
+            event.preventDefault();
+        }
+    })
+    .autocomplete({
+        source: function( request, response ) {
+            response( eval(gnf_autocomplete(request.term, '${selectQKey}')));
+        },
+        search: function() {
+            var term = this.value.split( /,\s*/ ).pop();
+            if ( term.length < 1 ) {
+                return false;
+            }
+        },
+        focus: function() { return false; },
+        select: function( event, ui ) {
+            var terms = this.value.split( /,\s*/ );
+            terms.pop();
+            terms.push( ui.item.label );
+            terms.push( "" );
+            this.value = terms.join( ", " );
+            terms = $('#${id}').val().split( /,\s*/ );
+            terms.pop();
+            terms.push( ui.item.value );
+            terms.push( "" );
+            $('#search6').val(terms.join( ", " ));
+
+            return false;
+        }
+    });

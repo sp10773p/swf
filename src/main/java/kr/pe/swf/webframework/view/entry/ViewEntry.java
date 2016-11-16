@@ -1,9 +1,9 @@
 package kr.pe.swf.webframework.view.entry;
 
-import kr.pe.swf.webframework.view.DetailsFactroy;
+import kr.pe.swf.webframework.view.ButtonsFactory;
+import kr.pe.swf.webframework.view.DetailsFactory;
 import kr.pe.swf.webframework.view.ListsFactory;
 import kr.pe.swf.webframework.view.SearchsFactory;
-import kr.pe.swf.webframework.view.factory.ButtonsFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,11 +14,11 @@ import java.util.Map;
  * Created by seongdonghun on 2016. 9. 21..
  */
 public class ViewEntry {
-    private List<SearchsFactory> searchsFactories = new ArrayList<SearchsFactory>();
-    private List<DetailsFactroy> detailsFactories = new ArrayList<DetailsFactroy>();
-    private List<ListsFactory> listsFactories = new ArrayList<ListsFactory>();
-    private List<ButtonsFactory> buttonsFactories = new ArrayList<ButtonsFactory>();
 
+    private List<SearchsFactory> searchsFactories = new ArrayList();
+    private List<DetailsFactory> detailsFactories = new ArrayList();
+    private List<ListsFactory> listsFactories     = new ArrayList();
+    private List<ButtonsFactory> buttonsFactories = new ArrayList();
     private String id;      // 화면 id
     private String type;    // View type
     private String title;   // 화면 제목
@@ -40,14 +40,13 @@ public class ViewEntry {
         this.buttonsFactories = buttonsFactories;
     }
 
-    public List<DetailsFactroy> getDetailsFactory() {
+    public List<DetailsFactory> getDetailsFactory() {
         return detailsFactories;
     }
 
-    public void setDetailsFactory(List<DetailsFactroy> detailsFactories) {
+    public void setDetailsFactory(List<DetailsFactory> detailsFactories) {
         this.detailsFactories = detailsFactories;
     }
-
 
     public List<ListsFactory> getListsFactory() {
         return listsFactories;
@@ -57,20 +56,20 @@ public class ViewEntry {
         this.listsFactories = listsFactories;
     }
 
-    public Map<String, String> getViewParam() {
-        return viewParam;
-    }
-
-    public void setViewParam(Map<String, String> viewParam) {
-        this.viewParam = viewParam;
-    }
-
     public List<SearchsFactory> getSearchsFactory() {
         return searchsFactories;
     }
 
     public void setSearchsFactory(List<SearchsFactory> searchsFactory) {
         this.searchsFactories = searchsFactory;
+    }
+
+    public Map<String, String> getViewParam() {
+        return viewParam;
+    }
+
+    public void setViewParam(Map<String, String> viewParam) {
+        this.viewParam = viewParam;
     }
 
     public String getId() {

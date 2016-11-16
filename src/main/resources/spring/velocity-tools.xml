@@ -1,0 +1,10 @@
+<tools>
+    <toolbox scope="application">
+        <tool key="date" format="yyyy년 MM월 dd일" class="org.apache.velocity.tools.generic.DateTool"  />
+        <tool key="convert" class="org.apache.velocity.tools.generic.ConversionTool" dateFormat="yyyyMMdd" />
+        <!--<tool key="lists" class="org.apache.velocity.tools.generic.ListTool" />-->
+    </toolbox>
+    <toolbox scope="request">
+        <tool class="kr.pe.sdh.common.util.CustomTool" />
+    </toolbox>
+</tools>

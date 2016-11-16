@@ -4,14 +4,18 @@
 var ajaxUtil = {};
 var serverUtil = {};
 
-serverUtil = function (formId, targetId, selectQKey) {
+serverUtil = function (formId, targetId, selectQKey, url, callback) {
     this.params = {};
+    this.mandValidItems = [];
     this.formId = formId;
     this.selectQKey = selectQKey;
     this.targetId = targetId;
+    this.url = url;
+    this.callback = callback;
 
-    this.setAllParam();
-
+    if(this.formId){
+        this.setAllParam();
+    }
 }
 
 serverUtil.prototype = {
@@ -23,14 +27,46 @@ serverUtil.prototype = {
 
         for(var i=0; i<searchData.length; i++){
             var id  = formObj[0][i].id;
-            var val = $('#' + id).val();
+            var obj = $('#' + id);
+            var val = obj.val();
+            var type = obj.attr("type");
+
+            // 필수체크필요 필드
+            if(obj.attr("mandatory")){
+                var title = obj.attr("mandatory");
+                //console.log(title + "," + id);
+                this.mandValidItems[this.mandValidItems.length] = {"id":id, "title":title};
+            }
+
+            /*if(type == "checkbox" || type == "radio"){*/
+            if(type == "checkbox"){
+                var checkedStr = "";
+                var name = obj.attr("name");
+                $('input:'+type+'[name="'+name+'"]').each(function () {
+                    if(this.checked){
+                        checkedStr += "'" + this.value +"',";
+                    }
+                });
+
+                if(checkedStr.length > 0){
+                    checkedStr = checkedStr.substring(0, checkedStr.length-1);
+                    this.params[name] = checkedStr;
+                }
+
+                if($('input:'+type+'[id="'+id+'"]').is(":checked") == false){
+                    val = null;
+                }
+
+            }else if(type == "radio"){
+                var name = obj.attr("name");
+                this.params[name] = $(':radio[name="' + name + '"]:checked').val();
+                val = null;
+            }
 
             if(val != null && val != ""){
                 this.params[id] = val;
             }
         }
-
-        this.params["selectQKey"] = this.selectQKey;
     },
     setParam: function (key, value) {
         this.params[key] = value;
@@ -39,17 +75,49 @@ serverUtil.prototype = {
         return this.params[key];
     },
     encodeURI: function () {
-        return "params=" + encodeURIComponent((JSON.stringify(this.params)).split( "null").join(''));
+        return encodeURIComponent((JSON.stringify(this.params)).split( "null").join(''));
+    },
+    sendSync: function () {
+        return new ajaxUtil.Request(this.url, {formData: this.encodeURI()}, null, "POST", true);
     },
     send: function () {
-        return new ajaxUtil.Request("/commonGridSelectList.do", this.encodeURI(), null, "POST", true);
+        return new ajaxUtil.Request(this.url, {formData: this.encodeURI()}, this.callback, "POST", false);
+    },
+    mandValidation: function () {
+        var validStr = "";
+        for(var i=0; i < this.mandValidItems.length; i++){
+            var m = this.mandValidItems[i];
+            var id = m["id"];
+            var val = $('#' + id).val();
+            var title = m["title"];
+
+            //console.log("[" + title + "]" + id + "::" + val);
+
+            if(val == null || val == ''){
+                validStr += title + "은(는) 필수사항입니다.\r\n";
+            }
+        }
+
+        if(validStr.length > 0){
+            alert(validStr);
+            return false;
+        }
+
+        return true;
     },
     loadGrid: function () {
-        $("#"+this.targetId).clearGridData();  // 이전 데이터 삭제
-        $("#"+this.targetId).setGridParam({url:"commonGridSelectList.do",
-                                     datatype:"json",
-                                     postData: this.encodeURI }).trigger("reloadGrid");
+        if(!this.mandValidation()) return;
 
+        this.params["selectQKey"] = this.selectQKey;
+
+        $("#"+this.targetId).clearGridData();  // 이전 데이터 삭제
+        $("#"+this.targetId).jqGrid("setGridParam",
+            {
+                url: this.url,
+                datatype: 'json',
+                mtype: 'post',
+                postData: {formData: this.encodeURI()}
+            }).trigger("reloadGrid");
     }
 }
 
@@ -133,39 +201,43 @@ function gfn_drawMain(data) {
 }
 
 /***
- * 조회조건의 조회시 기본으로 호출되는 함수
+ * 조회조건의 페이징그리드 조회시 기본으로 호출되는 함수
  */
-function gfn_gridSelectList(formId, targetId, selectQKey) {
-    $("#"+targetId).clearGridData();  // 이전 데이터 삭제
+function gfn_pagingGridSelectList(formId, targetId, selectQKey) {
+    var server = new serverUtil(formId, targetId, selectQKey, 'commonGridSelectList.do');
+    server.setParam("isPaging", "true");
+    server.loadGrid();
+}
 
-    //var server = new serverUtil(formId, targetId, selectQKey);
+/***
+ * 상세화면에서 호출되는 저장함수
+ */
+function gfn_saveData(formId, url, cQKey, iQkey, uQKey) {
+    url = (url == null ? 'commonSaveData.do' : url);
+    var server = new serverUtil(formId, null, null, url, 'gfn_saveDataCallback');
+    server.setParam("cQkey", cQKey);
+    server.setParam("iQkey", iQkey);
+    server.setParam("uQKey", uQKey);
+    server.send();
+}
+
+/***
+ * 공통 콜백
+ * @param data
+ */
+function gfn_saveDataCallback(data) {
+    if(data['code'] && data['code'] == 'S'){
+        alert('성공적으로 저장하였습니다.');
+    }
+}
+
+
+/***
+ * 상세화면에서 호출되는 저장함수
+ */
+function gfn_selectData(formId, selectQKey) {
+    var server = new serverUtil(formId, null, selectQKey, null);
     //server.loadGrid();
-
-
-    /*$("#" + targetId).jqGrid({
-        url: "example.php",
-        datatype: "json",
-        mtype: "POST",
-        colNames: ["Inv No", "Date", "Amount", "Tax", "Total", "Notes"],
-        colModel: [
-            { name: "invid", width: 55 },
-            { name: "invdate", width: 90 },
-            { name: "amount", width: 80, align: "right" },
-            { name: "tax", width: 80, align: "right" },
-            { name: "total", width: 80, align: "right" },
-            { name: "note", width: 150, sortable: false }
-        ],
-        pager: "#pager",
-        rowNum: 10,
-        rowList: [10, 20, 30],
-        sortname: "invid",
-        sortorder: "desc",
-        viewrecords: true,
-        gridview: true,
-        autoencode: true,
-        caption: "My first grid"
-    });*/
-
 }
 
 
@@ -183,4 +255,3 @@ function gnf_autocomplete(term, selectQKey){
     var data = new ajaxUtil.Request("/autoComplete.do",params, null, null, true);
     return data['data'];
 }
-

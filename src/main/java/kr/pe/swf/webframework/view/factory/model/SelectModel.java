@@ -1,9 +1,7 @@
 package kr.pe.swf.webframework.view.factory.model;
 
-import kr.pe.swf.webframework.util.HtmlUtil;
 import kr.pe.swf.webframework.util.StringUtils;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

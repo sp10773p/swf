@@ -2,7 +2,6 @@ package kr.pe.swf.webframework.controller;
 
 import com.ibatis.sqlmap.client.SqlMapClient;
 import com.ibatis.sqlmap.client.SqlMapException;
-import com.ibatis.sqlmap.engine.type.IntegerTypeHandler;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
@@ -16,7 +15,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLDecoder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by seongdonghun on 2016. 9. 27..
@@ -51,22 +52,21 @@ public class CommonController {
             if(Integer.parseInt(page) > 1){
                 startRow = (Integer.parseInt(page) - 1) * Integer.parseInt(rows);
             }
-
             params.put("rows", rows);
             params.put("page", page);
             params.put("sidx", sidx);
             params.put("sord", sord);
             params.put("startRow", startRow);
 
-            System.out.println("parameter : " + params);
+            System.out.println("param : " + params);
 
             int totCnt = 0;
             if(params.containsKey("isPaging") && "true".equals(params.get("isPaging"))){
                 try{
-                    totCnt = (Integer)sqlMapClient.queryForObject(selectQKey + "ForCount", params);
+                    totCnt = (Integer)sqlMapClient.queryForObject(selectQKey+"ForCount", params);
                 }catch(SqlMapException se){
                     LOGGER.error(se.getLocalizedMessage());
-                    throw new SqlMapException("Count 쿼리가 존재하지 않습니다. [" + selectQKey + "ForCount" +"]");
+                    throw new SqlMapException("Count 쿼리가 존재하지 않습니다.[" + selectQKey+"ForCount" + "]");
                 }
             }
 
@@ -78,7 +78,7 @@ public class CommonController {
             jsonObject.put("page"   , page);
             jsonObject.put("total"  , String.valueOf(total));
             jsonObject.put("records", String.valueOf(list.size()));
-            jsonObject.put("data"   , list);
+            jsonObject.put("data", list);
 
             result = jsonObject.toJSONString();
             System.out.println("result : " + result);
@@ -105,7 +105,18 @@ public class CommonController {
             //TODO 조회 / 조회후 배열 처리
             // sample
             List<Map<String, String>> list = sqlMapClient.queryForList(selectQKey);
+            /*Map<String, String> data = new HashMap<String, String>();
+            data.put("label", "Oh");
+            data.put("value", "K");
 
+            list.add(data);
+
+            data = new HashMap<String, String>();
+            data.put("label", "Seong");
+            data.put("value", "S");
+            list.add(data);*/
+
+            //jsonObject.put("data", StringUtils.listMapToString(list));
             jsonObject.put("data", list);
 
             result = jsonObject.toJSONString();
@@ -118,30 +129,28 @@ public class CommonController {
             response.getWriter().write(result);
         }
     }
-
     @RequestMapping("/selectSubMenu.do")
-    public void sselectSubMenu(@RequestParam(value = "menuId") String menuId, HttpServletResponse response) throws IOException{
+    public void selectSubMenu(@RequestParam(value = "menuid") String menuid, HttpServletResponse response) throws IOException {
+
         JSONObject jsonObject = new JSONObject();
         String result = new String();
 
         try {
 
-            System.out.println("menuid : " + menuId);
-
-            List<Map<String, Object>> list = sqlMapClient.queryForList("Common.selectSubMenuList", menuId);
+            System.out.println("menuid : " + menuid);
+            List<Map<String, Object>> list = sqlMapClient.queryForList("Common.selectSubMenuList", menuid);
 
             List subMenuList = new ArrayList();
-            String menuArr = menuId + ",";
+            String menuArr = menuid +",";
             for(Map<String, Object> pMap : list){
                 int lvl = (Integer)pMap.get("MENU_LVL");
                 if(lvl == 1){
                     continue;
                 }
-
                 String pMenuId = (String)pMap.get("P_MENU_ID");
 
                 if(menuArr.indexOf(pMenuId) > -1){
-                    menuArr += (String)pMap.get("MENU_ID");
+                    menuArr += (String)pMap.get("MENU_ID") +",";
 
                     subMenuList.add(pMap);
                 }
@@ -161,16 +170,18 @@ public class CommonController {
     }
 
     @RequestMapping("/commonSaveData.do")
-    public void commonSaveData(@RequestParam(value = "formData") String p, HttpServletResponse response) throws IOException{
+    public void commonSaveData(@RequestParam(required=false, value = "formData") String p,
+                                     HttpServletRequest request, HttpServletResponse response) throws IOException {
+
         JSONObject jsonObject = new JSONObject();
         try {
             Map params = (Map)(new JSONParser().parse(URLDecoder.decode(p, "UTF-8")));
 
-            //count 쿼리
+            // count 쿼리
             int cnt = 0;
-            if(params.containsKey("cQKey")){
-                String cQKey = (String)params.get("cQKey");
-                cnt = Integer.parseInt(String.valueOf(sqlMapClient.queryForObject(cQKey, params)));
+            if(params.containsKey("cQkey")){
+                String cQkey = (String)params.get("cQkey");
+                cnt = Integer.parseInt(String.valueOf(sqlMapClient.queryForObject(cQkey, params)));
 
             }
 
@@ -180,17 +191,17 @@ public class CommonController {
                     throw new Exception("Update 쿼리 Key가 존재하지 않습니다.");
                 }
 
-                String uQKey = (String) params.get("uQKey");
+                String uQKey = (String)params.get("uQKey");
                 sqlMapClient.update(uQKey, params);
 
             // Insert
             }else{
-                if(!params.containsKey("iQKey")){
+                if(!params.containsKey("iQkey")){
                     throw new Exception("Insert 쿼리 Key가 존재하지 않습니다.");
                 }
 
-                String iQKey = (String) params.get("iQKey");
-                sqlMapClient.insert(iQKey, params);
+                String iQkey = (String)params.get("iQkey");
+                sqlMapClient.insert(iQkey, params);
             }
 
             jsonObject.put("code", "S");
@@ -198,10 +209,16 @@ public class CommonController {
         }catch(Exception e){
             jsonObject.put("code", "E");
             e.printStackTrace();
-
         }finally {
             response.getWriter().write(jsonObject.toJSONString());
         }
     }
+/*
+
+    @RequestMapping("/test.do")
+    public void test(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        System.out.println("test");
+    }
+*/
 
 }

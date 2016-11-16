@@ -1,0 +1,37 @@
+$("#${GRID_ID}").jqGrid({
+    ${initOption}
+    colModel: ${colModel},
+    rowNum: ${rowNum},
+    rowList: ${rowList},
+    height: ${height},
+    pager: '#${GRID_ID}_PAGER',
+    sortname: '${sortname}',
+    sortorder: '${sortorder}',
+    jsonReader : {
+        page: "page",
+        total: "total",
+        root: "data",
+        records: function(obj){return obj.length;},
+        repeatitems: false
+        #*id: "gid"*#
+    },
+    viewrecords: true,
+    multiSort: true,
+    gridview: true,
+    autowidth: true,
+    #*autoheight: true,*#
+    autoencode: true,
+    emptyrecords: 'No Data',
+    #*loadComplete: function(data){
+        alert(data);
+    },*#
+    loadError: function(xhr, status, error){
+        alert("["+status +"]:"+ error);
+    },
+    ${defaultEvent}
+    rownumbers: true
+});
+
+$(window).resize(function() {
+//$("#${GRID_ID}").setGridWidth($(this).width() * 100);
+});

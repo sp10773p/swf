@@ -5,66 +5,66 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by sdh on 2016-10-15.
+ * Created by seongdonghun on 2016. 9. 12..
  */
-public class DetailEntry extends Entry {
-	private String colspan;
-	private String rowspan;
+public class DetailEntry extends Entry{
+    private String colspan;
+    private String rowspan;
 
-	private List<CompEntry> compEntries = new ArrayList<CompEntry>();
+    private List<CompEntry> compEntries = new ArrayList<CompEntry>();
 
-	private List<Map<String ,String>> list;
+    private List<Map<String, String>> list;
 
-	public Map toMap(){
-		Map<String, Object> map = super.toMap();
-		map.put("colspan", colspan);
-		map.put("rowspan", rowspan);
+    public Map toMap(){
+        Map<String, Object> map = super.toMap();
+        map.put("colspan", colspan);
+        map.put("rowspan", rowspan);
 
-		return map;
-	}
+        return map;
+    }
 
-	public String getColspan() {
-		return colspan;
-	}
+    public String getColspan() {
+        return colspan;
+    }
 
-	public void setColspan(String colspan) {
-		this.colspan = colspan;
-	}
+    public void setColspan(String colspan) {
+        this.colspan = colspan;
+    }
 
-	public String getRowspan() {
-		return rowspan;
-	}
+    public String getRowspan() {
+        return rowspan;
+    }
 
-	public void setRowspan(String rowspan) {
-		this.rowspan = rowspan;
-	}
+    public void setRowspan(String rowspan) {
+        this.rowspan = rowspan;
+    }
 
-	public List<CompEntry> getCompEntries() {
-		return compEntries;
-	}
+    public List<Map<String, String>> getList() {
+        return list;
+    }
 
-	public void setCompEntries(List<CompEntry> compEntries) {
-		this.compEntries = compEntries;
-	}
+    public void setList(List<Map<String, String>> list) {
+        this.list = list;
+    }
 
-	public void addCompEntries(CompEntry compEntry){
-		this.compEntries.add(compEntry);
-	}
+    public List<CompEntry> getCompEntries() {
+        return compEntries;
+    }
 
-	public List<Map<String, String>> getList() {
-		return list;
-	}
+    public void setCompEntries(List<CompEntry> eventEntries) {
+        this.compEntries = compEntries;
+    }
 
-	public void setList(List<Map<String, String>> list) {
-		this.list = list;
-	}
+    public void addCompEntry(CompEntry compEntry) {
+        this.compEntries.add(compEntry);
+    }
 
-	public String print() {
-		return "DetailEntry{" +
-				"colspan='" + colspan + '\'' +
-				", rowspan='" + rowspan + '\'' +
-				", compEntries=" + (compEntries == null ? "" : compEntries.toString())+
-				", list=" + (list == null ? "" : list.toString()) +
-				'}' + super.print();
-	}
+    public String print() {
+        return "DetailEntry{" +
+                "colspan='" + colspan + '\'' +
+                ", rowspan='" + rowspan + '\'' +
+                ", compEntries=" + compEntries +
+                ", list=" + list +
+                '}' + super.print();
+    }
 }

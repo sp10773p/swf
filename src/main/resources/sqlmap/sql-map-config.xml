@@ -5,5 +5,5 @@
 <sqlMapConfig>
     <settings enhancementEnabled="true" useStatementNamespaces="true" />
     <sqlMap resource="sqlmap/common/Common_ORA.xml" />
-    <!-- 분석 END -->          
+    <sqlMap resource="sqlmap/sample/Sample_ORA.xml" />
 </sqlMapConfig>

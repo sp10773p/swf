@@ -3,7 +3,6 @@ package kr.pe.swf.webframework.view.entry;
 import kr.pe.swf.webframework.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,31 +15,29 @@ public class SearchEntry extends Entry{
     private boolean isMult = false;
     private int length = 0;
 
-    private List<EventEntry> eventEntries;
+    private List<EventEntry> eventEntries = new ArrayList<EventEntry>();
 
     public Map toMap(){
-        Map<String, Object> map = new HashMap();
+        Map<String, Object> map = super.toMap();
         map.put("length" , length);
 
         // 쿼리 id를 우선으로 처리
         //if(selectQKey != null){
             map.put("selectQKey", selectQKey);
         //}else{
-            map.put("list", list);
+            //map.put("list", list);
         //}
 
-        // 쿼리 id를 우선으로 처리
         List eventList = new ArrayList();
-        if(eventEntries != null){
-            for(EventEntry eventEntry : eventEntries){
-                eventList.add(eventEntry.toMap());
-            }
+        for(EventEntry eventEntry : eventEntries){
+            eventList.add(eventEntry.toMap());
         }
 
         map.put("event", eventList);
 
         return map;
     }
+
 
     public String getSelectQKey() {
         return selectQKey;
@@ -49,7 +46,6 @@ public class SearchEntry extends Entry{
     public void setSelectQKey(String selectQKey) {
         this.selectQKey = selectQKey;
     }
-
 
     public boolean isMult() {
         return isMult;
@@ -96,18 +92,7 @@ public class SearchEntry extends Entry{
     }
 
     public void addEventEntry(EventEntry eventEntry) {
-        if(this.eventEntries == null)
-            this.eventEntries = new ArrayList<EventEntry>();
-
         this.eventEntries.add(eventEntry);
-    }
-
-    public List<Map<String, String>> getList() {
-        return list;
-    }
-
-    public void setList(List<Map<String, String>> list) {
-        this.list = list;
     }
 
     public String print() {
@@ -115,7 +100,6 @@ public class SearchEntry extends Entry{
                 ", selectQKey='" + selectQKey + '\'' +
                 ", isMult=" + isMult +
                 ", length=" + length +
-                ", list=" + (list == null ? "" : list.toString())+
                 ", eventEntries=" + (eventEntries == null ? "" : eventEntries.toString())+
                 '}' + super.print();
     }

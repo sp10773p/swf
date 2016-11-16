@@ -59,7 +59,8 @@
     .search-input {width: 98%; height: 24px; font-size: 14px; font-weight: normal}
     .search-date  {width: 100px; height: 24px; font-size: 14px; font-weight: normal; text-align: center}
     .searchForm {margin-bottom: 0px;}
-    .select_btn {padding-top: 30px; padding-right: 15px; width: 10%; float: right; text-align: right}
+    .btn_area {padding-right: 15px; width: 100%; float: right; text-align: right}
+    .select_btn, .detail_btn {padding-top: 30px; padding-right: 15px; width: 50%; float: right; text-align: right}
 
     /*** Override ***/
     input[type=checkbox].w3-check, input[type=radio].w3-radio {top: 3px; width: 18px; height: 18px}
@@ -74,13 +75,13 @@
     .ui-common-table {font-size: 14px}
     .ui-jqgrid .ui-jqgrid-view {z-index: 0}
 
-	/* detail 관련 */
-	.detail-table {border-collapse: collapse; border-spacing: 0; width: 100%; display: table; border: : 1px solid #ccc}
-	.detail-table tr {border-bottom: 1px solid #ddd}
-	.detail-table td, .detail-table th {border: 1px solid #ccc; padding: 6px 8px; display: table-cell; text-align: left; vertical-align: middle; font-size: 14px; height: 100%;}
-	.detail-table th {background-color: #ddffff!important;}
+    /* detail 관련*/
+    .detail-table {border-collapse:collapse;border-spacing:0;width:100%;display:table; border:1px solid #ccc}
+    .detail-table tr {border-bottom:1px solid #ddd}
+    .detail-table td,.detail-table th{border: 1px solid #ccc; padding:6px 8px;display:table-cell;text-align:left;vertical-align:top;
+        font-size: 14px; height: 100%; vertical-align: middle; }
+    .detail-table th {background-color: #ddffff!important; }
 
-	.detail-input {width: 98%; font-size: 14px; font-weight: normal}
-
+    .detail-input {width: 98%; font-size: 14px; font-weight: normal}
 
 </style>

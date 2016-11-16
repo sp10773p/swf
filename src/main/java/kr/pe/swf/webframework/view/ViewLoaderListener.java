@@ -1,7 +1,6 @@
 package kr.pe.swf.webframework.view;
 
 import kr.pe.swf.webframework.util.StringUtils;
-import org.hsqldb.lib.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -30,6 +29,9 @@ public class ViewLoaderListener extends ViewLoader implements ServletContextList
             System.out.println(">>>>> " + s);
         }
 
+        /***
+         * web.xml Listener parameter
+         */
         String viewPath   = servletContext.getInitParameter("viewPath");
         String gridType   = servletContext.getInitParameter("gridType");
         String searchType = servletContext.getInitParameter("searchType");
@@ -40,21 +42,21 @@ public class ViewLoaderListener extends ViewLoader implements ServletContextList
             LOGGER.info("View Loader Listener : initialization started");
         }
 
-
         if(viewPath == null && StringUtils.isEmpty(viewPath)){
             throw new RuntimeException("::: viewPath context-param이 존재하지 않습니다.");
         }
 
-        if(gridType == null && StringUtils.isEmpty(gridType)){
-            gridType = "jqgrid";
+
+        if(searchType == null && StringUtils.isEmpty(searchType)){
+            searchType = "kr.pe.swf.webframework.view.factory.w3factory.W3SearchBuilder";
         }
 
         if(detailType == null && StringUtils.isEmpty(detailType)){
             detailType = "kr.pe.swf.webframework.view.factory.w3factory.W3DetailBuilder";
         }
 
-        if(searchType == null && StringUtils.isEmpty(searchType)){
-            searchType = "kr.pe.swf.webframework.view.factory.w3factory.W3SearchBuilder";
+        if(gridType == null && StringUtils.isEmpty(gridType)){
+            gridType = "jqgrid";
         }
         LOGGER.info("View config path : {}", viewPath);
         LOGGER.info("Layout package : {}", searchType);

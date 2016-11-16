@@ -1,10 +1,7 @@
 package kr.pe.swf.webframework.controller;
 
 import com.ibatis.sqlmap.client.SqlMapClient;
-import com.ibatis.sqlmap.engine.mapping.sql.Sql;
-import kr.pe.swf.webframework.util.StringUtils;
 import kr.pe.swf.webframework.view.ViewInfoFactory;
-import kr.pe.swf.webframework.view.ViewLoader;
 import org.apache.velocity.app.VelocityEngine;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -36,25 +33,24 @@ public class ViewController {
     @Autowired
     private ViewInfoFactory viewInfoFactory;
 
-	@Autowired
-	private SqlMapClient sqlMapClient;
+    @Autowired
+    private SqlMapClient sqlMapClient;
 
-	private final String USER_SESSION_ID = "SWF_USER_SESSION_ID";
-	private final String MENU_SESSION_ID = "SWF_MENU_SESSION_ID";
+    private final String USER_SESSTION_ID = "SWF_USER_SESSTION_ID";
+    private final String MENU_SESSTION_ID = "SWF_MENU_SESSTION_ID";
 
     @RequestMapping("/index.do")
     public ModelAndView view(HttpServletRequest request, HttpServletResponse response) throws SQLException {
-	    ModelAndView modelAndView = new ModelAndView();
-	    modelAndView.setViewName("main");
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("main");
 
-	    HttpSession session = request.getSession(true);
-	    if(session.getAttribute(USER_SESSION_ID) == null){
-		    List list = sqlMapClient.queryForList("Common.selectMenuList", null);
-		    session.setAttribute(MENU_SESSION_ID, list);
+        HttpSession session = request.getSession();
+        if(session.getAttribute(USER_SESSTION_ID) == null){
+            List list = sqlMapClient.queryForList("Common.selectMenuList", null);
+            session.setAttribute(MENU_SESSTION_ID, list);
+        }
 
-	    }
-
-	    modelAndView.addObject("S_MENU", session.getAttribute(MENU_SESSION_ID));
+        modelAndView.addObject("S_MENU", session.getAttribute(MENU_SESSTION_ID));
 
         return modelAndView;
     }
@@ -67,25 +63,25 @@ public class ViewController {
 
         try {
 
-	        if(!viewInfoFactory.isExists(viewId)){
-		        throw new Exception("존재하지 않는 view : " + viewId);
-	        }
+            if(!viewInfoFactory.isExists(viewId)){
+                throw new Exception("존재하지 않는 view : " + viewId);
+            }
 
-	        //Request Parameter 셋팅
-	        Map viewParam = (Map)(new JSONParser().parse(URLDecoder.decode(p, "UTF-8")));
+            // Request Parameter 셋팅
+            Map viewParam = (Map)(new JSONParser().parse(URLDecoder.decode(p, "UTF-8")));
 
-	        System.out.println("viewParam : " + viewParam);
+            System.out.println("viewParam:" + viewParam);
 
-	        viewInfoFactory.getViewEntry(viewId).setViewParam(viewParam);
+            viewInfoFactory.getViewEntry(viewId).setViewParam(viewParam);
 
-	        Map map = new HashMap();
-	        map.put("title", viewInfoFactory.getTitle(viewId));
+            Map map = new HashMap();
+            map.put("title", viewInfoFactory.getTitle(viewId));
 
-	        //화면에 바인드 할 소스코드생성
-	        map.putAll(viewInfoFactory.getBindSourceCode(viewId));
+            // 화면에 바인드 할 소스코드 생성
+            map.putAll(viewInfoFactory.getBindSourceCode(viewId));
 
-	        // Velocity Bind
-	        viewInfoFactory.mergeLayout(viewId, map);
+            // Velocity Bind
+            viewInfoFactory.mergeLayout(viewId, map);
 
             returnData.put("code", "S");
             returnData.put("data", viewInfoFactory.getViewVmManage(viewId));
@@ -99,4 +95,9 @@ public class ViewController {
             response.getWriter().write(returnData.toJSONString());
         }
     }
+
+
+
+
+
 }

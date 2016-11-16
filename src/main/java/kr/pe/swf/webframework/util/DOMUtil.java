@@ -16,17 +16,7 @@
  */
 package kr.pe.swf.webframework.util;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import org.w3c.dom.*;
 
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
@@ -38,14 +28,9 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 //import org.apache.commons.logging.Log;
 //import org.apache.commons.logging.LogFactory;
@@ -441,7 +426,6 @@ public final class DOMUtil {
     }
 
 	public static List getChildren(Element documentElement) {
-		// TODO Auto-generated method stub
 		if (documentElement==null) return null;
 		
 		NodeList nodeList = documentElement.getChildNodes();
@@ -497,7 +481,6 @@ public final class DOMUtil {
 	}
 
 	public static List getChildren(Element documentElement,Namespace ns,String childNod) {
-		// TODO Auto-generated method stub
 		NodeList nodeList = documentElement.getChildNodes();
 		ArrayList al =new ArrayList();
         for (int i = 0; i < nodeList.getLength(); i++) {
@@ -510,7 +493,6 @@ public final class DOMUtil {
 		return al;
 	}
 	public static List getChildrenPrefix(Element documentElement,String prefix) {
-		// TODO Auto-generated method stub
 		NodeList nodeList = documentElement.getChildNodes();
 		ArrayList al =new ArrayList();
         for (int i = 0; i < nodeList.getLength(); i++) {
@@ -523,15 +505,13 @@ public final class DOMUtil {
 		return al;
 	}
 	public static String getAttribute(Element e, String attr) {
-		// TODO Auto-generated method stub
 		if(e==null) return null;
 		return e.getAttribute(attr);
 	}
 
 	public static void addAttribute(Element element, String atrName,
 			Namespace nSEB, String val) {
-		// TODO Auto-generated method stub
-		
+
 		element.setAttributeNS(nSEB.getURI(),atrName, val);
 		Attr attr = element.getAttributeNodeNS (nSEB.getURI(), atrName) ;
 		attr.setPrefix (nSEB.getPrefix()) ;

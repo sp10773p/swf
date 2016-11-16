@@ -1,7 +1,6 @@
 package kr.pe.swf.webframework.util;
 
-import kr.pe.swf.webframework.view.entry.SearchEntry;
-import sun.java2d.pipe.hw.AccelDeviceEventNotifier;
+import kr.pe.swf.webframework.view.entry.Entry;
 
 import java.util.List;
 import java.util.Map;
@@ -13,15 +12,15 @@ public class UIComponentsUtils {
     public static final String LF = "\r\n";
     private static String dateFormat = "yy-mm-dd";
 
-    public static String getBindScript(SearchEntry searchEntry){
-        String type = searchEntry.getType();
+    public static String getBindScript(Entry entry){
+        String type = StringUtils.trimStr(entry.getType());
 
         StringBuffer scriptBuffer = new StringBuffer();
 
         // 날짜
         if(type.indexOf("date") > -1){
-            scriptBuffer = getDateTypeScript(searchEntry);
-            scriptBuffer.append(getDateDefaultDateSetting(searchEntry));
+            scriptBuffer = getDateTypeScript(entry);
+            scriptBuffer.append(getDateDefaultDateSetting(entry));
         // 연도
         }else if(type.indexOf("year") > -1){
 
@@ -30,16 +29,16 @@ public class UIComponentsUtils {
 
         // autocomplete
         }else if(type.equals("autocomplete")){
-            scriptBuffer = getAutocompleteTypeScript(searchEntry);
+            scriptBuffer = getAutocompleteTypeScript(entry);
         }
 
         return scriptBuffer.toString();
     }
 
-    private static StringBuffer getAutocompleteTypeScript(SearchEntry searchEntry) {
+    private static StringBuffer getAutocompleteTypeScript(Entry entry) {
         StringBuffer itemBuffer = new StringBuffer();
         itemBuffer.append("[");
-        for(Map<String, String> item : searchEntry.getList()){
+        for(Map<String, String> item : entry.getList()){
             String label = item.get("label");
             String value = item.get("value");
             itemBuffer.append("{value: \"").append(value).append("\", label: \"").append(label).append("\"},");
@@ -53,7 +52,7 @@ public class UIComponentsUtils {
 
         StringBuffer scriptBuffer = new StringBuffer();
         scriptBuffer
-                .append("$('#"+searchEntry.getId()+"_VIEW')").append(LF)
+                .append("$('#"+entry.getId()+"_VIEW')").append(LF)
                 .append(".on( \"keydown\", function( event ) {").append(LF)
                 .append("\tif ( event.keyCode === $.ui.keyCode.TAB &&").append(LF)
                 .append("\t\t$( this ).autocomplete( \"instance\" ).menu.active ) {").append(LF)
@@ -87,11 +86,11 @@ public class UIComponentsUtils {
                 .append("\t\tterms.push( ui.item.label );").append(LF)
                 .append("\t\tterms.push( \"\" );").append(LF)
                 .append("\t\tthis.value = terms.join( \", \" );").append(LF)
-                .append("\t\tterms = $('#").append( searchEntry.getId()).append("').val().split( /,\\s*/ );").append(LF)
+                .append("\t\tterms = $('#").append( entry.getId()).append("').val().split( /,\\s*/ );").append(LF)
                 .append("\t\tterms.pop();").append(LF)
                 .append("\t\tterms.push( ui.item.value );").append(LF)
                 .append("\t\tterms.push( \"\" );").append(LF)
-                .append("\t\t$('#").append(searchEntry.getId()).append("').val(terms.join( \", \" ));").append(LF)
+                .append("\t\t$('#").append(entry.getId()).append("').val(terms.join( \", \" ));").append(LF)
 
 
                 .append("\t\treturn false;").append(LF)
@@ -102,20 +101,30 @@ public class UIComponentsUtils {
         return scriptBuffer;
     }
 
-    private static String getDateDefaultDateSetting(SearchEntry searchEntry) {
-        String id = searchEntry.getId();
-        String type = searchEntry.getType();
+    private static String getDateDefaultDateSetting(Entry entry) {
+        String id = entry.getId();
+        String type = entry.getType();
 
         String defaultDate = null;
-        if(type.equals("duedate")){
-            if(id.startsWith("from_")){
-                defaultDate = searchEntry.getFromDate();
-            }else{
-                defaultDate = searchEntry.getToDate();
-            }
+        if(StringUtils.isNotEmpty(entry.getValue())){
+            String str = entry.getValue();
+            String year = str.substring(0, 4);
+            String mon  = str.substring(4, 6);
+            String day  = str.substring(6, 8);
+
+            defaultDate = year+"-"+mon+"-"+day;
 
         }else{
-            defaultDate = searchEntry.getDefaultDate();
+            if(type.equals("duedate")){
+                if(id.startsWith("from_")){
+                    defaultDate = entry.getFromDate();
+                }else{
+                    defaultDate = entry.getToDate();
+                }
+
+            }else{
+                defaultDate = entry.getDefaultDate();
+            }
         }
 
         if(StringUtils.isNotEmpty(defaultDate)){
@@ -125,9 +134,9 @@ public class UIComponentsUtils {
         }
     }
 
-    private static StringBuffer getDateTypeScript(SearchEntry searchEntry) {
-        String id = searchEntry.getId();
-        String type = searchEntry.getType();
+    private static StringBuffer getDateTypeScript(Entry entry) {
+        String id = entry.getId();
+        String type = entry.getType();
 
         StringBuffer scriptBuffer = new StringBuffer();
         scriptBuffer.append("$('#").append(id).append("').datepicker({").append(LF);
@@ -154,19 +163,19 @@ public class UIComponentsUtils {
         // defaultDate Setting
         if(type.equals("duedate")){
             if(id.startsWith("from_")){
-                if(StringUtils.isNotEmpty(searchEntry.getFromDate())) {
-                    scriptBuffer.append(creatJqueryOption("defaultDate", searchEntry.getFromDate()));
+                if(StringUtils.isNotEmpty(entry.getFromDate())) {
+                    scriptBuffer.append(creatJqueryOption("defaultDate", entry.getFromDate()));
 
                 }
             }else{
-                if(StringUtils.isNotEmpty(searchEntry.getToDate())) {
-                    scriptBuffer.append(creatJqueryOption("defaultDate", searchEntry.getToDate()));
+                if(StringUtils.isNotEmpty(entry.getToDate())) {
+                    scriptBuffer.append(creatJqueryOption("defaultDate", entry.getToDate()));
 
                 }
             }
         }else {
-            if(StringUtils.isNotEmpty(searchEntry.getDefaultDate())){
-                scriptBuffer.append(creatJqueryOption("defaultDate", searchEntry.getDefaultDate()));
+            if(StringUtils.isNotEmpty(entry.getDefaultDate())){
+                scriptBuffer.append(creatJqueryOption("defaultDate", entry.getDefaultDate()));
             }
         }
 
@@ -227,8 +236,8 @@ public class UIComponentsUtils {
         return "\t" + key + ":" + result + (isComma ? "," : "") + LF;
     }
 
-    public static String getSearchEventScript(String type, String id, String function){
-        String jquerySelectorStr = "$(#" + id +"')";
+    public static String getSearchEventScript(String type, String id, String function) {
+        String jquerySelectorStr = "$('#" + id + "')";
         String event = "keypress";
 
         if(type.equals("radio") || type.equals("checkbox")){
@@ -240,14 +249,15 @@ public class UIComponentsUtils {
         }
 
         return getSearchScript(jquerySelectorStr, event, function);
+
     }
 
-    public static String getSearchScript(String selector, String event, String function){
+    public static String getSearchScript(String selector, String event, String function) {
         StringBuffer scriptBuffer = new StringBuffer();
 
         scriptBuffer.append(selector).append(".on(\"").append(event).append("\", function(event){\r\n");
         if(event.equals("keypress")){
-            scriptBuffer.append("\tif(event.whitch == 13){\r\n");
+            scriptBuffer.append("\tif(event.which == 13){\r\n");
         }
 
         scriptBuffer.append("\t").append(function).append(";\r\n");
@@ -256,10 +266,8 @@ public class UIComponentsUtils {
             scriptBuffer.append("\t\tevent.preventDefault();\r\n");
             scriptBuffer.append("\t}\r\n");
         }
-
-        scriptBuffer.append("}0;\r\n");
+        scriptBuffer.append("});\r\n");
 
         return scriptBuffer.toString();
     }
-
 }

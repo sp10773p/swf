@@ -49,7 +49,7 @@ public class DateUtil {
 		c.set(Integer.parseInt(cdate.substring(0, 4)), Integer.parseInt(cdate.substring(4, 6))-1, Integer.parseInt(cdate.substring(6)));
 		c.add(Calendar.DAY_OF_MONTH	,idiff);
 		String date =getDateFormat(c.getTime(),"yyyyMMdd");
-		System.out.println(getDateFormat(c.getTime(),"yyyyMMdd"));
+		//System.out.println(getDateFormat(c.getTime(),"yyyyMMdd"));
 		
 		return date;
 	}

@@ -49,6 +49,10 @@ public abstract class SearchBuilder {
         this.searchColSize = searColSize;
     }
 
+    public void setSearchsFactory(SearchsFactory searchsFactory) {
+        this.searchsFactory = searchsFactory;
+    }
+
     public Map<String , String> drawSearch() throws Exception {
         Map<String , String> codeMap = new HashMap<String, String>();
 
@@ -92,11 +96,4 @@ public abstract class SearchBuilder {
     public abstract SearchRow createRow();
     public abstract SearchCol createCol(SearchEntry data);
 
-    public void setSearchsFactory(SearchsFactory searchsFactory) {
-        this.searchsFactory = searchsFactory;
-    }
-
-    public SearchsFactory getSearchsFactory() {
-        return searchsFactory;
-    }
 }

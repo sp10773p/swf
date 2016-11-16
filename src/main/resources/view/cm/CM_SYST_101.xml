@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<view id="CM_SYST_101" type="DEFAULT_TREE_1" title="Menu 관리">
+    <button id="btn_new" function="fn_insert">신규</button>
+    <button id="btn_save" function="fn_save">저장</button>
+    <button id="btn_del" function="fn_delete">삭제</button>
+    <lists isFirstLoad="Y" qKey="Common.selectMenuMngList" layout="TREE_GRID">
+        <colModel>
+            <![CDATA[
+			[
+                {label:'Menu Name' ,name:'MENU_NM',width:'100%', resizable: false},
+                {label:'id'        , name:'id'    , width:1    , hidden: true}
+			]
+			]]>
+        </colModel>
+    </lists>
+    <details colSize="1">
+        <title>Menu ID</title>
+        <detail><comp id="MENU_ID" type="text" length="10" isMand="Y" /></detail>
+        <title>Menu Name</title>
+        <detail><comp id="MENU_NM" type="text" length="50" isMand="Y" /></detail>
+        <title>Menu Level</title>
+        <detail><comp id="MENU_LVL" type="text"/></detail>
+        <title>Menu Type</title>
+        <detail><comp id="MENU_TYPE" type="text"/></detail>
+        <title>SEQ</title>
+        <detail><comp id="SEQ" type="text"/></detail>
+        <title>URL</title>
+        <detail><comp id="URL" type="text"/></detail>
+        <title>Used YN</title>
+        <detail><comp id="USEYN" type="text"/></detail>
+        <hidden id="P_MENU_ID" />
+        <hidden id="LEAFYN" />
+    </details>
+    <script>
+        <![CDATA[
+
+        ]]>
+    </script>
+</view>

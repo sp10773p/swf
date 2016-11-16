@@ -1,5 +1,6 @@
 package kr.pe.swf.webframework.view.factory.w3factory;
 
+import kr.pe.swf.webframework.util.StringUtils;
 import kr.pe.swf.webframework.util.UIComponentsUtils;
 import kr.pe.swf.webframework.view.entry.SearchEntry;
 import kr.pe.swf.webframework.view.factory.SearchCol;
@@ -19,17 +20,21 @@ public class W3SearchBuilder extends SearchBuilder {
 
     public String bindComponent(SearchEntry searchEntry) throws Exception {
         StringBuffer scriptBuffer = new StringBuffer();
-        if(searchEntry.getType().startsWith("due")) {
+        String type = StringUtils.trimStr(searchEntry.getType());
+        if(type.startsWith("due")) {
             String orgId = searchEntry.getId();
 
             searchEntry.setId("from_" + orgId);
             scriptBuffer.append(UIComponentsUtils.getBindScript(searchEntry));
+            scriptBuffer.append(UIComponentsUtils.getSearchEventScript(type, searchEntry.getId(), searchsFactory.getFunction()));
 
             searchEntry.setId("to_" + orgId);
             scriptBuffer.append(UIComponentsUtils.getBindScript(searchEntry));
+            scriptBuffer.append(UIComponentsUtils.getSearchEventScript(type, searchEntry.getId(), searchsFactory.getFunction()));
 
         }else{
             scriptBuffer.append(UIComponentsUtils.getBindScript(searchEntry));
+            scriptBuffer.append(UIComponentsUtils.getSearchEventScript(type, searchEntry.getId(), searchsFactory.getFunction()));
 
         }
 

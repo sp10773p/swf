@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<view id="sampleDefaultList" type="DEFAULT_LIST" title="List1 type">
-
-    <searchs colSize="3" function="" qKey="selectTestList">
-        <search id="search1" type="duedate" title="Due Date" isMand="Y" from="-1y" to="0" />
-        <search id="search2" type="select"  title="Select Box" isMand="Y">
+<view id="SM_SMPL_101" type="DEFAULT_LIST" title="List1 type">
+    <searchs colSize="3" function="" qKey="Sample.selectTbCrudList">
+        <search id="PREO_DATE" type="duedate" title="Due Date" isMand="Y" from="-1y" to="30" />
+        <search id="C_SELECT" type="select"  title="Select Box" isMand="Y">
             <style>width: 150px</style>
             <list>
                 <item code="">All</item>
-                <item code="A" selected="true">A</item>
-                <item code="B">B</item>
+                <item code="A" selected="true">Ant</item>
+                <item code="M">Maven</item>
             </list>
             <!-- CODE, VALUE, DEFAULT
                 <selectQKey>module1.select</selectQKey>
             -->
         </search>
-        <search id="search3" type="checkbox" title="Check Box">
+        <search id="C_CHECK" type="checkbox" title="Check Box">
             <list>
                 <item code="M">Milk</item>
                 <item code="S" checked="true">Sugar</item>
@@ -23,11 +22,7 @@
                 <selectQKey>module1.select</selectQKey>
             -->
         </search>
-        <search id="search4" type="text" title="Text Box" length="10">
-            <!-- <style>font-size:12px</style> -->
-            <!-- <event name="keypress">fn_search</event> -->
-        </search>
-        <search id="search5" type="radio" title="Radio Button">
+        <search id="C_RADIO" type="radio" title="Radio Button">
             <list>
                 <item code="M">Milk</item>
                 <item code="S" checked="true">Sugar</item>
@@ -36,33 +31,51 @@
                 <selectQKey>module1.select</selectQKey>
             -->
         </search>
-        <search id="search6" type="autocomplete" title="Autocomplete" isMulti="Y">
-            <selectQKey>
-                Common.selectAutocompleteList
-            </selectQKey>
+        <search id="C_AUTOCOMPLETE" type="autocomplete" title="Autocomplete" isMulti="Y">
+            <selectQKey>Sample.selectAutocompleteList</selectQKey>
         </search>
-        <search id="search7" type="date" title="Date" default="-7" />
-        <search id="search8" type="text" title="검색조건8" length="10" />
-        <search id="search9" type="text" title="검색조건9" length="10" />
+        <search id="C_DATE" type="date" title="Date" default="-7" />
+        <search id="C_TEXT1" type="text" title="Text box1" length="50" />
+        <search id="C_TEXT2" type="text" title="Text box2" length="50" />
     </searchs>
-    <lists url="" rowNum="" rowList="" sortname="" sortorder="" viewrecords="" >
-		<colNames>['Inv No','Date', 'Client', 'Amount','Tax','Total','Notes']</colNames>
+    <button id="btn_new" function="fn_insert">신규</button>
+    <button id="btn_del" function="fn_delete">삭제</button>
+    <lists rowNum="" rowList="" sortname="C_TEXT3" sortorder="" >
 		<colModel>
+            <![CDATA[
 			[
-				{name:'ID',index:'ID', width:55},
-				{name:'INVDATE',index:'INVDATE', width:90, jsonmap:"INVDATE"},
-				{name:'NAME',index:'NAME asc, invdate', width:100},
-				{name:'AMOUNT',index:'AMOUNT', width:80, align:"right"},
-				{name:'TAX',index:'TAX', width:80, align:"right"},
-				{name:'TOTAL',index:'TOTAL', width:80,align:"right"},
-				{name:'NOTE',index:'NOTE', width:150, sortable:false}
+                {name:'C_SELECT', hidden: true},
+                {label:'C_DUE_DATE'    , name:'C_DUE_DATE'    ,index:'C_DUE_DATE'   , width:80 , align:"center"},
+                {label:'C_SELECT'      , name:'C_SELECT_VIEW' ,index:'C_SELECT_VIEW asc&#44; C_CHECK', width:100},
+                {label:'C_CHECK'       , name:'C_CHECK'       ,index:'C_CHECK'       , width:100},
+                {label:'C_RADIO'       , name:'C_RADIO'       ,index:'C_RADIO'       , width:100},
+                {label:'C_AUTOCOMPLETE', name:'C_AUTOCOMPLETE',index:'C_AUTOCOMPLETE', width:150},
+                {label:'C_DATE'        , name:'C_DATE'        ,index:'C_DATE'        , width:80 , align:"center"},
+                {label:'C_TEXT1'       , name:'C_TEXT1'       ,index:'C_TEXT1'       , width:100},
+                {label:'C_TEXT2'       , name:'C_TEXT2'       ,index:'C_TEXT2'       , width:100, sortable:false},
+                {label:'C_TEXT3'       , name:'C_TEXT3'       ,index:'C_TEXT3'       , width:100, align:"right"}
 			]
+			]]>
 		</colModel>
+        <event name="onSelectRow">
+            function(rowid, status, e){
+                var params = gfn_getRowData(this.id, rowid);
+                gfn_mainView('SM_SMPL_301', params, "U");
+            }
+        </event>
     </lists>
     <script>
         <![CDATA[
             function fn_test(formId, targetId, selectQkey){
                 alert("test");
+            }
+
+            function fn_insert(obj){
+                alert("insert");
+            }
+
+            function fn_delete(obj){
+                alert("delete");
             }
         ]]>
     </script>

@@ -4,7 +4,7 @@
     <property name="LOG_HOME" value="logs" />
     <!-- <property name="LOG_PATTERN" value="%logger{36} %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"/> -->
     <!--<property name="LOG_PATTERN" value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>-->
-    <property name="LOG_PATTERN" value=" %-5level %logger{36} - %msg%n"/>
+    <property name="LOG_PATTERN" value="[%d{yyyy-MM-dd HH:mm:ss}] [%-5level] %logger{36} - %msg%n"/>
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_HOME}/test-web-app.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -25,9 +25,9 @@
         </encoder>
     </appender>
 
-    <logger name="org.springframework" level="INFO" >
-        <appender-ref ref="STDOUT" />
-        <!--<appender-ref ref="FILE" />-->
+    <logger name="org.springframework" level="DEBUG" >
+            <appender-ref ref="STDOUT" />
+            <!--<appender-ref ref="FILE" />-->
     </logger>
 
     <logger name="kr.pe.swf" level="DEBUG">
@@ -36,7 +36,7 @@
     </logger>
 
     <!-- turn OFF all logging (children can override) -->
-    <root level="INFO">
+    <root level="DEBUG">
         <appender-ref ref="STDOUT" />
         <!--<appender-ref ref="FILE" />-->
     </root>

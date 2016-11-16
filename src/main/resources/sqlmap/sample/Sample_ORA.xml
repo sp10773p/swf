@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Sample">
+	<sql id="paging">
+		LIMIT $startRow$, $rows$
+	</sql>
+
+	<select id="selectAutocompleteList" parameterClass="map" resultClass="hashmap">
+		SELECT 	D.CODE AS "value",
+				D.NAME AS "label"
+		  FROM 	CM_CODE_MASTER M, CM_CODE_DETAIL D
+		 WHERE 	M.CODE = D.P_CODE
+		   AND  M.GROUP_CODE = 'MGROUP001'
+		   AND  M.USE_YN = 'Y'
+		   AND  D.USE_YN = 'Y'
+	</select>
+
+	<select id="selectTbCrudList" parameterClass="map" resultClass="hashmap">
+		SELECT 	CAST(CAST(C_DUE_DATE AS DATE) AS CHAR) AS C_DUE_DATE,
+				IF(C_SELECT = 'A', 'Ant', IF(C_SELECT = 'M', 'Maven', 'All')) AS C_SELECT_VIEW,
+				C_SELECT,
+				C_CHECK,
+				C_RADIO,
+				C_AUTOCOMPLETE,
+				CAST(C_DATE AS CHAR) AS C_DATE,
+				C_TEXT1,
+				C_TEXT2,
+				C_TEXT3
+		  FROM  TB_CRUD
+		 WHERE  1=1
+		<isNotEmpty property="from_PREO_DATE">
+			<isNotEmpty property="to_PREO_DATE">
+				AND C_DUE_DATE BETWEEN REPLACE(#from_PREO_DATE#, '-', '') AND REPLACE(#to_PREO_DATE#, '-', '')
+			</isNotEmpty>
+		</isNotEmpty>
+		<isNotEmpty property="C_CHECK">
+			AND C_CHECK IN ($C_CHECK$)
+		</isNotEmpty>
+		<isNotEmpty property="C_RADIO">
+			AND C_RADIO = #C_RADIO#
+		</isNotEmpty>
+		<isNotEmpty property="C_SELECT">
+			AND C_SELECT = #C_SELECT#
+		</isNotEmpty>
+		<isNotEmpty property="C_DATE">
+			AND C_DATE = CAST(#C_DATE# AS DATE)
+		</isNotEmpty>
+		<isNotEmpty property="C_TEXT1">
+			AND C_TEXT1 = #C_TEXT1#
+		</isNotEmpty>
+		<isNotEmpty property="C_TEXT2">
+			AND C_TEXT2 LIKE CONCAT(CONCAT('%', #C_TEXT2#), '%')
+		</isNotEmpty>
+		<isNotEmpty property="sidx">
+			ORDER BY $sidx$ $sord$
+		</isNotEmpty>
+		<include refid="paging"/>
+	</select>
+
+	<select id="selectTbCrudListForCount" parameterClass="map" resultClass="int">
+		SELECT 	COUNT(*)
+		  FROM  TB_CRUD
+		 WHERE  1=1
+		<isNotEmpty property="from_PREO_DATE">
+			<isNotEmpty property="to_PREO_DATE">
+				AND C_DUE_DATE BETWEEN REPLACE(#from_PREO_DATE#, '-', '') AND REPLACE(#to_PREO_DATE#, '-', '')
+			</isNotEmpty>
+		</isNotEmpty>
+		<isNotEmpty property="C_CHECK">
+			AND C_CHECK IN ($C_CHECK$)
+		</isNotEmpty>
+		<isNotEmpty property="C_RADIO">
+			AND C_RADIO = #C_RADIO#
+		</isNotEmpty>
+		<isNotEmpty property="C_SELECT">
+			AND C_SELECT = #C_SELECT#
+		</isNotEmpty>
+		<isNotEmpty property="C_DATE">
+			AND C_DATE = CAST(#C_DATE# AS DATE)
+		</isNotEmpty>
+		<isNotEmpty property="C_TEXT1">
+			AND C_TEXT1 = #C_TEXT1#
+		</isNotEmpty>
+		<isNotEmpty property="C_TEXT2">
+			AND C_TEXT2 LIKE CONCAT(CONCAT('%', #C_TEXT2#), '%')
+		</isNotEmpty>
+	</select>
+</sqlMap>
+
